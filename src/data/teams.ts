@@ -1,8 +1,10 @@
-interface Team {
+export interface Team {
   name: string;
   latitude: number;
   longitude: number;
 }
+
+export const divisionCount = 8;
 
 export const teams: Team[] = [
     { name: 'Atlanta Hawks', latitude: 33.7488, longitude: -84.3880 },
@@ -17,7 +19,7 @@ export const teams: Team[] = [
     { name: 'Golden State Warriors', latitude: 37.7749, longitude: -122.4194 },
     { name: 'Houston Rockets', latitude: 29.7604, longitude: -95.3698 },
     { name: 'Indiana Pacers', latitude: 39.7684, longitude: -86.1580 },
-    { name: 'LA Clippers', latitude: 34.0522, longitude: -118.2437 },
+    { name: 'Los Angeles Clippers', latitude: 34.0522, longitude: -118.2437 },
     { name: 'Los Angeles Lakers', latitude: 34.0522, longitude: -118.2437 },
     { name: 'Memphis Grizzlies', latitude: 35.1495, longitude: -90.0490 },
     { name: 'Miami Heat', latitude: 25.7617, longitude: -80.1918 },
@@ -35,6 +37,8 @@ export const teams: Team[] = [
     { name: 'Toronto Raptors', latitude: 43.6532, longitude: -79.3832 },
     { name: 'Utah Jazz', latitude: 40.7608, longitude: -111.8910 },
     { name: 'Washington Wizards', latitude: 38.9072, longitude: -77.0369 },
+    { name: 'Las Vegas Gamblers', latitude: 35.6039, longitude: -105.2249 },
+    { name: 'Seattle Supersonics', latitude: 47.6229, longitude: -122.352 },
   ];
   
   
