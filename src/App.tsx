@@ -1,35 +1,71 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { teams } from './data/teams'
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+interface Team {
+  name: string;
+  latitude: number;
+  longitude: number;
+}
+
+const App: React.FC = () => {
+  const [divisions, setDivisions] = useState<string[][]>([]);
+
+  const handleGenerateDivisions = () => {
+    const divisionCount = 6;
+    const teamsPerDivision = Math.ceil(teams.length / divisionCount);
+    const newDivisions: string[][] = [];
+
+    let currentDivision: string[] = [];
+    teams.forEach((team, index) => {
+      currentDivision.push(team.name);
+      if (currentDivision.length === teamsPerDivision || index === teams.length - 1) {
+        newDivisions.push(currentDivision);
+        currentDivision = [];
+      }
+    });
+
+    setDivisions(newDivisions);
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="flex p-4">
+      <div className="flex-1 mr-8">
+        <h2 className="text-xl font-bold mb-4">Teams</h2>
+        <ul>
+          {teams.map((team, index) => (
+            <li key={index} className="mb-2">
+              <span>{team.name}</span> - <span>({team.latitude}, {team.longitude})</span>
+            </li>
+          ))}
+        </ul>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+
+      <div className="flex-1">
+        <h2 className="text-xl font-bold mb-4">Divisions</h2>
+        <button
+          onClick={handleGenerateDivisions}
+          className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
+        >
+          Generate Divisions
         </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+
+        <>
+          {divisions.map((division, index) => (
+            <div key={`division-${index}`} className="mb-4">
+              <h2 className="font-semibold mb-4">Division {index + 1}</h2>
+              <ul>
+                {division.map((team, idx) => (
+                  <li key={idx}>{team}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    </div>
+  );
+};
+
 
 export default App
