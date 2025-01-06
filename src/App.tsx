@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { teams } from './data/teams'
-import './App.css'
+import { useState } from 'react';
+import { teams } from './data/teams';
+import './App.css';
 
 interface Team {
   name: string;
@@ -35,7 +35,10 @@ const App: React.FC = () => {
         <ul>
           {teams.map((team, index) => (
             <li key={index} className="mb-2">
-              <span>{team.name}</span> - <span>({team.latitude}, {team.longitude})</span>
+              <span>{team.name}</span> -{' '}
+              <span>
+                ({team.latitude}, {team.longitude})
+              </span>
             </li>
           ))}
         </ul>
@@ -43,10 +46,7 @@ const App: React.FC = () => {
 
       <div className="flex-1">
         <h2 className="text-xl font-bold mb-4">Divisions</h2>
-        <button
-          onClick={handleGenerateDivisions}
-          className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
-        >
+        <button onClick={handleGenerateDivisions} className="bg-blue-500 text-white px-4 py-2 rounded mb-4">
           Generate Divisions
         </button>
 
@@ -67,5 +67,4 @@ const App: React.FC = () => {
   );
 };
 
-
-export default App
+export default App;
