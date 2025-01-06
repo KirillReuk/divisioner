@@ -1,4 +1,10 @@
-export const teams = [
+interface Team {
+  name: string;
+  latitude: number;
+  longitude: number;
+}
+
+export const teams: Team[] = [
     { name: 'Atlanta Hawks', latitude: 33.7488, longitude: -84.3880 },
     { name: 'Boston Celtics', latitude: 42.3601, longitude: -71.0589 },
     { name: 'Brooklyn Nets', latitude: 40.6782, longitude: -73.9442 },

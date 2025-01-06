@@ -2,16 +2,10 @@ import { useState } from 'react';
 import { teams } from './data/teams';
 import './App.css';
 
-interface Team {
-  name: string;
-  latitude: number;
-  longitude: number;
-}
-
 const App: React.FC = () => {
   const [divisions, setDivisions] = useState<string[][]>([]);
 
-  const handleGenerateDivisions = () => {
+  const generateDivisions = () => {
     const divisionCount = 6;
     const teamsPerDivision = Math.ceil(teams.length / divisionCount);
     const newDivisions: string[][] = [];
@@ -46,7 +40,7 @@ const App: React.FC = () => {
 
       <div className="flex-1">
         <h2 className="text-xl font-bold mb-4">Divisions</h2>
-        <button onClick={handleGenerateDivisions} className="bg-blue-500 text-white px-4 py-2 rounded mb-4">
+        <button onClick={generateDivisions} className="bg-blue-500 text-white px-4 py-2 rounded mb-4">
           Generate Divisions
         </button>
 
