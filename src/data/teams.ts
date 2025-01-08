@@ -2,6 +2,7 @@ export interface Team {
   name: string;
   latitude: number;
   longitude: number;
+  index?: number;
 }
 
 export const divisionCount = 8;

@@ -9,15 +9,18 @@ class Partitioning {
   components: Team[][];
 
   constructor(teams: Team[], divisionCount: number) {
-    this.teams = teams;
+    const teamsWithIndex = teams.map((team, index) => ({ ...team, index }));
+    this.teams = teamsWithIndex;
     this.divisionCount = divisionCount;
     this.maxDivisionSize = Math.ceil(teams.length / divisionCount);
     this.distanceMatrix = this.precomputeDistances();
-    this.components = teams.map(team => [team]);
+    this.components = teamsWithIndex.map(team => [team]);
   }
 
-  distanceBetweenTeams = (team1: Team, team2: Team): number => {
-    return this.distanceMatrix[this.teams.indexOf(team1)][this.teams.indexOf(team2)];
+  private distanceBetweenTeams = (team1: Team, team2: Team): number => {
+    const team1Index = team1.index || this.teams.indexOf(team1);
+    const team2Index = team2.index || this.teams.indexOf(team2);
+    return this.distanceMatrix[team1Index][team2Index];
   };
 
   private precomputeDistances = (): number[][] => {
