@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { Team, teams } from './data/teams';
-import { getDivisions } from './utils/partitioning';
+import { divisionCount, Team, teams } from './data/teams';
+import Partitioning from './utils/partitioning';
 import './App.css';
 
 const App: React.FC = () => {
   const [divisions, setDivisions] = useState<Team[][]>([]);
 
   const generateDivisions = () => {
-    const divisions = getDivisions(teams);
+    const partitioning = new Partitioning(teams, divisionCount);
+    const divisions = partitioning.getDivisions();
     setDivisions(divisions);
   };
 
