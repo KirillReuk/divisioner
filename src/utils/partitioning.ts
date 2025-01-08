@@ -1,6 +1,35 @@
 import { Team } from '../data/teams';
 import { haversineDistance } from '../utils/distance';
 
+const calculateCentroid = (teams: Team[]): { lat: number; lon: number } => {
+  let totalLat = 0;
+  let totalLon = 0;
+  teams.forEach(team => {
+    totalLat += team.latitude;
+    totalLon += team.longitude;
+  });
+
+  const numTeams = teams.length;
+  return { lat: totalLat / numTeams, lon: totalLon / numTeams };
+};
+
+export const splitIntoConferences = (components: Team[][]): Team[][][] => {
+  const divisionsWithCentroids = components.map(division => ({
+    division,
+    centroid: calculateCentroid(division),
+  }));
+
+  divisionsWithCentroids.sort((a, b) => {
+    return b.centroid.lon - a.centroid.lon;
+  });
+
+  const half = Math.ceil(divisionsWithCentroids.length / 2);
+  const firstConference = divisionsWithCentroids.slice(0, half).map(d => d.division);
+  const secondConference = divisionsWithCentroids.slice(half).map(d => d.division);
+
+  return [firstConference, secondConference];
+};
+
 class Partitioning {
   teams: Team[];
   divisionCount: number;
