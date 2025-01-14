@@ -1,14 +1,16 @@
 import { useState } from 'react';
-import { divisionCount, Team, teams } from './data/teams';
+import { divisionCount, Team, defaultTeams } from './data/teams';
 import Partitioning, { splitIntoConferences } from './utils/partitioning';
 import MapView from './MapView';
+import TeamView from './TeamViewer';
 import './App.css';
 
 const App: React.FC = () => {
   const [divisions, setDivisions] = useState<Team[][]>([]);
   const [conferences, setConferences] = useState<Team[][][]>([]);
+  const [teams, setTeams] = useState<Team[]>(defaultTeams);
 
-  const generateConferences = () => {
+  const generateConferences = (teams: Team[], divisionCount: number) => {
     const partitioning = new Partitioning(teams, divisionCount);
     const divisions = partitioning.getDivisions();
     setDivisions(divisions);
@@ -20,22 +22,15 @@ const App: React.FC = () => {
     <>
       <div className="flex p-4">
         <div className="flex-1 mr-8">
-          <h2 className="text-xl font-bold mb-4">Teams</h2>
-          <ul>
-            {teams.map((team, index) => (
-              <li key={index} className="mb-2">
-                <span>{team.name}</span> -{' '}
-                <span>
-                  ({team.latitude}, {team.longitude})
-                </span>
-              </li>
-            ))}
-          </ul>
+          <TeamView teams={teams} setTeams={setTeams} />
         </div>
 
         <div className="flex-1">
           <h2 className="text-xl font-bold mb-4">Divisions</h2>
-          <button onClick={generateConferences} className="bg-blue-500 text-white px-4 py-2 rounded mb-4">
+          <button
+            onClick={() => generateConferences(teams, divisionCount)}
+            className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
+          >
             Generate Divisions
           </button>
 
