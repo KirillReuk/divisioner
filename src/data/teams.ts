@@ -5,7 +5,7 @@ export interface Team {
   index?: number;
 }
 
-export const divisionCount = 8;
+export const defaultDivisionCount = 8;
 
 export const defaultTeams: Team[] = [
     { name: 'Atlanta Hawks', latitude: 33.7488, longitude: -84.3880 },
