@@ -15,7 +15,8 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
 
   return (
     <div className="p-4 bg-gray-100 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Teams</h2>
+      <h2 className="text-2xl font-bold">Teams</h2>
+      <h5 className="text-gray-400 mb-4">({teams.length} teams in total)</h5>
       <div className="overflow-x-auto">
         <table className="table-auto w-full border-collapse border border-gray-300">
           <thead>
