@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -9,17 +9,38 @@ interface MapViewProps {
 }
 
 const MapView: React.FC<MapViewProps> = ({ divisions }) => {
-  const divisionColors = ['red', 'blue', 'green', 'purple', 'orange', 'yellow', 'pink', 'brown', 'cyan', 'lightGreen', 'gray'];
+  const divisionColors = [
+    'red',
+    'blue',
+    'green',
+    'purple',
+    'orange',
+    'yellow',
+    'pink',
+    'brown',
+    'cyan',
+    'lightGreen',
+    'gray',
+  ];
 
-  const SetMapView = () => {
+  const FitBounds = () => {
     const map = useMap();
-    map.setView([39.8283, -98.5795], 4); // Сделать динамически
+
+    useEffect(() => {
+      const allCoordinates = divisions.flat().map(team => [team.latitude, team.longitude] as [number, number]);
+
+      if (allCoordinates.length > 0) {
+        const bounds = L.latLngBounds(allCoordinates);
+        map.fitBounds(bounds, { padding: [50, 50] });
+      }
+    }, [divisions, map]);
+
     return null;
   };
 
   return (
     <MapContainer style={{ height: '600px', width: '100%' }}>
-      <SetMapView />
+      <FitBounds />
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
       {divisions.map((division, divisionIndex) =>
