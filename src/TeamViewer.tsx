@@ -55,8 +55,28 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                     placeholder="Longitude"
                   />
                 </td>
+                <td>
+                  <button
+                    onClick={() => setTeams(teams.filter((_, i) => i !== index))}
+                    className="bg-red-500 text-white px-2 py-1 font-bold text-xl"
+                  >
+                    -
+                  </button>
+                </td>
               </tr>
             ))}
+            {
+              <tr key="addButton" className="hover:bg-gray-100">
+                <td colSpan={4}>
+                  <button
+                    onClick={() => setTeams([...teams, { name: 'New Team', latitude: 0, longitude: 0 }])}
+                    className="w-full bg-green-500 text-white px-4 py-2"
+                  >
+                    Add Team
+                  </button>
+                </td>
+              </tr>
+            }
           </tbody>
         </table>
       </div>
