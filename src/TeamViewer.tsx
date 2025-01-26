@@ -1,5 +1,6 @@
 import React from 'react';
 import { Team } from './data/teams';
+import LocationSearchRow from './LocationSearchRow';
 
 interface EditableTeamsProps {
   teams: Team[];
@@ -22,6 +23,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
           <thead>
             <tr className="bg-gray-200">
               <th className="border border-gray-300 px-4 py-2 text-left">Name</th>
+              <th className="w-1/4 border border-gray-300 px-4 py-2 text-left">Location</th>
               <th className="w-1/4 border border-gray-300 px-4 py-2 text-left">Latitude</th>
               <th className="w-1/4 border border-gray-300 px-4 py-2 text-left">Longitude</th>
             </tr>
@@ -36,6 +38,17 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                     onChange={e => handleInputChange(index, 'name', e.target.value)}
                     className="w-full px-2 py-1 border border-gray-400"
                     placeholder="Team Name"
+                  />
+                </td>
+                <td>
+                  <LocationSearchRow
+                    key={team.name}
+                    index={index}
+                    onSelect={(index, _, lat, lng) => {
+                      const updatedTeams = [...teams];
+                      updatedTeams[index] = { ...updatedTeams[index], latitude: lat, longitude: lng };
+                      setTeams(updatedTeams);
+                    }}
                   />
                 </td>
                 <td>
@@ -70,7 +83,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
               <tr key="addButton" className="hover:bg-gray-100">
                 <td colSpan={4}>
                   <button
-                    onClick={() => setTeams([...teams, { name: 'New Team', latitude: 0, longitude: 0 }])}
+                    onClick={() => setTeams([...teams, { name: 'New Team', location: '', latitude: 0, longitude: 0 }])}
                     className="w-full bg-green-500 text-white px-4 py-2"
                   >
                     Add Team
