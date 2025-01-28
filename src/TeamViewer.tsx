@@ -1,6 +1,6 @@
 import React from 'react';
 import { Team } from './data/teams';
-import LocationSearchRow from './LocationSearchRow';
+import LocationSearchInput from './LocationSearchInput';
 
 interface EditableTeamsProps {
   teams: Team[];
@@ -22,62 +22,52 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
         <table className="table-auto w-full border-collapse border border-gray-300">
           <thead>
             <tr className="bg-gray-200">
-              <th className="border border-gray-300 px-4 py-2 text-left">Name</th>
-              <th className="w-1/4 border border-gray-300 px-4 py-2 text-left">Location</th>
-              <th className="w-1/4 border border-gray-300 px-4 py-2 text-left">Latitude</th>
-              <th className="w-1/4 border border-gray-300 px-4 py-2 text-left">Longitude</th>
+              <th className="w-1/3 border border-gray-300 px-4 py-2 text-left">Name</th>
+              <th className="w-full border border-gray-300 px-4 py-2 text-left">Location</th>
             </tr>
           </thead>
           <tbody>
             {teams.map((team, index) => (
-              <tr key={index} className="hover:bg-gray-100">
-                <td>
-                  <input
-                    type="text"
-                    value={team.name}
-                    onChange={e => handleInputChange(index, 'name', e.target.value)}
-                    className="w-full px-2 py-1 border border-gray-400"
-                    placeholder="Team Name"
-                  />
-                </td>
-                <td>
-                  <LocationSearchRow
-                    key={team.name}
-                    index={index}
-                    onSelect={(index, _, lat, lng) => {
-                      const updatedTeams = [...teams];
-                      updatedTeams[index] = { ...updatedTeams[index], latitude: lat, longitude: lng };
-                      setTeams(updatedTeams);
-                    }}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    value={team.latitude}
-                    onChange={e => handleInputChange(index, 'latitude', parseFloat(e.target.value))}
-                    className="w-full px-2 py-1 border border-gray-400"
-                    placeholder="Latitude"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    value={team.longitude}
-                    onChange={e => handleInputChange(index, 'longitude', parseFloat(e.target.value))}
-                    className="w-full px-2 py-1 border border-gray-400"
-                    placeholder="Longitude"
-                  />
-                </td>
-                <td>
-                  <button
-                    onClick={() => setTeams(teams.filter((_, i) => i !== index))}
-                    className="bg-red-500 text-white px-2 py-1 font-bold text-xl"
-                  >
-                    -
-                  </button>
-                </td>
-              </tr>
+              <>
+                <tr key={index} className="hover:bg-gray-100">
+                  <td>
+                    <input
+                      type="text"
+                      value={team.name}
+                      onChange={e => handleInputChange(index, 'name', e.target.value)}
+                      className="w-full px-2 py-1 border border-gray-400"
+                      placeholder="Team Name"
+                    />
+                  </td>
+                  <td>
+                    <LocationSearchInput
+                      key={team.name}
+                      index={index}
+                      onSelect={(index, _, lat, lng) => {
+                        const updatedTeams = [...teams];
+                        updatedTeams[index] = { ...updatedTeams[index], latitude: lat, longitude: lng };
+                        setTeams(updatedTeams);
+                      }}
+                    />
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => setTeams(teams.filter((_, i) => i !== index))}
+                      className="bg-red-500 text-white px-2 py-1 font-bold text-xl"
+                    >
+                      -
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td colSpan={2}>
+                    <div className="mb-2 text-start ml-2">
+                      <span className="font-bold">Latitude:</span> {team.latitude.toFixed(4)}{' '}
+                      <span className="font-bold">Longitude:</span> {team.longitude.toFixed(4)}
+                    </div>
+                  </td>
+                </tr>
+              </>
             ))}
             {
               <tr key="addButton" className="hover:bg-gray-100">

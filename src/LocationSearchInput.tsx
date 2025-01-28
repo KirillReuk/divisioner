@@ -11,30 +11,31 @@ interface LocationResult {
   geometry: { lat: number; lng: number };
 }
 
-const LocationSearchRow: React.FC<LocationSearchRowProps> = ({ index, onSelect }) => {
+const LocationSearchInput: React.FC<LocationSearchRowProps> = ({ index, onSelect }) => {
   const [query, setQuery] = useState('');
   const [locationResults, setLocationResults] = useState<LocationResult[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const fetchLocations = async (searchQuery: string) => {
+    setLoading(true);
     const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(searchQuery)}&key=${API_KEY}`;
 
-    if (!searchQuery || searchQuery.length < 3) return;
+    if (!searchQuery || searchQuery.length < 3) {
+      setLocationResults([]);
+      setLoading(false);
+      return;
+    }
     try {
       const response = await fetch(url);
       const data = await response.json();
 
-      // const data = {
-      //   results: [
-      //     { formatted: 'aaab', geometry: { lat: 0, lng: 0 } },
-      //     { formatted: 'aaad', geometry: { lat: 1, lng: 1 } },
-      //   ],
-      // }; // mock response
       if (data.results) {
         setLocationResults(data.results);
       }
     } catch (error) {
       console.error('Error fetching location data:', error);
     }
+    setLoading(false);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,6 +45,9 @@ const LocationSearchRow: React.FC<LocationSearchRowProps> = ({ index, onSelect }
   };
 
   const handleOptionSelect = (selectedValue: string) => {
+    if (selectedValue === 'No results found' || selectedValue === 'Loading...') {
+      return;
+    }
     const selectedLocation = locationResults.find(result => result.formatted === selectedValue);
     if (selectedLocation) {
       setQuery(selectedLocation.formatted);
@@ -52,27 +56,31 @@ const LocationSearchRow: React.FC<LocationSearchRowProps> = ({ index, onSelect }
   };
 
   return (
-    <tr>
-      <td>
-        <input
-          type="search"
-          list={`location-results-${index}`}
-          value={query}
-          onChange={handleInputChange}
-          onBlur={e => handleOptionSelect(e.target.value)}
-          placeholder="Search location"
-          className="border border-gray-300 rounded px-2 py-1"
-        />
-        <datalist id={`location-results-${index}`}>
-          {locationResults.map(result => (
-            <option key={`${result.geometry.lat}-${result.geometry.lng}`} value={result.formatted}>
-              {result.formatted}
-            </option>
-          ))}
-        </datalist>
-      </td>
-    </tr>
+    <>
+      <input
+        type="search"
+        list={`location-results-${index}`}
+        value={query}
+        onChange={e => {
+          handleInputChange(e);
+          handleOptionSelect(e.target.value);
+        }}
+        placeholder="Search location"
+        className="w-full border border-gray-300 px-2 py-1"
+      />
+      <datalist id={`location-results-${index}`}>
+        {loading ? (
+          <option value="Loading..." />
+        ) : query.length >= 3 && locationResults.length === 0 ? (
+          <option value="No results found" />
+        ) : (
+          locationResults.map(result => (
+            <option key={`${result.geometry.lat}-${result.geometry.lng}`} value={result.formatted} />
+          ))
+        )}
+      </datalist>
+    </>
   );
 };
 
-export default LocationSearchRow;
+export default LocationSearchInput;
