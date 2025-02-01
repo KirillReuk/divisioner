@@ -48,6 +48,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                         updatedTeams[index] = { ...updatedTeams[index], latitude: lat, longitude: lng };
                         setTeams(updatedTeams);
                       }}
+                      initialLocation={team.location}
                     />
                   </td>
                   <td>
