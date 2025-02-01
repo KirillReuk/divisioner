@@ -4,6 +4,8 @@ import { API_KEY } from './config';
 interface LocationSearchRowProps {
   index: number;
   onSelect: (index: number, formatted: string, lat: number, lng: number) => void;
+  onFocus?: () => void;
+  onBlur?: () => void;
   initialLocation?: string;
 }
 
@@ -12,7 +14,13 @@ interface LocationResult {
   geometry: { lat: number; lng: number };
 }
 
-const LocationSearchInput: React.FC<LocationSearchRowProps> = ({ index, onSelect, initialLocation }) => {
+const LocationSearchInput: React.FC<LocationSearchRowProps> = ({
+  index,
+  onSelect,
+  onFocus,
+  onBlur,
+  initialLocation,
+}) => {
   const [query, setQuery] = useState(initialLocation || '');
   const [locationResults, setLocationResults] = useState<LocationResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -66,6 +74,8 @@ const LocationSearchInput: React.FC<LocationSearchRowProps> = ({ index, onSelect
           handleInputChange(e);
           handleOptionSelect(e.target.value);
         }}
+        onFocus={onFocus}
+        onBlur={onBlur}
         placeholder="Search location"
         className="w-full border border-gray-300 px-2 py-1"
       />

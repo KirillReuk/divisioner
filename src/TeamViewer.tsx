@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Team } from './data/teams';
 import LocationSearchInput from './LocationSearchInput';
 
@@ -8,6 +8,8 @@ interface EditableTeamsProps {
 }
 
 const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
+
   const handleInputChange = (index: number, field: keyof Team, value: string | number) => {
     const updatedTeams = [...teams];
     updatedTeams[index] = { ...updatedTeams[index], [field]: value };
@@ -48,6 +50,8 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                         updatedTeams[index] = { ...updatedTeams[index], latitude: lat, longitude: lng };
                         setTeams(updatedTeams);
                       }}
+                      onFocus={() => setFocusedIndex(index)}
+                      onBlur={() => setFocusedIndex(null)}
                       initialLocation={team.location}
                     />
                   </td>
@@ -60,14 +64,16 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                     </button>
                   </td>
                 </tr>
-                <tr>
-                  <td colSpan={2}>
-                    <div className="mb-2 text-start ml-2">
-                      <span className="font-bold">Latitude:</span> {team.latitude.toFixed(4)}{' '}
-                      <span className="font-bold">Longitude:</span> {team.longitude.toFixed(4)}
-                    </div>
-                  </td>
-                </tr>
+                {focusedIndex === index && (
+                  <tr>
+                    <td colSpan={2}>
+                      <div className="mb-2 text-start ml-2">
+                        <span className="font-bold">Latitude:</span> {team.latitude.toFixed(4)}{' '}
+                        <span className="font-bold">Longitude:</span> {team.longitude.toFixed(4)}
+                      </div>
+                    </td>
+                  </tr>
+                )}
               </>
             ))}
             {
