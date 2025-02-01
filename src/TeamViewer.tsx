@@ -7,13 +7,22 @@ interface EditableTeamsProps {
   setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
 }
 
+type InputMode = 'location' | 'coordinates';
+
 const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
+  const [inputMode, setInputMode] = useState<InputMode[]>(Array(teams.length).fill('location'));
 
   const handleInputChange = (index: number, field: keyof Team, value: string | number) => {
     const updatedTeams = [...teams];
     updatedTeams[index] = { ...updatedTeams[index], [field]: value };
     setTeams(updatedTeams);
+  };
+
+  const handleModeChange = (index: number) => {
+    const updatedMode = [...inputMode];
+    updatedMode[index] = updatedMode[index] === 'location' ? 'coordinates' : 'location';
+    setInputMode(updatedMode);
   };
 
   return (
@@ -42,18 +51,37 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                     />
                   </td>
                   <td>
-                    <LocationSearchInput
-                      key={team.name}
-                      index={index}
-                      onSelect={(index, _, lat, lng) => {
-                        const updatedTeams = [...teams];
-                        updatedTeams[index] = { ...updatedTeams[index], latitude: lat, longitude: lng };
-                        setTeams(updatedTeams);
-                      }}
-                      onFocus={() => setFocusedIndex(index)}
-                      onBlur={() => setFocusedIndex(null)}
-                      initialLocation={team.location}
-                    />
+                    {inputMode[index] === 'location' ? (
+                      <LocationSearchInput
+                        key={"location-search-" + index}
+                        index={index}
+                        onSelect={(index, _, lat, lng) => {
+                          const updatedTeams = [...teams];
+                          updatedTeams[index] = { ...updatedTeams[index], latitude: lat, longitude: lng };
+                          setTeams(updatedTeams);
+                        }}
+                        onFocus={() => setFocusedIndex(index)}
+                        // onBlur={() => setFocusedIndex(null)}
+                        initialLocation={team.location}
+                      />
+                    ) : (
+                      <div className="flex gap-1">
+                        <input
+                          type="number"
+                          value={team.latitude}
+                          onChange={e => handleInputChange(index, 'latitude', parseFloat(e.target.value))}
+                          className="w-1/2 px-2 py-1 border border-gray-400"
+                          placeholder="Latitude"
+                        />
+                        <input
+                          type="number"
+                          value={team.longitude}
+                          onChange={e => handleInputChange(index, 'longitude', parseFloat(e.target.value))}
+                          className="w-1/2 px-2 py-1 border border-gray-400"
+                          placeholder="Longitude"
+                        />
+                      </div>
+                    )}
                   </td>
                   <td>
                     <button
@@ -67,10 +95,27 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                 {focusedIndex === index && (
                   <tr>
                     <td colSpan={2}>
-                      <div className="mb-2 text-start ml-2">
-                        <span className="font-bold">Latitude:</span> {team.latitude.toFixed(4)}{' '}
-                        <span className="font-bold">Longitude:</span> {team.longitude.toFixed(4)}
-                      </div>
+                      <p className="mb-2 ml-2 text-start">
+                        {inputMode[index] === 'location' ? (
+                          <>
+                            <span className="font-bold">Latitude:</span> {team.latitude.toFixed(4)}{' '}
+                            <span className="font-bold">Longitude:</span> {team.longitude.toFixed(4)}
+                          </>
+                        ) : (
+                          <>
+                            <span className="font-bold">Location:</span> {team.location}
+                          </>
+                        )}
+                        <span className="float-end">
+                          <input
+                            type="checkbox"
+                            checked={inputMode[index] === 'coordinates'}
+                            onChange={() => handleModeChange(index)}
+                            className="form-checkbox"
+                          />{' '}
+                          <span>Use Coordinates</span>
+                        </span>
+                      </p>
                     </td>
                   </tr>
                 )}
