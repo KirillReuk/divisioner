@@ -8,10 +8,15 @@ interface EditableTeamsProps {
 }
 
 type InputMode = 'location' | 'coordinates';
+type FieldsToValidate = 'latitude' | 'longitude';
 
 const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const [inputMode, setInputMode] = useState<InputMode[]>(Array(teams.length).fill('location'));
+  const [errors, setErrors] = useState<Record<FieldsToValidate, boolean>>({
+    latitude: false,
+    longitude: false,
+  });
 
   const handleInputChange = (index: number, field: keyof Team, value: string | number) => {
     const updatedTeams = [...teams];
@@ -24,6 +29,9 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
     updatedMode[index] = updatedMode[index] === 'location' ? 'coordinates' : 'location';
     setInputMode(updatedMode);
   };
+
+  const validateLatitude = (value: number) => setErrors({ ...errors, latitude: value < -90 || value > 90 });
+  const validateLongitude = (value: number) => setErrors({ ...errors, longitude: value < -180 || value > 180 });
 
   return (
     <div className="p-4 bg-gray-100 rounded-lg shadow-md">
@@ -53,7 +61,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                   <td>
                     {inputMode[index] === 'location' ? (
                       <LocationSearchInput
-                        key={"location-search-" + index}
+                        key={'location-search-' + index}
                         index={index}
                         onSelect={(index, _, lat, lng) => {
                           const updatedTeams = [...teams];
@@ -69,15 +77,21 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                         <input
                           type="number"
                           value={team.latitude}
-                          onChange={e => handleInputChange(index, 'latitude', parseFloat(e.target.value))}
-                          className="w-1/2 px-2 py-1 border border-gray-400"
+                          onChange={e => {
+                            handleInputChange(index, 'latitude', parseFloat(e.target.value));
+                            validateLatitude(parseFloat(e.target.value));
+                          }}
+                          className={`w-1/2 px-2 py-1 border ${errors.latitude ? 'border-red-600' : 'border-gray-400'}`}
                           placeholder="Latitude"
                         />
                         <input
                           type="number"
                           value={team.longitude}
-                          onChange={e => handleInputChange(index, 'longitude', parseFloat(e.target.value))}
-                          className="w-1/2 px-2 py-1 border border-gray-400"
+                          onChange={e => {
+                            handleInputChange(index, 'longitude', parseFloat(e.target.value));
+                            validateLongitude(parseFloat(e.target.value));
+                          }}
+                          className={`w-1/2 px-2 py-1 border ${errors.longitude ? 'border-red-600' : 'border-gray-400'}`}
                           placeholder="Longitude"
                         />
                       </div>
@@ -113,7 +127,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                             onChange={() => handleModeChange(index)}
                             className="form-checkbox"
                           />{' '}
-                          <span>Use Coordinates</span>
+                          <span>{inputMode[index] === 'location' ? 'Input Coordinates' : 'Input Locations'}</span>
                         </span>
                       </p>
                     </td>
