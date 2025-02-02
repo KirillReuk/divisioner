@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Team } from './data/teams';
 import LocationSearchInput from './LocationSearchInput';
+import { fetchCoordinates } from './utils/geocoding';
+import debounce from 'lodash.debounce';
 
 interface EditableTeamsProps {
   teams: Team[];
@@ -17,11 +19,39 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
     latitude: false,
     longitude: false,
   });
+  const [pendingCoords, setPendingCoords] = useState<{ index: number; latitude: number; longitude: number } | null>(
+    null
+  );
 
-  const handleInputChange = (index: number, field: keyof Team, value: string | number) => {
+  useEffect(() => {
+    if (!pendingCoords) return;
+
+    const debouncedFetch = debounce(() => {
+      updateCoordinatesResults(pendingCoords.index, pendingCoords.latitude, pendingCoords.longitude);
+    }, 500);
+
+    debouncedFetch();
+    return () => debouncedFetch.cancel();
+  }, [pendingCoords]);
+
+  const handleTeamNameChange = (index: number, value: string) => {
     const updatedTeams = [...teams];
-    updatedTeams[index] = { ...updatedTeams[index], [field]: value };
+    updatedTeams[index] = { ...updatedTeams[index], name: value };
     setTeams(updatedTeams);
+  };
+
+  const handleCoordinatesChange = (index: number, field: keyof Team, value: number) => {
+    setTeams(prevTeams => {
+      const updatedTeams = [...prevTeams];
+      updatedTeams[index] = { ...updatedTeams[index], [field]: value };
+      return updatedTeams;
+    });
+
+    setPendingCoords(prev => ({
+      index,
+      latitude: field === 'latitude' ? value : (prev?.latitude ?? teams[index].latitude),
+      longitude: field === 'longitude' ? value : (prev?.longitude ?? teams[index].longitude),
+    }));
   };
 
   const handleModeChange = (index: number) => {
@@ -32,6 +62,17 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
 
   const validateLatitude = (value: number) => setErrors({ ...errors, latitude: value < -90 || value > 90 });
   const validateLongitude = (value: number) => setErrors({ ...errors, longitude: value < -180 || value > 180 });
+
+  const updateCoordinatesResults = async (index: number, latitude: number, longitude: number) => {
+    const results = await fetchCoordinates(latitude, longitude);
+    if (results) {
+      setTeams(prevTeams => {
+        const updatedTeams = [...prevTeams];
+        updatedTeams[index] = { ...updatedTeams[index], location: results[0].formatted };
+        return updatedTeams;
+      });
+    }
+  };
 
   return (
     <div className="p-4 bg-gray-100 rounded-lg shadow-md">
@@ -53,7 +94,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                     <input
                       type="text"
                       value={team.name}
-                      onChange={e => handleInputChange(index, 'name', e.target.value)}
+                      onChange={e => handleTeamNameChange(index, e.target.value)}
                       className="w-full px-2 py-1 border border-gray-400"
                       placeholder="Team Name"
                     />
@@ -69,7 +110,6 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                           setTeams(updatedTeams);
                         }}
                         onFocus={() => setFocusedIndex(index)}
-                        // onBlur={() => setFocusedIndex(null)}
                         initialLocation={team.location}
                       />
                     ) : (
@@ -78,7 +118,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                           type="number"
                           value={team.latitude}
                           onChange={e => {
-                            handleInputChange(index, 'latitude', parseFloat(e.target.value));
+                            handleCoordinatesChange(index, 'latitude', parseFloat(e.target.value));
                             validateLatitude(parseFloat(e.target.value));
                           }}
                           className={`w-1/2 px-2 py-1 border ${errors.latitude ? 'border-red-600' : 'border-gray-400'}`}
@@ -88,7 +128,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                           type="number"
                           value={team.longitude}
                           onChange={e => {
-                            handleInputChange(index, 'longitude', parseFloat(e.target.value));
+                            handleCoordinatesChange(index, 'longitude', parseFloat(e.target.value));
                             validateLongitude(parseFloat(e.target.value));
                           }}
                           className={`w-1/2 px-2 py-1 border ${errors.longitude ? 'border-red-600' : 'border-gray-400'}`}
