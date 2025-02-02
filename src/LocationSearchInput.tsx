@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { API_KEY } from './config';
+import { fetchLocations } from './utils/geocoding';
 
 interface LocationSearchRowProps {
   index: number;
@@ -25,24 +25,19 @@ const LocationSearchInput: React.FC<LocationSearchRowProps> = ({
   const [locationResults, setLocationResults] = useState<LocationResult[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchLocations = async (searchQuery: string) => {
+  const updateLocationResults = async (searchQuery: string) => {
     setLoading(true);
-    const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(searchQuery)}&key=${API_KEY}`;
 
     if (!searchQuery || searchQuery.length < 3) {
       setLocationResults([]);
       setLoading(false);
       return;
     }
-    try {
-      const response = await fetch(url);
-      const data = await response.json();
 
-      if (data.results) {
-        setLocationResults(data.results);
-      }
-    } catch (error) {
-      console.error('Error fetching location data:', error);
+    const results = await fetchLocations(searchQuery);
+
+    if (results) {
+      setLocationResults(results);
     }
     setLoading(false);
   };
@@ -50,7 +45,7 @@ const LocationSearchInput: React.FC<LocationSearchRowProps> = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value;
     setQuery(newQuery);
-    fetchLocations(newQuery);
+    updateLocationResults(newQuery);
   };
 
   const handleOptionSelect = (selectedValue: string) => {
