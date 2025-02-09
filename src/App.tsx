@@ -16,10 +16,24 @@ const App: React.FC = () => {
   const [divisionsCount, setDivisionsCount] = useState<number>(defaultDivisionCount);
 
   return (
-    <>
-      <button onClick={() => setActiveTab(activeTab === 'teams' ? 'divisions' : 'teams')}>Swap Tabs</button>
+    <div className=" p-4">
+      <div className="flex justify-start mb-4">
+        <button
+          onClick={() => setActiveTab('teams')}
+          className={`px-4 py-2 ${activeTab === 'teams' ? 'bg-blue-500 text-white' : 'bg-gray-300'}`}
+        >
+          Teams
+        </button>
+        <button
+          onClick={() => setActiveTab('divisions')}
+          className={`px-4 py-2 ml-2 ${activeTab === 'divisions' ? 'bg-blue-500 text-white' : 'bg-gray-300'} ${divisions.length === 0 && 'text-gray-400'}`}
+          disabled={divisions.length === 0}
+        >
+          Divisions
+        </button>
+      </div>
       {activeTab === 'teams' ? (
-        <div className="flex p-4">
+        <div className="flex">
           <div className="flex-1 mr-8">
             <DivisionCountInput
               teams={teams}
@@ -42,7 +56,7 @@ const App: React.FC = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
