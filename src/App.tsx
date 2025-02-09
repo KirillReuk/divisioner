@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { defaultDivisionCount, Team, defaultTeams } from './data/teams';
 import MapView from './MapView';
-import TeamView from './TeamViewer';
+import TeamView from './inputTab/TeamViewer';
 import DivisionView from './DivisionView';
 import './App.css';
+import DivisionCountInput from './inputTab/DivisionCountInput';
 
 const App: React.FC = () => {
   const [divisions, setDivisions] = useState<Team[][]>([]);
@@ -16,17 +17,17 @@ const App: React.FC = () => {
       <div className="flex p-4">
         <div className="flex-1 mr-8">
           <TeamView teams={teams} setTeams={setTeams} />
-        </div>
-
-        <div className="flex-1">
-          <DivisionView
+          <DivisionCountInput
             teams={teams}
-            conferences={conferences}
             divisionsCount={divisionsCount}
             setDivisions={setDivisions}
             setConferences={setConferences}
             setDivisionsCount={setDivisionsCount}
           />
+        </div>
+
+        <div className="flex-1">
+          <DivisionView conferences={conferences} />
         </div>
       </div>
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Team } from './data/teams';
-import LocationSearchInput from './LocationSearchInput';
-import { fetchCoordinates } from './utils/geocoding';
+import { Team } from '../data/teams';
+import LocationSearchInput from '../LocationSearchInput';
+import { fetchCoordinates } from '../utils/geocoding';
 import debounce from 'lodash.debounce';
 
 interface EditableTeamsProps {
