@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { Team } from './data/teams';
+import { Team } from '../data/teams';
 
 interface MapViewProps {
   divisions: Team[][];

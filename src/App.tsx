@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { defaultDivisionCount, Team, defaultTeams } from './data/teams';
-import MapView from './MapView';
+import MapView from './divisionsTab/MapView';
 import TeamView from './inputTab/TeamViewer';
-import DivisionView from './DivisionView';
+import DivisionView from './divisionsTab/DivisionView';
 import './App.css';
 import DivisionCountInput from './inputTab/DivisionCountInput';
 
@@ -41,18 +41,18 @@ const App: React.FC = () => {
               setDivisions={setDivisions}
               setConferences={setConferences}
               setDivisionsCount={setDivisionsCount}
+              setActiveTab={setActiveTab}
             />
             <TeamView teams={teams} setTeams={setTeams} />
           </div>
         </div>
       ) : (
-        <div className="flex p-4">
-          <div className="flex-1">
-            <DivisionView conferences={conferences} />
-          </div>
-
+        <div className="flex flex-col">
           <div className="h-[600px] w-full">
             <MapView divisions={divisions} />
+          </div>
+          <div className="flex-1">
+            <DivisionView conferences={conferences} />
           </div>
         </div>
       )}

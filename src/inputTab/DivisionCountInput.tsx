@@ -8,6 +8,7 @@ interface EditableTeamsProps {
   setDivisions: React.Dispatch<React.SetStateAction<Team[][]>>;
   setConferences: React.Dispatch<React.SetStateAction<Team[][][]>>;
   setDivisionsCount: React.Dispatch<React.SetStateAction<number>>;
+  setActiveTab: React.Dispatch<React.SetStateAction<'teams' | 'divisions'>>;
 }
 
 const DivisionCountInput: React.FC<EditableTeamsProps> = ({
@@ -16,6 +17,7 @@ const DivisionCountInput: React.FC<EditableTeamsProps> = ({
   setDivisions,
   setConferences,
   setDivisionsCount,
+  setActiveTab,
 }) => {
   const generateConferences = (teams: Team[], divisionCount: number) => {
     const partitioning = new Partitioning(teams, divisionCount);
@@ -47,7 +49,10 @@ const DivisionCountInput: React.FC<EditableTeamsProps> = ({
           className="flex-1 border border-gray-300 rounded-md px-3 max-h-24 focus:outline-none focus:ring-2 focus:ring-blue-500 h-8 mr-2"
         />
         <button
-          onClick={() => generateConferences(teams, divisionsCount)}
+          onClick={() => {
+            generateConferences(teams, divisionsCount);
+            setActiveTab('divisions');
+          }}
           className="flex-1 bg-blue-500 text-white rounded h-8"
         >
           Generate Divisions

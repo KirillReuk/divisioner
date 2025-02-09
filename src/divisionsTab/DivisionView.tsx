@@ -1,5 +1,5 @@
 import React from 'react';
-import { Team } from './data/teams';
+import { Team } from '../data/teams';
 
 interface EditableTeamsProps {
   conferences: Team[][][];
