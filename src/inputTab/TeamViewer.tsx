@@ -78,118 +78,95 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
     <div className="p-4 bg-gray-100 rounded-lg shadow-md">
       <h2 className="text-2xl font-bold">Teams</h2>
       <h5 className="text-gray-400 mb-4">({teams.length} teams in total)</h5>
-      <div className="overflow-x-auto">
-        <table className="table-auto w-full border-collapse border border-gray-300">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="w-1/3 border border-gray-300 px-4 py-2 text-left">Name</th>
-              <th className="w-full border border-gray-300 px-4 py-2 text-left">Location</th>
-            </tr>
-          </thead>
-          <tbody>
-            {teams.map((team, index) => (
-              <>
-                <tr key={index} className="hover:bg-gray-100">
-                  <td>
-                    <input
-                      type="text"
-                      value={team.name}
-                      onChange={e => handleTeamNameChange(index, e.target.value)}
-                      className="w-full px-2 py-1 border border-gray-400"
-                      placeholder="Team Name"
-                    />
-                  </td>
-                  <td>
-                    {inputMode[index] === 'location' ? (
-                      <LocationSearchInput
-                        key={'location-search-' + index}
-                        index={index}
-                        onSelect={(index, _, lat, lng) => {
-                          const updatedTeams = [...teams];
-                          updatedTeams[index] = { ...updatedTeams[index], latitude: lat, longitude: lng };
-                          setTeams(updatedTeams);
-                        }}
-                        onFocus={() => setFocusedIndex(index)}
-                        initialLocation={team.location}
-                      />
-                    ) : (
-                      <div className="flex gap-1">
-                        <input
-                          type="number"
-                          value={team.latitude}
-                          onChange={e => {
-                            handleCoordinatesChange(index, 'latitude', parseFloat(e.target.value));
-                            validateLatitude(parseFloat(e.target.value));
-                          }}
-                          className={`w-1/2 px-2 py-1 border ${errors.latitude ? 'border-red-600' : 'border-gray-400'}`}
-                          placeholder="Latitude"
-                        />
-                        <input
-                          type="number"
-                          value={team.longitude}
-                          onChange={e => {
-                            handleCoordinatesChange(index, 'longitude', parseFloat(e.target.value));
-                            validateLongitude(parseFloat(e.target.value));
-                          }}
-                          className={`w-1/2 px-2 py-1 border ${errors.longitude ? 'border-red-600' : 'border-gray-400'}`}
-                          placeholder="Longitude"
-                        />
-                      </div>
-                    )}
-                  </td>
-                  <td>
-                    <button
-                      onClick={() => setTeams(teams.filter((_, i) => i !== index))}
-                      className="bg-red-500 text-white px-2 py-1 font-bold text-xl"
-                    >
-                      -
-                    </button>
-                  </td>
-                </tr>
-                {focusedIndex === index && (
-                  <tr>
-                    <td colSpan={2}>
-                      <p className="mb-2 ml-2 text-start">
-                        {inputMode[index] === 'location' ? (
-                          <>
-                            <span className="font-bold">Latitude:</span> {team.latitude.toFixed(4)}{' '}
-                            <span className="font-bold">Longitude:</span> {team.longitude.toFixed(4)}
-                          </>
-                        ) : (
-                          <>
-                            <span className="font-bold">Location:</span> {team.location}
-                          </>
-                        )}
-                        <span className="float-end">
-                          <input
-                            type="checkbox"
-                            checked={inputMode[index] === 'coordinates'}
-                            onChange={() => handleModeChange(index)}
-                            className="form-checkbox"
-                          />{' '}
-                          <span>{inputMode[index] === 'location' ? 'Input Coordinates' : 'Input Locations'}</span>
-                        </span>
-                      </p>
-                    </td>
-                  </tr>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        {teams.map((team, index) => (
+          <div key={index} className="p-2 bg-white shadow rounded-lg">
+            <div className="flex flex-1">
+              <input
+                type="text"
+                value={team.name}
+                onChange={e => handleTeamNameChange(index, e.target.value)}
+                className="px-2 py-1 mx-2 border border-gray-400 rounded"
+                placeholder="Team Name"
+                onFocus={() => setFocusedIndex(index)}
+              />
+              {inputMode[index] === 'location' ? (
+                <LocationSearchInput
+                  key={'location-search-' + index}
+                  index={index}
+                  onSelect={(index, _, lat, lng) => {
+                    const updatedTeams = [...teams];
+                    updatedTeams[index] = { ...updatedTeams[index], latitude: lat, longitude: lng };
+                    setTeams(updatedTeams);
+                  }}
+                  onFocus={() => setFocusedIndex(index)}
+                  initialLocation={team.location}
+                />
+              ) : (
+                <>
+                  <input
+                    type="number"
+                    value={team.latitude}
+                    onChange={e => {
+                      handleCoordinatesChange(index, 'latitude', parseFloat(e.target.value));
+                      validateLatitude(parseFloat(e.target.value));
+                    }}
+                    className="w-1/4 px-2 py-1 mx-1 border border-gray-400 rounded"
+                    placeholder="Latitude"
+                    onFocus={() => setFocusedIndex(index)}
+                  />
+                  <input
+                    type="number"
+                    value={team.longitude}
+                    onChange={e => {
+                      handleCoordinatesChange(index, 'longitude', parseFloat(e.target.value));
+                      validateLongitude(parseFloat(e.target.value));
+                    }}
+                    className="w-1/4 px-2 py-1 border border-gray-400 rounded"
+                    placeholder="Longitude"
+                    onFocus={() => setFocusedIndex(index)}
+                  />
+                </>
+              )}
+              <button
+                onClick={() => setTeams(teams.filter((_, i) => i !== index))}
+                className="px-3 py-1 bg-red-500 text-white rounded ml-2"
+              >
+                x
+              </button>
+            </div>
+            {focusedIndex === index && (
+              <p className="my-2 mx-2 text-start">
+                {inputMode[index] === 'location' ? (
+                  <>
+                    <span className="font-bold">Latitude:</span> {team.latitude.toFixed(4)}{' '}
+                    <span className="font-bold">Longitude:</span> {team.longitude.toFixed(4)}
+                  </>
+                ) : (
+                  <>
+                    <span className="font-bold">Location:</span> {team.location}
+                  </>
                 )}
-              </>
-            ))}
-            {
-              <tr key="addButton" className="hover:bg-gray-100">
-                <td colSpan={4}>
-                  <button
-                    onClick={() => setTeams([...teams, { name: 'New Team', location: '', latitude: 0, longitude: 0 }])}
-                    className="w-full bg-green-500 text-white px-4 py-2"
-                  >
-                    Add Team
-                  </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+                <span className="float-end">
+                  <input
+                    type="checkbox"
+                    checked={inputMode[index] === 'coordinates'}
+                    onChange={() => handleModeChange(index)}
+                    className="form-checkbox"
+                  />{' '}
+                  <span>{inputMode[index] === 'location' ? 'Input Coordinates' : 'Input Locations'}</span>
+                </span>
+              </p>
+            )}
+          </div>
+        ))}
       </div>
+      <button
+        onClick={() => setTeams([...teams, { name: 'New Team', location: '', latitude: 0, longitude: 0 }])}
+        className="w-full mt-4 bg-green-500 text-white px-4 py-2 rounded"
+      >
+        Add Team
+      </button>
     </div>
   );
 };

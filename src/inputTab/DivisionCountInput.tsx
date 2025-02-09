@@ -36,7 +36,7 @@ const DivisionCountInput: React.FC<EditableTeamsProps> = ({
     <>
       <div className="flex items-center p-4 bg-gray-100 mb-4">
         <label htmlFor="divisions" className="flex-none text-lg font-medium mr-8">
-          How many?
+          How many divisions?
         </label>
         <input
           id="divisions"
