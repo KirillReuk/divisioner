@@ -8,6 +8,7 @@ interface EditableTeamsProps {
 const DivisionView: React.FC<EditableTeamsProps> = ({ conferences }) => {
   return (
     <div className="p-4 bg-gray-100 rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-4">Divisions</h2>
       {conferences.length !== 0 && (
         <div className="flex">
           <div className="flex-1">

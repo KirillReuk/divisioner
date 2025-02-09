@@ -34,7 +34,6 @@ const DivisionCountInput: React.FC<EditableTeamsProps> = ({
 
   return (
     <>
-      <h2 className="text-2xl font-bold mb-4">Divisions</h2>
       <div className="flex items-center p-4 bg-gray-100 mb-4">
         <label htmlFor="divisions" className="flex-none text-lg font-medium mr-8">
           How many?
