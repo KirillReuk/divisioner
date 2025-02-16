@@ -1,28 +1,18 @@
 import { API_KEY } from '../config';
 
-//type the return type
-export const fetchLocations = async (searchQuery: string): Promise<any> => {
-  const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(searchQuery)}&key=${API_KEY}`;
-
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-
-    if (data.results) {
-      return data.results;
-    }
-  } catch (error) {
-    console.error('Error fetching location data:', error);
-  }
+type GeocodingResult = {
+  formatted: string;
+  geometry: { lat: number; lng: number };
 };
 
-//type the return type
-export const fetchCoordinates = async (lat: number, lng: number): Promise<any> => {
-  const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(`${lat} ${lng}`)}&key=${API_KEY}`;
+type GeocodingResponse = {
+  results: GeocodingResult[];
+};
 
+const fetchGeocodingData = async (url: string): Promise<GeocodingResult[] | null> => {
   try {
     const response = await fetch(url);
-    const data = await response.json();
+    const data = (await response.json()) as GeocodingResponse;
 
     if (data.results) {
       return data.results;
@@ -30,4 +20,15 @@ export const fetchCoordinates = async (lat: number, lng: number): Promise<any> =
   } catch (error) {
     console.error('Error fetching location data:', error);
   }
+  return null;
+};
+
+export const fetchLocations = async (searchQuery: string): Promise<GeocodingResult[] | null> => {
+  const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(searchQuery)}&key=${API_KEY}`;
+  return fetchGeocodingData(url);
+};
+
+export const fetchCoordinates = async (lat: number, lng: number): Promise<GeocodingResult[] | null> => {
+  const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(`${lat} ${lng}`)}&key=${API_KEY}`;
+  return fetchGeocodingData(url);
 };

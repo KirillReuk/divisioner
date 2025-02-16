@@ -72,7 +72,7 @@ const LocationSearchInput: React.FC<LocationSearchRowProps> = ({
         onFocus={onFocus}
         onBlur={onBlur}
         placeholder="Search location"
-        className="w-1/2 border border-gray-300 px-2 py-1"
+        className="flex-1 p-2 border border-gray-400 rounded"
       />
       <datalist id={`location-results-${index}`}>
         {loading ? (

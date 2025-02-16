@@ -1,6 +1,7 @@
 import React from 'react';
 import { Team, Division } from '../data/teams';
 import Partitioning, { splitIntoConferences } from '../utils/partitioning';
+import { Tab } from '../App';
 
 interface EditableTeamsProps {
   teams: Team[];
@@ -8,7 +9,7 @@ interface EditableTeamsProps {
   setDivisions: React.Dispatch<React.SetStateAction<Division[]>>;
   setConferences: React.Dispatch<React.SetStateAction<Division[][]>>;
   setDivisionsCount: React.Dispatch<React.SetStateAction<number>>;
-  setActiveTab: React.Dispatch<React.SetStateAction<'teams' | 'divisions'>>;
+  setActiveTab: React.Dispatch<React.SetStateAction<Tab>>;
 }
 
 const DivisionCountInput: React.FC<EditableTeamsProps> = ({

@@ -26,8 +26,8 @@ const DivisionView: React.FC<EditableTeamsProps> = ({ conferences }) => {
                   Division {index + 1}
                 </h2>
                 <ul>
-                  {division.teams.map((team, idx) => (
-                    <li key={idx}>{team.name}</li>
+                  {division.teams.map((team, teamIndex) => (
+                    <li key={`team-${conferenceIndex}-${index}-${teamIndex}`}>{team.name}</li>
                   ))}
                 </ul>
               </div>

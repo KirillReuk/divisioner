@@ -81,12 +81,12 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         {teams.map((team, index) => (
           <div key={index} className="p-2 bg-white shadow rounded-lg">
-            <div className="flex flex-1">
+            <div className="flex gap-4">
               <input
                 type="text"
                 value={team.name}
                 onChange={e => handleTeamNameChange(index, e.target.value)}
-                className="px-2 py-1 mx-2 border border-gray-400 rounded"
+                className="flex-1 p-2 border border-gray-400 rounded"
                 placeholder="Team Name"
                 onFocus={() => setFocusedIndex(index)}
               />
@@ -103,7 +103,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                   initialLocation={team.location}
                 />
               ) : (
-                <>
+                <div className='flex-1 flex gap-2'>
                   <input
                     type="number"
                     value={team.latitude}
@@ -111,7 +111,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                       handleCoordinatesChange(index, 'latitude', parseFloat(e.target.value));
                       validateLatitude(parseFloat(e.target.value));
                     }}
-                    className="w-1/4 px-2 py-1 mx-1 border border-gray-400 rounded"
+                    className="flex-1 border border-gray-400 rounded w-1/2 px-2"
                     placeholder="Latitude"
                     onFocus={() => setFocusedIndex(index)}
                   />
@@ -122,21 +122,21 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                       handleCoordinatesChange(index, 'longitude', parseFloat(e.target.value));
                       validateLongitude(parseFloat(e.target.value));
                     }}
-                    className="w-1/4 px-2 py-1 border border-gray-400 rounded"
+                    className="flex-1 border border-gray-400 rounded w-1/2 px-2"
                     placeholder="Longitude"
                     onFocus={() => setFocusedIndex(index)}
                   />
-                </>
+                </div>
               )}
               <button
                 onClick={() => setTeams(teams.filter((_, i) => i !== index))}
-                className="px-3 py-1 bg-red-500 text-white rounded ml-2"
+                className="px-3 py-1 bg-red-500 text-white rounded w-sm"
               >
-                x
+                X
               </button>
             </div>
             {focusedIndex === index && (
-              <p className="my-2 mx-2 text-start">
+              <p className="mt-2 mx-2 text-start">
                 {inputMode[index] === 'location' ? (
                   <>
                     <span className="font-bold">Latitude:</span> {team.latitude.toFixed(4)}{' '}

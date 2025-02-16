@@ -33,8 +33,8 @@ const MapView: React.FC<MapViewProps> = ({ divisions }) => {
       <FitBounds />
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-      {divisions.map(division =>
-        division.teams.map(team => {
+      {divisions.map((division, divisionIndex) =>
+        division.teams.map((team, teamIndex) => {
           const icon = L.divIcon({
             className: 'custom-icon',
             html: `<div style="background-color: ${shadeHue(division.hue, 90, 50)}; width: 20px; height: 20px; border-radius: 50%;"></div>`,
@@ -44,7 +44,7 @@ const MapView: React.FC<MapViewProps> = ({ divisions }) => {
           });
 
           return (
-            <Marker key={team.name} position={[team.latitude, team.longitude]} icon={icon}>
+            <Marker key={`team-${divisionIndex}-${teamIndex}`} position={[team.latitude, team.longitude]} icon={icon}>
               <Popup>{team.name}</Popup>
             </Marker>
           );
