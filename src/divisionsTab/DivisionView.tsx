@@ -1,5 +1,6 @@
 import React from 'react';
 import { Division } from '../data/teams';
+import { shadeHue } from '../utils/partitioning';
 
 interface EditableTeamsProps {
   conferences: Division[][];
@@ -18,10 +19,12 @@ const DivisionView: React.FC<EditableTeamsProps> = ({ conferences }) => {
             {conference?.map((division, index) => (
               <div
                 key={`division-${index}`}
-                className="mb-4 p-2 rounded-md"
-                style={{ backgroundColor: division.color }}
+                className="mb-4 p-2 rounded-md text-stone-200"
+                style={{ backgroundColor: shadeHue(division.hue, 70, 40) }}
               >
-                <h2 className="font-semibold mb-4">Division {index + 1}</h2>
+                <h2 className="font-semibold mb-2" style={{ backgroundColor: shadeHue(division.hue, 60, 40) }}>
+                  Division {index + 1}
+                </h2>
                 <ul>
                   {division.teams.map((team, idx) => (
                     <li key={idx}>{team.name}</li>

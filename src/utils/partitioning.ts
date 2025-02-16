@@ -1,11 +1,9 @@
 import { Team, Division } from '../data/teams';
 import { haversineDistance } from '../utils/distance';
 
-const generateColor = (index: number, total: number): string => {
-  const hue = (index / total) * 360;
-  return `hsl(${hue}, 90%, 50%)`;
-};
-
+const generateHue = (index: number, total: number): number => (index / total) * 360;
+export const shadeHue = (hue: number, saturation: number, value: number): string =>
+  `hsl(${hue}, ${saturation}%, ${value}%)`;
 const calculateCentroid = (division: Division): { lat: number; lon: number } => {
   let totalLat = 0;
   let totalLon = 0;
@@ -209,7 +207,7 @@ class Partitioning {
 
     return this.components.map((division, index) => ({
       teams: division,
-      color: generateColor(index, this.components.length),
+      hue: generateHue(index, this.components.length),
     }));
   };
 }
