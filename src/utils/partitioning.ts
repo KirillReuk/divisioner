@@ -1,19 +1,24 @@
-import { Team } from '../data/teams';
+import { Team, Division } from '../data/teams';
 import { haversineDistance } from '../utils/distance';
 
-const calculateCentroid = (teams: Team[]): { lat: number; lon: number } => {
+const generateColor = (index: number, total: number): string => {
+  const hue = (index / total) * 360;
+  return `hsl(${hue}, 90%, 50%)`;
+};
+
+const calculateCentroid = (division: Division): { lat: number; lon: number } => {
   let totalLat = 0;
   let totalLon = 0;
-  teams.forEach(team => {
+  division.teams.forEach(team => {
     totalLat += team.latitude;
     totalLon += team.longitude;
   });
 
-  const numTeams = teams.length;
+  const numTeams = division.teams.length;
   return { lat: totalLat / numTeams, lon: totalLon / numTeams };
 };
 
-export const splitIntoConferences = (components: Team[][]): Team[][][] => {
+export const splitIntoConferences = (components: Division[]): Division[][] => {
   const divisionsWithCentroids = components.map(division => ({
     division,
     centroid: calculateCentroid(division),
@@ -145,7 +150,7 @@ class Partitioning {
     return distances.sort((a, b) => a.distance - b.distance);
   };
 
-  public getDivisions = (): Team[][] => {
+  public getDivisions = (): Division[] => {
     const maxDivisionSize = Math.ceil(this.teams.length / this.divisionCount);
 
     while (this.components.length > this.divisionCount) {
@@ -201,7 +206,11 @@ class Partitioning {
     }
 
     this.optimizeDivisions();
-    return this.components;
+
+    return this.components.map((division, index) => ({
+      teams: division,
+      color: generateColor(index, this.components.length),
+    }));
   };
 }
 

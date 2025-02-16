@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { defaultDivisionCount, Team, defaultTeams } from './data/teams';
+import { defaultDivisionCount, Team, defaultTeams, Division } from './data/teams';
 import MapView from './divisionsTab/MapView';
 import TeamView from './inputTab/TeamViewer';
 import DivisionView from './divisionsTab/DivisionView';
@@ -10,8 +10,8 @@ type activeTab = 'teams' | 'divisions';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<activeTab>('teams');
-  const [divisions, setDivisions] = useState<Team[][]>([]);
-  const [conferences, setConferences] = useState<Team[][][]>([]);
+  const [divisions, setDivisions] = useState<Division[]>([]);
+  const [conferences, setConferences] = useState<Division[][]>([]);
   const [teams, setTeams] = useState<Team[]>(defaultTeams);
   const [divisionsCount, setDivisionsCount] = useState<number>(defaultDivisionCount);
 

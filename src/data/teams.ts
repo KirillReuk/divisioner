@@ -6,7 +6,12 @@ export interface Team {
   index?: number;
 }
 
-export const defaultDivisionCount = 8;
+export type Division = {
+  teams: Team[];
+  color: string;
+};
+
+export const defaultDivisionCount = 6;
 
 export const defaultTeams: Team[] = [
   { name: 'Atlanta Hawks', location: 'Atlanta, Georgia, USA', latitude: 33.7488, longitude: -84.388 },

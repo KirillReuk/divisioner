@@ -1,8 +1,8 @@
 import React from 'react';
-import { Team } from '../data/teams';
+import { Division } from '../data/teams';
 
 interface EditableTeamsProps {
-  conferences: Team[][][];
+  conferences: Division[][];
 }
 
 const DivisionView: React.FC<EditableTeamsProps> = ({ conferences }) => {
@@ -10,14 +10,18 @@ const DivisionView: React.FC<EditableTeamsProps> = ({ conferences }) => {
     <div className="p-4 bg-gray-100 rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">Divisions</h2>
       {conferences.length !== 0 && (
-        <div className="flex">
+        <div className="flex gap-4">
           <div className="flex-1">
             <h2 className="font-bold mb-4">Eastern Conference</h2>
             {conferences[0]?.map((division, index) => (
-              <div key={`division-${index}`} className="mb-4">
+              <div
+                key={`division-${index}`}
+                className="mb-4 p-2 rounded-md"
+                style={{ backgroundColor: division.color }}
+              >
                 <h2 className="font-semibold mb-4">Division {index + 1}</h2>
                 <ul>
-                  {division.map((team, idx) => (
+                  {division.teams.map((team, idx) => (
                     <li key={idx}>{team.name}</li>
                   ))}
                 </ul>
@@ -27,10 +31,14 @@ const DivisionView: React.FC<EditableTeamsProps> = ({ conferences }) => {
           <div className="flex-1">
             <h2 className="font-bold mb-4">Western Conference</h2>
             {conferences[1]?.map((division, index) => (
-              <div key={`division-${index}`} className="mb-4">
+              <div
+                key={`division-${index}`}
+                className="mb-4 p-2 rounded-md"
+                style={{ backgroundColor: division.color }}
+              >
                 <h2 className="font-semibold mb-4">Division {index + 1}</h2>
                 <ul>
-                  {division.map((team, idx) => (
+                  {division.teams.map((team, idx) => (
                     <li key={idx}>{team.name}</li>
                   ))}
                 </ul>
