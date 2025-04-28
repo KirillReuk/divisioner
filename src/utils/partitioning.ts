@@ -5,32 +5,33 @@ const generateHue = (index: number, total: number): number => (index / total) * 
 export const shadeHue = (hue: number, saturation: number, value: number): string =>
   `hsl(${hue}, ${saturation}%, ${value}%)`;
 const calculateCentroid = (division: Division): { lat: number; lon: number } => {
-  let totalLat = 0;
-  let totalLon = 0;
-  division.teams.forEach(team => {
-    totalLat += team.latitude;
-    totalLon += team.longitude;
-  });
+  const { totalLat, totalLon } = division.teams.reduce(
+    (acc, team) => ({
+      totalLat: acc.totalLat + team.latitude,
+      totalLon: acc.totalLon + team.longitude,
+    }),
+    { totalLat: 0, totalLon: 0 }
+  );
 
-  const numTeams = division.teams.length;
+  const numTeams = division.teams.length || 1;
   return { lat: totalLat / numTeams, lon: totalLon / numTeams };
 };
 
 export const splitIntoConferences = (components: Division[]): Division[][] => {
-  const divisionsWithCentroids = components.map(division => ({
-    division,
-    centroid: calculateCentroid(division),
-  }));
-
-  divisionsWithCentroids.sort((a, b) => {
-    return b.centroid.lon - a.centroid.lon;
-  });
+  const divisionsWithCentroids = [...components]
+    .map(division => ({
+      division,
+      centroid: calculateCentroid(division),
+    }))
+    .sort((a, b) => b.centroid.lon - a.centroid.lon);
 
   const half = Math.ceil(divisionsWithCentroids.length / 2);
-  const firstConference = divisionsWithCentroids.slice(0, half).map(d => d.division);
-  const secondConference = divisionsWithCentroids.slice(half).map(d => d.division);
+  const result = [
+    divisionsWithCentroids.slice(0, half).map(d => d.division),
+    divisionsWithCentroids.slice(half).map(d => d.division),
+  ];
 
-  return [firstConference, secondConference];
+  return result;
 };
 
 class Partitioning {
@@ -50,23 +51,23 @@ class Partitioning {
   }
 
   private distanceBetweenTeams = (team1: Team, team2: Team): number => {
-    const team1Index = team1.index || this.teams.indexOf(team1);
-    const team2Index = team2.index || this.teams.indexOf(team2);
-    return this.distanceMatrix[team1Index][team2Index];
+    const getTeamIndex = (team: Team): number => team.index || this.teams.indexOf(team);
+
+    return this.distanceMatrix[getTeamIndex(team1)][getTeamIndex(team2)];
   };
 
   private precomputeDistances = (): number[][] => {
-    const distances: number[][] = [];
+    const numberOfTeams = this.teams.length;
 
-    for (let i = 0; i < this.teams.length; i++) {
-      distances[i] = [];
-      for (let j = 0; j < this.teams.length; j++) {
-        distances[i][j] = haversineDistance(
-          this.teams[i].latitude,
-          this.teams[i].longitude,
-          this.teams[j].latitude,
-          this.teams[j].longitude
-        );
+    const distances: number[][] = Array.from({ length: numberOfTeams }, () => Array(numberOfTeams).fill(0));
+
+    for (let i = 0; i < numberOfTeams; i++) {
+      const teamA = this.teams[i];
+      for (let j = i; j < numberOfTeams; j++) {
+        const teamB = this.teams[j];
+        const distance = haversineDistance(teamA.latitude, teamA.longitude, teamB.latitude, teamB.longitude);
+        distances[i][j] = distance;
+        distances[j][i] = distance;
       }
     }
 
@@ -100,9 +101,8 @@ class Partitioning {
           const comp1 = this.components[i];
           const comp2 = this.components[j];
 
-          for (let team1 of comp1) {
-            for (let team2 of comp2) {
-              // Create hypothetical swap
+          comp1.forEach(team1 => {
+            comp2.forEach(team2 => {
               const newComp1 = comp1.filter(team => team !== team1).concat(team2);
               const newComp2 = comp2.filter(team => team !== team2).concat(team1);
 
@@ -120,8 +120,8 @@ class Partitioning {
                 bestSwap = { i, j, team1, team2 };
                 improved = true;
               }
-            }
-          }
+            });
+          });
         }
       }
 
@@ -133,13 +133,12 @@ class Partitioning {
     }
   };
 
-  private calculateDistances = () => {
+  private calculateDistancesBetweenComponents = () => {
     const distances = [];
     for (let i = 0; i < this.components.length; i++) {
       for (let j = i + 1; j < this.components.length; j++) {
         const minDistance = this.components[i]
-          .map(team1 => this.components[j].map(team2 => this.distanceBetweenTeams(team1, team2)))
-          .flat()
+          .flatMap(team1 => this.components[j].map(team2 => this.distanceBetweenTeams(team1, team2)))
           .reduce((a, b) => Math.min(a, b), Infinity);
 
         distances.push({ index1: i, index2: j, distance: minDistance });
@@ -152,7 +151,7 @@ class Partitioning {
     const maxDivisionSize = Math.ceil(this.teams.length / this.divisionCount);
 
     while (this.components.length > this.divisionCount) {
-      const distances = this.calculateDistances();
+      const distances = this.calculateDistancesBetweenComponents();
 
       let merged = false;
       for (const { index1, index2 } of distances) {
@@ -161,7 +160,7 @@ class Partitioning {
 
         if (comp1.length + comp2.length <= maxDivisionSize) {
           this.components[index1] = comp1.concat(comp2);
-          this.components.splice(index2, 1);
+          this.components = this.components.filter((_, index) => index !== index2);
           merged = true;
           break;
         }
@@ -173,11 +172,11 @@ class Partitioning {
           0
         );
         const smallestComponent = this.components[smallestIndex];
-        this.components.splice(smallestIndex, 1);
+        this.components = this.components.filter((_, index) => index !== smallestIndex);
 
         const singleTeamComponents = smallestComponent.map(team => [team]);
 
-        for (const singleTeam of singleTeamComponents) {
+        singleTeamComponents.forEach(singleTeam => {
           let closestComponentIndex = -1;
           let minDistance = Infinity;
 
@@ -199,7 +198,7 @@ class Partitioning {
           } else {
             this.components.push(singleTeam);
           }
-        }
+        });
       }
     }
 
