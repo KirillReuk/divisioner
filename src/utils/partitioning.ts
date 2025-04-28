@@ -1,6 +1,13 @@
 import { Team, Division } from '../data/teams';
 import { haversineDistance } from '../utils/distance';
 
+type PotentialSwap = {
+  i: number;
+  j: number;
+  team1: Team;
+  team2: Team;
+} | null;
+
 const generateHue = (index: number, total: number): number => (index / total) * 360;
 export const shadeHue = (hue: number, saturation: number, value: number): string =>
   `hsl(${hue}, ${saturation}%, ${value}%)`;
@@ -51,7 +58,7 @@ class Partitioning {
   }
 
   private distanceBetweenTeams = (team1: Team, team2: Team): number => {
-    const getTeamIndex = (team: Team): number => team.index || this.teams.indexOf(team);
+    const getTeamIndex = (team: Team): number => this.teams.indexOf(team);
 
     return this.distanceMatrix[getTeamIndex(team1)][getTeamIndex(team2)];
   };
@@ -88,48 +95,52 @@ class Partitioning {
     return this.components.reduce((total, component) => total + this.calculateComponentDistance(component), 0);
   }
 
-  private optimizeDivisions = () => {
-    let improved = true;
+  private findBestSwap(): PotentialSwap | null {
+    let bestSwap: PotentialSwap = null;
+    let bestDistance = this.calculateTotalDistance();
 
-    while (improved) {
-      improved = false;
-      let bestSwap = null;
-      let bestDistance = this.calculateTotalDistance();
+    for (let i = 0; i < this.components.length; i++) {
+      for (let j = i + 1; j < this.components.length; j++) {
+        const component1 = this.components[i];
+        const component2 = this.components[j];
 
-      for (let i = 0; i < this.components.length; i++) {
-        for (let j = i + 1; j < this.components.length; j++) {
-          const comp1 = this.components[i];
-          const comp2 = this.components[j];
+        component1.forEach(team1 => {
+          component2.forEach(team2 => {
+            const newComponent1 = component1.filter(team => team !== team1).concat(team2);
+            const newComponent2 = component2.filter(team => team !== team2).concat(team1);
 
-          comp1.forEach(team1 => {
-            comp2.forEach(team2 => {
-              const newComp1 = comp1.filter(team => team !== team1).concat(team2);
-              const newComp2 = comp2.filter(team => team !== team2).concat(team1);
+            const newComponents = [...this.components];
+            newComponents[i] = newComponent1;
+            newComponents[j] = newComponent2;
 
-              const newComponents = [...this.components];
-              newComponents[i] = newComp1;
-              newComponents[j] = newComp2;
+            const newDistance = newComponents.reduce(
+              (total, component) => total + this.calculateComponentDistance(component),
+              0
+            );
 
-              const newDistance = newComponents.reduce(
-                (total, component) => total + this.calculateComponentDistance(component),
-                0
-              );
-
-              if (newDistance < bestDistance) {
-                bestDistance = newDistance;
-                bestSwap = { i, j, team1, team2 };
-                improved = true;
-              }
-            });
+            if (newDistance < bestDistance) {
+              bestDistance = newDistance;
+              bestSwap = { i, j, team1, team2 };
+            }
           });
-        }
+        });
+      }
+    }
+
+    return bestSwap;
+  }
+
+  private optimizeDivisions = () => {
+    while (true) {
+      const bestSwap = this.findBestSwap();
+
+      if (!bestSwap) {
+        break;
       }
 
-      if (bestSwap) {
-        const { i, j, team1, team2 } = bestSwap;
-        this.components[i] = this.components[i].filter(team => team !== team1).concat(team2);
-        this.components[j] = this.components[j].filter(team => team !== team2).concat(team1);
-      }
+      const { i, j, team1, team2 } = bestSwap;
+      this.components[i] = this.components[i].filter(team => team !== team1).concat(team2);
+      this.components[j] = this.components[j].filter(team => team !== team2).concat(team1);
     }
   };
 
@@ -147,58 +158,68 @@ class Partitioning {
     return distances.sort((a, b) => a.distance - b.distance);
   };
 
-  public getDivisions = (): Division[] => {
-    const maxDivisionSize = Math.ceil(this.teams.length / this.divisionCount);
+  private mergeClosestComponents(distances: { index1: number; index2: number; distance: number }[]): boolean {
+    for (const { index1, index2 } of distances) {
+      const comp1 = this.components[index1];
+      const comp2 = this.components[index2];
 
+      if (comp1.length + comp2.length <= this.maxDivisionSize) {
+        this.components[index1] = comp1.concat(comp2);
+        this.components.splice(index2, 1);
+
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private findClosestComponent(singleTeam: Team): { index: number; distance: number } | null {
+    let closestComponentIndex = -1;
+    let minDistance = Infinity;
+
+    for (let i = 0; i < this.components.length; i++) {
+      if (this.components[i].length < this.maxDivisionSize) {
+        const distance = this.components[i]
+          .map(team => this.distanceBetweenTeams(singleTeam, team))
+          .reduce((a, b) => Math.min(a, b), Infinity);
+
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestComponentIndex = i;
+        }
+      }
+    }
+
+    return closestComponentIndex !== -1 ? { index: closestComponentIndex, distance: minDistance } : null;
+  }
+
+  private trySplitSmallestComponent(): void {
+    const smallestComponentIndex = this.components.reduce(
+      (minIndex, component, index) => (component.length < this.components[minIndex].length ? index : minIndex),
+      0
+    );
+    const smallestComponent = this.components[smallestComponentIndex];
+    this.components.splice(smallestComponentIndex, 1);
+
+    const singleTeamComponents = smallestComponent.map(team => [team]);
+
+    singleTeamComponents.forEach(singleTeam => {
+      const closestComponent = this.findClosestComponent(singleTeam[0]);
+
+      if (closestComponent) {
+        this.components[closestComponent.index].push(singleTeam[0]);
+      } else {
+        this.components.push(singleTeam);
+      }
+    });
+  }
+
+  public getDivisions = (): Division[] => {
     while (this.components.length > this.divisionCount) {
       const distances = this.calculateDistancesBetweenComponents();
 
-      let merged = false;
-      for (const { index1, index2 } of distances) {
-        const comp1 = this.components[index1];
-        const comp2 = this.components[index2];
-
-        if (comp1.length + comp2.length <= maxDivisionSize) {
-          this.components[index1] = comp1.concat(comp2);
-          this.components = this.components.filter((_, index) => index !== index2);
-          merged = true;
-          break;
-        }
-      }
-
-      if (!merged) {
-        const smallestIndex = this.components.reduce(
-          (minIndex, component, index) => (component.length < this.components[minIndex].length ? index : minIndex),
-          0
-        );
-        const smallestComponent = this.components[smallestIndex];
-        this.components = this.components.filter((_, index) => index !== smallestIndex);
-
-        const singleTeamComponents = smallestComponent.map(team => [team]);
-
-        singleTeamComponents.forEach(singleTeam => {
-          let closestComponentIndex = -1;
-          let minDistance = Infinity;
-
-          for (let i = 0; i < this.components.length; i++) {
-            if (this.components[i].length < maxDivisionSize) {
-              const distance = this.components[i]
-                .map(team => this.distanceBetweenTeams(singleTeam[0], team))
-                .reduce((a, b) => Math.min(a, b), Infinity);
-
-              if (distance < minDistance) {
-                minDistance = distance;
-                closestComponentIndex = i;
-              }
-            }
-          }
-
-          if (closestComponentIndex !== -1) {
-            this.components[closestComponentIndex].push(singleTeam[0]);
-          } else {
-            this.components.push(singleTeam);
-          }
-        });
+      if (!this.mergeClosestComponents(distances)) {
+        this.trySplitSmallestComponent();
       }
     }
 

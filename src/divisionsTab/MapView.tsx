@@ -15,8 +15,7 @@ const MapView: React.FC<MapViewProps> = ({ divisions }) => {
 
     useEffect(() => {
       const allCoordinates = divisions
-        .map(division => division.teams)
-        .flat()
+        .flatMap(division => division.teams)
         .map(team => [team.latitude, team.longitude] as [number, number]);
 
       if (allCoordinates.length > 0) {

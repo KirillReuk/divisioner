@@ -3,7 +3,6 @@ export interface Team {
   location: string;
   latitude: number;
   longitude: number;
-  index?: number;
 }
 
 export type Division = {
