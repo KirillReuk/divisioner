@@ -86,7 +86,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                 type="text"
                 value={team.name}
                 onChange={e => handleTeamNameChange(index, e.target.value)}
-                className="flex-1 p-2 border border-gray-400 rounded"
+                className="flex-1 p-2 rounded"
                 placeholder="Team Name"
                 onFocus={() => setFocusedIndex(index)}
               />
@@ -103,7 +103,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                   initialLocation={team.location}
                 />
               ) : (
-                <div className='flex-1 flex gap-2'>
+                <div className="flex-1 flex gap-2">
                   <input
                     type="number"
                     value={team.latitude}
@@ -111,7 +111,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                       handleCoordinatesChange(index, 'latitude', parseFloat(e.target.value));
                       validateLatitude(parseFloat(e.target.value));
                     }}
-                    className="flex-1 border border-gray-400 rounded w-1/2 px-2"
+                    className="flex-1 rounded w-1/2 px-2"
                     placeholder="Latitude"
                     onFocus={() => setFocusedIndex(index)}
                   />
@@ -122,7 +122,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                       handleCoordinatesChange(index, 'longitude', parseFloat(e.target.value));
                       validateLongitude(parseFloat(e.target.value));
                     }}
-                    className="flex-1 border border-gray-400 rounded w-1/2 px-2"
+                    className="flex-1 rounded w-1/2 px-2"
                     placeholder="Longitude"
                     onFocus={() => setFocusedIndex(index)}
                   />
@@ -130,9 +130,9 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
               )}
               <button
                 onClick={() => setTeams(teams.filter((_, i) => i !== index))}
-                className="px-3 py-1 bg-red-500 text-white rounded w-sm"
+                className="px-3 bg-white-500 text-black rounded w-sm"
               >
-                X
+                x
               </button>
             </div>
             {focusedIndex === index && (

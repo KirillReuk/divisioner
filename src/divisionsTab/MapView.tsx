@@ -3,7 +3,6 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { Division } from '../data/teams';
-import { shadeHue } from '../utils/partitioning';
 
 interface MapViewProps {
   divisions: Division[];
@@ -36,7 +35,7 @@ const MapView: React.FC<MapViewProps> = ({ divisions }) => {
         division.teams.map((team, teamIndex) => {
           const icon = L.divIcon({
             className: 'custom-icon',
-            html: `<div style="background-color: ${shadeHue(division.hue, 90, 50)}; width: 20px; height: 20px; border-radius: 50%;"></div>`,
+            html: `<div style="background-color: ${division.color}; width: 20px; height: 20px; border-radius: 50%;"></div>`,
             iconSize: [20, 20],
             iconAnchor: [10, 10],
             popupAnchor: [0, -10],

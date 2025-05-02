@@ -7,7 +7,7 @@ export interface Team {
 
 export type Division = {
   teams: Team[];
-  hue: number;
+  color: string;
 };
 
 export const defaultDivisionCount = 6;

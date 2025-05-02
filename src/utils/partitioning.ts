@@ -1,5 +1,6 @@
 import { Team, Division } from '../data/teams';
 import { haversineDistance } from '../utils/distance';
+import chroma from 'chroma-js';
 
 type PotentialSwap = {
   i: number;
@@ -8,9 +9,6 @@ type PotentialSwap = {
   team2: Team;
 } | null;
 
-const generateHue = (index: number, total: number): number => (index / total) * 360;
-export const shadeHue = (hue: number, saturation: number, value: number): string =>
-  `hsl(${hue}, ${saturation}%, ${value}%)`;
 const calculateCentroid = (division: Division): { lat: number; lon: number } => {
   const { totalLat, totalLon } = division.teams.reduce(
     (acc, team) => ({
@@ -227,7 +225,7 @@ class Partitioning {
 
     return this.components.map((division, index) => ({
       teams: division,
-      hue: generateHue(index, this.components.length),
+      color: chroma.scale('Spectral').mode('lab').colors(this.components.length)[index],
     }));
   };
 }
