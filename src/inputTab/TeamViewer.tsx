@@ -94,9 +94,9 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                 <LocationSearchInput
                   key={'location-search-' + index}
                   index={index}
-                  onSelect={(index, _, lat, lng) => {
+                  onSelect={(index, location, latitude, longitude) => {
                     const updatedTeams = [...teams];
-                    updatedTeams[index] = { ...updatedTeams[index], latitude: lat, longitude: lng };
+                    updatedTeams[index] = { ...updatedTeams[index], location, latitude, longitude };
                     setTeams(updatedTeams);
                   }}
                   onFocus={() => setFocusedIndex(index)}
