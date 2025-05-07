@@ -1,4 +1,5 @@
 import { Team, Division } from '../data/teams';
+import { Rivalry } from '../rivalryTab/RivalryView';
 import { haversineDistance } from '../utils/distance';
 import chroma from 'chroma-js';
 
@@ -45,18 +46,35 @@ class Partitioning {
   maxDivisionSize: number;
   distanceMatrix: number[][];
   components: Team[][];
+  rivalries: Rivalry[];
 
-  constructor(teams: Team[], divisionCount: number) {
+  constructor(teams: Team[], divisionCount: number, rivalries: Rivalry[]) {
     const teamsWithIndex = teams.map((team, index) => ({ ...team, index }));
     this.teams = teamsWithIndex;
     this.divisionCount = divisionCount;
+    this.rivalries = rivalries;
     this.maxDivisionSize = Math.ceil(teams.length / divisionCount);
     this.distanceMatrix = this.precomputeDistances();
-    this.components = teamsWithIndex.map(team => [team]);
+
+    this.components = this.generateInitialComponents(teamsWithIndex, rivalries);
   }
 
+  private generateInitialComponents = (teams: Team[], rivalries: Rivalry[]): Team[][] => {
+    const result = [] as Team[][];
+    rivalries.forEach(rivalry => {
+      result.push([rivalry.team1, rivalry.team2]);
+    });
+    teams
+      .filter(team => !rivalries.some(rivalry => rivalry.team1.name === team.name || rivalry.team2.name === team.name))
+      .forEach(team => {
+        result.push([team]);
+      });
+
+    return result;
+  };
+
   private distanceBetweenTeams = (team1: Team, team2: Team): number => {
-    const getTeamIndex = (team: Team): number => this.teams.indexOf(team);
+    const getTeamIndex = (teamToFind: Team): number => this.teams.findIndex(team => team.name === teamToFind.name);
 
     return this.distanceMatrix[getTeamIndex(team1)][getTeamIndex(team2)];
   };
@@ -104,6 +122,18 @@ class Partitioning {
 
         component1.forEach(team1 => {
           component2.forEach(team2 => {
+            if (
+              this.rivalries.some(
+                rivalry =>
+                  rivalry.team1 === team1 ||
+                  rivalry.team2 === team2 ||
+                  rivalry.team1 === team2 ||
+                  rivalry.team2 === team1
+              )
+            ) {
+              return;
+            }
+
             const newComponent1 = component1.filter(team => team !== team1).concat(team2);
             const newComponent2 = component2.filter(team => team !== team2).concat(team1);
 
