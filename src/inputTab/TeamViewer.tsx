@@ -11,6 +11,8 @@ interface EditableTeamsProps {
 
 type FieldsToValidate = 'latitude' | 'longitude';
 
+const DEFAULT_TEAM = { name: 'New Team', location: '', latitude: 0, longitude: 0 };
+
 const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
   const [errors, setErrors] = useState<Record<FieldsToValidate, boolean>>({
     latitude: false,
@@ -55,13 +57,17 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
   const validateLongitude = (value: number) => setErrors({ ...errors, longitude: value < -180 || value > 180 });
 
   const updateCoordinatesResults = async (index: number, latitude: number, longitude: number) => {
-    const results = await fetchCoordinates(latitude, longitude);
-    if (results) {
-      setTeams(prevTeams => {
-        const updatedTeams = [...prevTeams];
-        updatedTeams[index] = { ...updatedTeams[index], location: results[0].formatted };
-        return updatedTeams;
-      });
+    try {
+      const results = await fetchCoordinates(latitude, longitude);
+      if (results && results.length > 0) {
+        setTeams(prevTeams => {
+          const updatedTeams = [...prevTeams];
+          updatedTeams[index] = { ...updatedTeams[index], location: results[0].formatted };
+          return updatedTeams;
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching coordinates:', error);
     }
   };
 
@@ -72,10 +78,9 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
       <table className="table-auto w-full">
         <thead>
           <tr>
-            <th className="text-lg text-left font-medium p-2">Team Name</th>
-            <th className="text-lg text-left font-medium p-2 w-2/5">Location</th>
-            <th className="text-lg text-left font-medium p-2">Latitude</th>
-            <th className="text-lg text-left font-medium p-2">Longitude</th>
+            <th className="text-lg text-left font-medium p-2 w-1/5">Team Name</th>
+            <th className="text-lg text-left font-medium p-2">Location</th>
+            <th className="text-lg text-left font-medium p-2 w-1/6">Coordinates</th>
           </tr>
         </thead>
         <tbody>
@@ -110,11 +115,9 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                     handleCoordinatesChange(index, 'latitude', parseFloat(e.target.value));
                     validateLatitude(parseFloat(e.target.value));
                   }}
-                  className="rounded w-full p-2 bg-gray-100 focus:bg-white"
+                  className="rounded w-1/2 p-2 bg-gray-100 focus:bg-white"
                   placeholder="Latitude"
                 />
-              </td>
-              <td>
                 <input
                   type="number"
                   value={team.longitude}
@@ -122,7 +125,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                     handleCoordinatesChange(index, 'longitude', parseFloat(e.target.value));
                     validateLongitude(parseFloat(e.target.value));
                   }}
-                  className="rounded w-full p-2 bg-gray-100 focus:bg-white"
+                  className="rounded w-1/2 p-2 bg-gray-100 focus:bg-white"
                   placeholder="Longitude"
                 />
               </td>
@@ -139,7 +142,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
         </tbody>
       </table>
       <button
-        onClick={() => setTeams([...teams, { name: 'New Team', location: '', latitude: 0, longitude: 0 }])}
+        onClick={() => setTeams([...teams, DEFAULT_TEAM])}
         className="w-full mt-4 bg-green-500 text-white px-4 py-2 rounded"
       >
         <span className="text-xl font-bold">+</span> Add Team
