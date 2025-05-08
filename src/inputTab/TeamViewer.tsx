@@ -9,12 +9,9 @@ interface EditableTeamsProps {
   setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
 }
 
-type InputMode = 'location' | 'coordinates';
 type FieldsToValidate = 'latitude' | 'longitude';
 
 const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
-  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
-  const [inputMode, setInputMode] = useState<InputMode[]>(Array(teams.length).fill('location'));
   const [errors, setErrors] = useState<Record<FieldsToValidate, boolean>>({
     latitude: false,
     longitude: false,
@@ -54,12 +51,6 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
     }));
   };
 
-  const handleModeChange = (index: number) => {
-    const updatedMode = [...inputMode];
-    updatedMode[index] = updatedMode[index] === 'location' ? 'coordinates' : 'location';
-    setInputMode(updatedMode);
-  };
-
   const validateLatitude = (value: number) => setErrors({ ...errors, latitude: value < -90 || value > 90 });
   const validateLongitude = (value: number) => setErrors({ ...errors, longitude: value < -180 || value > 180 });
 
@@ -78,19 +69,28 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
     <div className="p-4 bg-gray-100 shadow-md">
       <h2 className="text-2xl font-bold">Teams</h2>
       <h5 className="text-gray-400 mb-4">({teams.length} teams in total)</h5>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-        {teams.map((team, index) => (
-          <div key={index} className="p-2 bg-white shadow rounded-lg">
-            <div className="flex gap-4">
-              <input
-                type="text"
-                value={team.name}
-                onChange={e => handleTeamNameChange(index, e.target.value)}
-                className="flex-1 p-2 rounded"
-                placeholder="Team Name"
-                onFocus={() => setFocusedIndex(index)}
-              />
-              {inputMode[index] === 'location' ? (
+      <table className="table-auto w-full">
+        <thead>
+          <tr>
+            <th className="text-lg text-left font-medium p-2">Team Name</th>
+            <th className="text-lg text-left font-medium p-2 w-2/5">Location</th>
+            <th className="text-lg text-left font-medium p-2">Latitude</th>
+            <th className="text-lg text-left font-medium p-2">Longitude</th>
+          </tr>
+        </thead>
+        <tbody>
+          {teams.map((team, index) => (
+            <tr className="border-b border-t border-300 border-black" key={index}>
+              <td>
+                <input
+                  type="text"
+                  value={team.name}
+                  onChange={e => handleTeamNameChange(index, e.target.value)}
+                  className="p-2 rounded w-full bg-gray-100 focus:bg-white"
+                  placeholder="Team Name"
+                />
+              </td>
+              <td>
                 <LocationSearchInput
                   key={'location-search-' + index}
                   index={index}
@@ -99,73 +99,50 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                     updatedTeams[index] = { ...updatedTeams[index], location, latitude, longitude };
                     setTeams(updatedTeams);
                   }}
-                  onFocus={() => setFocusedIndex(index)}
                   initialLocation={team.location}
                 />
-              ) : (
-                <div className="flex-1 flex gap-2">
-                  <input
-                    type="number"
-                    value={team.latitude}
-                    onChange={e => {
-                      handleCoordinatesChange(index, 'latitude', parseFloat(e.target.value));
-                      validateLatitude(parseFloat(e.target.value));
-                    }}
-                    className="flex-1 rounded w-1/2 px-2"
-                    placeholder="Latitude"
-                    onFocus={() => setFocusedIndex(index)}
-                  />
-                  <input
-                    type="number"
-                    value={team.longitude}
-                    onChange={e => {
-                      handleCoordinatesChange(index, 'longitude', parseFloat(e.target.value));
-                      validateLongitude(parseFloat(e.target.value));
-                    }}
-                    className="flex-1 rounded w-1/2 px-2"
-                    placeholder="Longitude"
-                    onFocus={() => setFocusedIndex(index)}
-                  />
-                </div>
-              )}
-              <button
-                onClick={() => setTeams(teams.filter((_, i) => i !== index))}
-                className="px-3 bg-white-500 text-black rounded w-sm"
-              >
-                x
-              </button>
-            </div>
-            {focusedIndex === index && (
-              <p className="mt-2 mx-2 text-start">
-                {inputMode[index] === 'location' ? (
-                  <>
-                    <span className="font-bold">Latitude:</span> {team.latitude.toFixed(4)}{' '}
-                    <span className="font-bold">Longitude:</span> {team.longitude.toFixed(4)}
-                  </>
-                ) : (
-                  <>
-                    <span className="font-bold">Location:</span> {team.location}
-                  </>
-                )}
-                <span className="float-end">
-                  <input
-                    type="checkbox"
-                    checked={inputMode[index] === 'coordinates'}
-                    onChange={() => handleModeChange(index)}
-                    className="form-checkbox"
-                  />{' '}
-                  <span>{inputMode[index] === 'location' ? 'Input Coordinates' : 'Input Locations'}</span>
-                </span>
-              </p>
-            )}
-          </div>
-        ))}
-      </div>
+              </td>
+              <td>
+                <input
+                  type="number"
+                  value={team.latitude}
+                  onChange={e => {
+                    handleCoordinatesChange(index, 'latitude', parseFloat(e.target.value));
+                    validateLatitude(parseFloat(e.target.value));
+                  }}
+                  className="rounded w-full p-2 bg-gray-100 focus:bg-white"
+                  placeholder="Latitude"
+                />
+              </td>
+              <td>
+                <input
+                  type="number"
+                  value={team.longitude}
+                  onChange={e => {
+                    handleCoordinatesChange(index, 'longitude', parseFloat(e.target.value));
+                    validateLongitude(parseFloat(e.target.value));
+                  }}
+                  className="rounded w-full p-2 bg-gray-100 focus:bg-white"
+                  placeholder="Longitude"
+                />
+              </td>
+              <td>
+                <button
+                  onClick={() => setTeams(teams.filter((_, i) => i !== index))}
+                  className="px-3 bg-white-500 text-black rounded align-middle"
+                >
+                  x
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
       <button
         onClick={() => setTeams([...teams, { name: 'New Team', location: '', latitude: 0, longitude: 0 }])}
         className="w-full mt-4 bg-green-500 text-white px-4 py-2 rounded"
       >
-        Add Team
+        <span className="text-xl font-bold">+</span> Add Team
       </button>
     </div>
   );
