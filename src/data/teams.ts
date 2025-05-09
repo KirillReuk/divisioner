@@ -10,8 +10,6 @@ export type Division = {
   color: string;
 };
 
-export const defaultDivisionCount = 8;
-
 export const defaultTeams: Team[] = [
   { name: 'Atlanta Hawks', location: 'Atlanta, Georgia, USA', latitude: 33.749, longitude: -84.388 },
   { name: 'Boston Celtics', location: 'Boston, Massachusetts, USA', latitude: 42.36, longitude: -71.059 },

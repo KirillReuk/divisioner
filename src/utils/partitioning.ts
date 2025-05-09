@@ -60,7 +60,7 @@ class Partitioning {
   }
 
   private generateInitialComponents = (teams: Team[], rivalries: Rivalry[]): Team[][] => {
-    const result = [] as Team[][];
+    const result: Team[][] = [];
     rivalries.forEach(rivalry => {
       result.push([rivalry.team1, rivalry.team2]);
     });
@@ -221,7 +221,7 @@ class Partitioning {
     return closestComponentIndex !== -1 ? { index: closestComponentIndex, distance: minDistance } : null;
   }
 
-  private trySplitSmallestComponent(): void {
+  private tryRecycleSmallestComponent(): void {
     const smallestComponentIndex = this.components.reduce(
       (minIndex, component, index) => (component.length < this.components[minIndex].length ? index : minIndex),
       0
@@ -247,7 +247,7 @@ class Partitioning {
       const distances = this.calculateDistancesBetweenComponents();
 
       if (!this.mergeClosestComponents(distances)) {
-        this.trySplitSmallestComponent();
+        this.tryRecycleSmallestComponent();
       }
     }
 

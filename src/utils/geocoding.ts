@@ -1,4 +1,5 @@
 import { API_KEY } from '../config';
+import { GEOCODING_API_URL } from '../data/constants';
 
 type GeocodingResult = {
   formatted: string;
@@ -12,7 +13,7 @@ type GeocodingResponse = {
 const fetchGeocodingData = async (url: string): Promise<GeocodingResult[] | null> => {
   try {
     const response = await fetch(url);
-    const data = (await response.json()) as GeocodingResponse;
+    const data: GeocodingResponse = await response.json();
 
     if (data.results) {
       return data.results;
@@ -24,11 +25,11 @@ const fetchGeocodingData = async (url: string): Promise<GeocodingResult[] | null
 };
 
 export const fetchLocations = async (searchQuery: string): Promise<GeocodingResult[] | null> => {
-  const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(searchQuery)}&key=${API_KEY}`;
+  const url = `${GEOCODING_API_URL}?q=${encodeURIComponent(searchQuery)}&key=${API_KEY}`;
   return fetchGeocodingData(url);
 };
 
 export const fetchCoordinates = async (lat: number, lng: number): Promise<GeocodingResult[] | null> => {
-  const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(`${lat} ${lng}`)}&key=${API_KEY}`;
+  const url = `${GEOCODING_API_URL}?q=${encodeURIComponent(`${lat} ${lng}`)}&key=${API_KEY}`;
   return fetchGeocodingData(url);
 };

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { defaultDivisionCount, Team, defaultTeams, Division } from './data/teams';
+import { Team, defaultTeams, Division } from './data/teams';
 import MapView from './divisionsTab/MapView';
 import TeamView from './inputTab/TeamViewer';
 import DivisionView from './divisionsTab/DivisionView';
@@ -7,6 +7,7 @@ import './App.css';
 import DivisionCountInput from './inputTab/DivisionCountInput';
 import Partitioning, { splitIntoConferences } from './utils/partitioning';
 import RivalryView, { Rivalry } from './rivalryTab/RivalryView';
+import { DEFAULT_DIVISION_COUNT } from './data/constants';
 
 export type Tab = 'teams' | 'rivalries' | 'divisions';
 
@@ -16,7 +17,7 @@ const App: React.FC = () => {
   const [conferences, setConferences] = useState<Division[][]>([]);
   const [teams, setTeams] = useState<Team[]>(defaultTeams);
   const [rivalries, setRivalries] = useState<Rivalry[]>([]);
-  const [divisionsCount, setDivisionsCount] = useState<number>(defaultDivisionCount);
+  const [divisionsCount, setDivisionsCount] = useState<number>(DEFAULT_DIVISION_COUNT);
 
   const renderTabButton = (tab: Tab, tabName: string, disabled?: boolean): JSX.Element => (
     <button

@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { Division } from '../data/teams';
+import { MARKER_ICON_ANCHOR, MARKER_ICON_SIZE, MARKER_POPUP_ANCHOR, TILE_LAYER_URL } from '../data/constants';
 
 interface MapViewProps {
   divisions: Division[];
@@ -13,9 +14,9 @@ const MapView: React.FC<MapViewProps> = ({ divisions }) => {
     const map = useMap();
 
     useEffect(() => {
-      const allCoordinates = divisions
+      const allCoordinates: [number, number][] = divisions
         .flatMap(division => division.teams)
-        .map(team => [team.latitude, team.longitude] as [number, number]);
+        .map(team => [team.latitude, team.longitude]);
 
       if (allCoordinates.length > 0) {
         const bounds = L.latLngBounds(allCoordinates);
@@ -29,16 +30,16 @@ const MapView: React.FC<MapViewProps> = ({ divisions }) => {
   return (
     <MapContainer style={{ height: '600px', width: '100%' }}>
       <FitBounds />
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      <TileLayer url={TILE_LAYER_URL} />
 
       {divisions.map((division, divisionIndex) =>
         division.teams.map((team, teamIndex) => {
           const icon = L.divIcon({
             className: 'custom-icon',
             html: `<div style="background-color: ${division.color}; width: 20px; height: 20px; border-radius: 50%;"></div>`,
-            iconSize: [20, 20],
-            iconAnchor: [10, 10],
-            popupAnchor: [0, -10],
+            iconSize: MARKER_ICON_SIZE,
+            iconAnchor: MARKER_ICON_ANCHOR,
+            popupAnchor: MARKER_POPUP_ANCHOR,
           });
 
           return (

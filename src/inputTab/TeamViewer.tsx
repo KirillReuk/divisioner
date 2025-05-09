@@ -3,6 +3,7 @@ import { Team } from '../data/teams';
 import LocationSearchInput from '../LocationSearchInput';
 import { fetchCoordinates } from '../utils/geocoding';
 import debounce from 'lodash.debounce';
+import { DEFAULT_TEAM, MAX_LATITUDE, MAX_LONGITUDE, MIN_LATITUDE, MIN_LONGITUDE } from '../data/constants';
 
 interface EditableTeamsProps {
   teams: Team[];
@@ -10,8 +11,6 @@ interface EditableTeamsProps {
 }
 
 type FieldsToValidate = 'latitude' | 'longitude';
-
-const DEFAULT_TEAM = { name: 'New Team', location: '', latitude: 0, longitude: 0 };
 
 const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
   const [errors, setErrors] = useState<Record<FieldsToValidate, boolean>>({
@@ -53,8 +52,10 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
     }));
   };
 
-  const validateLatitude = (value: number) => setErrors({ ...errors, latitude: value < -90 || value > 90 });
-  const validateLongitude = (value: number) => setErrors({ ...errors, longitude: value < -180 || value > 180 });
+  const validateLatitude = (value: number) =>
+    setErrors({ ...errors, latitude: value < MIN_LATITUDE || value > MAX_LATITUDE });
+  const validateLongitude = (value: number) =>
+    setErrors({ ...errors, longitude: value < MIN_LONGITUDE || value > MAX_LONGITUDE });
 
   const updateCoordinatesResults = async (index: number, latitude: number, longitude: number) => {
     try {
@@ -73,7 +74,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
 
   return (
     <div className="p-4 bg-gray-100 shadow-md">
-      <h2 className="text-2xl font-bold">Teams</h2>
+      {/* <h2 className="text-2xl font-bold">Teams</h2> */}
       <h5 className="text-gray-400 mb-4">({teams.length} teams in total)</h5>
       <table className="table-auto w-full">
         <thead>
@@ -129,10 +130,11 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
                   placeholder="Longitude"
                 />
               </td>
-              <td>
+              <td className="text-end">
                 <button
                   onClick={() => setTeams(teams.filter((_, i) => i !== index))}
-                  className="px-3 bg-white-500 text-black rounded align-middle"
+                  className="px-4 bg-white-500 text-black rounded align-middle"
+                  aria-label={`Remove team ${team.name}`}
                 >
                   x
                 </button>
