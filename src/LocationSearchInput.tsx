@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { fetchLocations } from './utils/geocoding';
 
 interface LocationSearchRowProps {
@@ -6,7 +6,7 @@ interface LocationSearchRowProps {
   onSelect: (index: number, formatted: string, lat: number, lng: number) => void;
   onFocus?: () => void;
   onBlur?: () => void;
-  initialLocation?: string;
+  location?: string;
 }
 
 interface LocationResult {
@@ -14,16 +14,16 @@ interface LocationResult {
   geometry: { lat: number; lng: number };
 }
 
-const LocationSearchInput: React.FC<LocationSearchRowProps> = ({
-  index,
-  onSelect,
-  onFocus,
-  onBlur,
-  initialLocation,
-}) => {
-  const [query, setQuery] = useState(initialLocation || '');
+const LocationSearchInput: React.FC<LocationSearchRowProps> = ({ index, onSelect, onFocus, onBlur, location }) => {
+  const [query, setQuery] = useState(location || '');
   const [locationResults, setLocationResults] = useState<LocationResult[]>([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (location) {
+      handleInputChange(location);
+    }
+  }, [location]);
 
   const updateLocationResults = async (searchQuery: string) => {
     setLoading(true);
@@ -42,10 +42,9 @@ const LocationSearchInput: React.FC<LocationSearchRowProps> = ({
     setLoading(false);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newQuery = e.target.value;
-    setQuery(newQuery);
-    updateLocationResults(newQuery);
+  const handleInputChange = (query: string) => {
+    setQuery(query);
+    updateLocationResults(query);
   };
 
   const handleOptionSelect = (selectedValue: string) => {
@@ -66,7 +65,7 @@ const LocationSearchInput: React.FC<LocationSearchRowProps> = ({
         list={`location-results-${index}`}
         value={query}
         onChange={e => {
-          handleInputChange(e);
+          handleInputChange(e.target.value);
           handleOptionSelect(e.target.value);
         }}
         onFocus={onFocus}
