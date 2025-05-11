@@ -1,4 +1,4 @@
-import { Team } from './teams';
+import { Team } from '../utils/types';
 
 // General Constants
 export const DEFAULT_TEAM: Team = { name: 'New Team', location: '', latitude: 0, longitude: 0 };

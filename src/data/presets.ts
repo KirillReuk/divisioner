@@ -1,4 +1,4 @@
-import { Team } from './teams';
+import { Team } from '../utils/types';
 
 export const presets: Record<string, Team[]> = {
   NBA: [

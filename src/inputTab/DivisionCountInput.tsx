@@ -1,7 +1,5 @@
 import React from 'react';
-import { Team } from '../data/teams';
-import { Tab } from '../App';
-import { Rivalry } from '../rivalryTab/RivalryView';
+import { Rivalry, Tab, Team } from '../utils/types';
 
 interface EditableTeamsProps {
   teams: Team[];

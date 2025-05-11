@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { Division } from '../data/teams';
+import { Division } from '../utils/types';
 import { MARKER_ICON_ANCHOR, MARKER_ICON_SIZE, MARKER_POPUP_ANCHOR, TILE_LAYER_URL } from '../data/constants';
 
 interface MapViewProps {

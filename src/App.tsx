@@ -1,16 +1,14 @@
 import { useState } from 'react';
-import { Team, Division } from './data/teams';
+import { Division, Rivalry, Tab, Team } from './utils/types';
 import MapView from './divisionsTab/MapView';
 import TeamView from './inputTab/TeamViewer';
 import DivisionView from './divisionsTab/DivisionView';
 import './App.css';
 import DivisionCountInput from './inputTab/DivisionCountInput';
 import Partitioning, { splitIntoConferences } from './utils/partitioning';
-import RivalryView, { Rivalry } from './rivalryTab/RivalryView';
+import RivalryView from './rivalryTab/RivalryView';
 import { DEFAULT_DIVISION_COUNT } from './data/constants';
 import PresetModal from './PresetModal';
-
-export type Tab = 'teams' | 'rivalries' | 'divisions';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('teams');

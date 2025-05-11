@@ -1,5 +1,5 @@
 import React from 'react';
-import { Division } from '../data/teams';
+import { Division } from '../utils/types';
 import chroma from 'chroma-js';
 import { CONFERENCE_NAMES } from '../data/constants';
 

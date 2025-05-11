@@ -1,16 +1,11 @@
 import React from 'react';
-import { Team } from '../data/teams';
+import { Rivalry, Team } from '../utils/types';
 
 interface EditableRivalryProps {
   teams: Team[];
   rivalries: Rivalry[];
   setRivalries: React.Dispatch<React.SetStateAction<Rivalry[]>>;
 }
-
-export type Rivalry = {
-  team1: Team;
-  team2: Team;
-};
 
 const RivalryView: React.FC<EditableRivalryProps> = ({ teams, rivalries, setRivalries }) => {
   const handleRivalryTeamChange = (index: number, team1: Team, team2: Team) => {

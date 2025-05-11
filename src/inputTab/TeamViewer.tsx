@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Team } from '../data/teams';
+import { Team } from '../utils/types';
 import LocationSearchInput from '../LocationSearchInput';
 import { fetchCoordinates } from '../utils/geocoding';
 import debounce from 'lodash.debounce';

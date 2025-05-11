@@ -1,6 +1,6 @@
 import React from 'react';
 import { presets } from './data/presets';
-import { Team } from './data/teams';
+import { Team } from './utils/types';
 
 interface PresetModalProps {
   isOpen: boolean;

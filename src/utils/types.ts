@@ -9,3 +9,10 @@ export type Division = {
   teams: Team[];
   color: string;
 };
+
+export type Tab = 'teams' | 'rivalries' | 'divisions';
+
+export type Rivalry = {
+  team1: Team;
+  team2: Team;
+};

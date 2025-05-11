@@ -1,5 +1,4 @@
-import { Team, Division } from '../data/teams';
-import { Rivalry } from '../rivalryTab/RivalryView';
+import { Division, Rivalry, Team } from './types';
 import { haversineDistance } from '../utils/distance';
 import chroma from 'chroma-js';
 
