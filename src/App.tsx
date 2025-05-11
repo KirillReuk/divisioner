@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Team, defaultTeams, Division } from './data/teams';
+import { Team, Division } from './data/teams';
 import MapView from './divisionsTab/MapView';
 import TeamView from './inputTab/TeamViewer';
 import DivisionView from './divisionsTab/DivisionView';
@@ -8,6 +8,7 @@ import DivisionCountInput from './inputTab/DivisionCountInput';
 import Partitioning, { splitIntoConferences } from './utils/partitioning';
 import RivalryView, { Rivalry } from './rivalryTab/RivalryView';
 import { DEFAULT_DIVISION_COUNT } from './data/constants';
+import PresetModal from './PresetModal';
 
 export type Tab = 'teams' | 'rivalries' | 'divisions';
 
@@ -15,9 +16,10 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('teams');
   const [divisions, setDivisions] = useState<Division[]>([]);
   const [conferences, setConferences] = useState<Division[][]>([]);
-  const [teams, setTeams] = useState<Team[]>(defaultTeams);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [rivalries, setRivalries] = useState<Rivalry[]>([]);
   const [divisionsCount, setDivisionsCount] = useState<number>(DEFAULT_DIVISION_COUNT);
+  const [showPresetModal, setShowPresetModal] = useState(false);
 
   const renderTabButton = (tab: Tab, tabName: string, disabled?: boolean): JSX.Element => (
     <button
@@ -39,6 +41,12 @@ const App: React.FC = () => {
 
   return (
     <>
+      <PresetModal
+        isOpen={showPresetModal}
+        onClose={() => setShowPresetModal(false)}
+        onSelectPreset={presetTeams => setTeams(presetTeams)}
+      />
+
       <div className="flex justify-start mb-4 gap-2">
         {renderTabButton('teams', 'Teams')}
         {renderTabButton('rivalries', 'Rivalries')}
@@ -55,7 +63,7 @@ const App: React.FC = () => {
               setDivisionsCount={setDivisionsCount}
               setActiveTab={setActiveTab}
             />
-            <TeamView teams={teams} setTeams={setTeams} />
+            <TeamView teams={teams} setTeams={setTeams} setShowPresetModal={setShowPresetModal} />
           </div>
         </div>
       )}

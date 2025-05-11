@@ -13,6 +13,7 @@
     "chroma-js": "^3.1.2",
     "leaflet": "^1.9.4",
     "lodash.debounce": "^4.0.8",
+    "lucide-react": "^0.508.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-leaflet": "^4.2.1"

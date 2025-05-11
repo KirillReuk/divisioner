@@ -4,15 +4,17 @@ import LocationSearchInput from '../LocationSearchInput';
 import { fetchCoordinates } from '../utils/geocoding';
 import debounce from 'lodash.debounce';
 import { DEFAULT_TEAM, MAX_LATITUDE, MAX_LONGITUDE, MIN_LATITUDE, MIN_LONGITUDE } from '../data/constants';
+import { Atom } from 'lucide-react';
 
 interface EditableTeamsProps {
   teams: Team[];
   setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
+  setShowPresetModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 type FieldsToValidate = 'latitude' | 'longitude';
 
-const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
+const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams, setShowPresetModal }) => {
   const [errors, setErrors] = useState<Record<FieldsToValidate, boolean>>({
     latitude: false,
     longitude: false,
@@ -74,8 +76,14 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams }) => {
 
   return (
     <div className="p-4 bg-gray-100 shadow-md">
-      {/* <h2 className="text-2xl font-bold">Teams</h2> */}
-      <h5 className="text-gray-400 mb-4">({teams.length} teams in total)</h5>
+      <button
+        onClick={() => setShowPresetModal(true)}
+        className="text-sm px-2 bg-white rounded border border-black float-left flex items-center gap-1"
+      >
+        <Atom className="w-4 h-4" />
+        Use a Preset
+      </button>
+      <h5 className="text-gray-400 mb-4 text-right float-right">{teams.length} teams in total</h5>
       <table className="table-auto w-full">
         <thead>
           <tr>
