@@ -100,7 +100,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams, setShowPreset
                   type="text"
                   value={team.name}
                   onChange={e => handleTeamNameChange(index, e.target.value)}
-                  className="p-2 rounded w-full bg-gray-100 focus:bg-white"
+                  className="p-2 rounded w-full bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out"
                   placeholder="Team Name"
                 />
               </td>
@@ -124,8 +124,9 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams, setShowPreset
                     handleCoordinatesChange(index, 'latitude', parseFloat(e.target.value));
                     validateLatitude(parseFloat(e.target.value));
                   }}
-                  className="rounded w-1/2 p-2 bg-gray-100 focus:bg-white"
+                  className="rounded w-1/2 p-2 bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out"
                   placeholder="Latitude"
+                  step="0.001"
                 />
                 <input
                   type="number"
@@ -134,11 +135,11 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams, setShowPreset
                     handleCoordinatesChange(index, 'longitude', parseFloat(e.target.value));
                     validateLongitude(parseFloat(e.target.value));
                   }}
-                  className="rounded w-1/2 p-2 bg-gray-100 focus:bg-white"
+                  className="rounded w-1/2 p-2 bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out"
                   placeholder="Longitude"
                 />
               </td>
-              <td className="text-end">
+              <td className="text-end w-10">
                 <button
                   onClick={() => setTeams(teams.filter((_, i) => i !== index))}
                   className="px-4 bg-white-500 text-black rounded align-middle"
