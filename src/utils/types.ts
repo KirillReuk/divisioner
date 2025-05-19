@@ -13,6 +13,5 @@ export type Division = {
 export type Tab = 'teams' | 'rivalries' | 'divisions';
 
 export type Rivalry = {
-  team1: Team;
-  team2: Team;
+  teams: Team[];
 };
