@@ -1,4 +1,4 @@
-import { Division, Rivalry, Team } from './types';
+import { Division, Rivalry, Team, TeamWithPseudo } from './types';
 import { haversineDistance } from '../utils/distance';
 import chroma from 'chroma-js';
 
@@ -40,34 +40,42 @@ export const splitIntoConferences = (components: Division[]): Division[][] => {
 };
 
 class Partitioning {
-  teams: Team[];
+  teams: TeamWithPseudo[];
   divisionCount: number;
   maxDivisionSize: number;
   distanceMatrix: number[][];
-  components: Team[][];
-  rivalries: Rivalry[];
+  components: TeamWithPseudo[][];
 
   constructor(teams: Team[], divisionCount: number, rivalries: Rivalry[]) {
-    const teamsWithIndex = teams.map((team, index) => ({ ...team, index }));
+    const pseudoTeamsFromRivalries = rivalries.map(rivalry => ({
+      name: 'Rivalry: ' + rivalry.teams.map(team => team.name).join(' vs. '),
+      location: 'Anywhere!',
+      latitude: rivalry.teams.reduce((acc, team) => acc + team.latitude, 0) / rivalry.teams.length,
+      longitude: rivalry.teams.reduce((acc, team) => acc + team.longitude, 0) / rivalry.teams.length,
+      teamsIncluded: rivalry.teams,
+      weight: rivalry.teams.length,
+    })) as TeamWithPseudo[];
+    const nonRivaledTeams = teams.filter(
+      team => !rivalries.some(rivalry => rivalry.teams.some(rivalTeam => rivalTeam.name === team.name))
+    );
+
+    const teamsWithIndex = pseudoTeamsFromRivalries.concat(nonRivaledTeams).map((team, index) => ({
+      ...team,
+      index,
+    }));
     this.teams = teamsWithIndex;
     this.divisionCount = divisionCount;
-    this.rivalries = rivalries;
     this.maxDivisionSize = Math.ceil(teams.length / divisionCount);
     this.distanceMatrix = this.precomputeDistances();
 
-    this.components = this.generateInitialComponents(teamsWithIndex, rivalries);
+    this.components = this.generateInitialComponents(teamsWithIndex);
   }
 
-  private generateInitialComponents = (teams: Team[], rivalries: Rivalry[]): Team[][] => {
+  private generateInitialComponents = (teams: Team[]): Team[][] => {
     const result: Team[][] = [];
-    rivalries.forEach(rivalry => {
-      result.push([rivalry.team1, rivalry.team2]);
+    teams.forEach(team => {
+      result.push([team]);
     });
-    teams
-      .filter(team => !rivalries.some(rivalry => rivalry.team1.name === team.name || rivalry.team2.name === team.name))
-      .forEach(team => {
-        result.push([team]);
-      });
 
     return result;
   };
@@ -110,6 +118,10 @@ class Partitioning {
     return this.components.reduce((total, component) => total + this.calculateComponentDistance(component), 0);
   }
 
+  private calculateComponentWeight = (component: Team[]): number => {
+    return component.reduce((total, team) => total + (team.weight || 1), 0);
+  };
+
   private findBestSwap(): PotentialSwap | null {
     let bestSwap: PotentialSwap = null;
     let bestDistance = this.calculateTotalDistance();
@@ -121,21 +133,15 @@ class Partitioning {
 
         component1.forEach(team1 => {
           component2.forEach(team2 => {
-            if (
-              this.rivalries.some(
-                rivalry =>
-                  rivalry.team1 === team1 ||
-                  rivalry.team2 === team2 ||
-                  rivalry.team1 === team2 ||
-                  rivalry.team2 === team1
-              )
-            ) {
-              return;
-            }
-
             const newComponent1 = component1.filter(team => team !== team1).concat(team2);
             const newComponent2 = component2.filter(team => team !== team2).concat(team1);
 
+            if (
+              this.calculateComponentWeight(newComponent1) > this.maxDivisionSize ||
+              this.calculateComponentWeight(newComponent2) > this.maxDivisionSize
+            ) {
+              return;
+            }
             const newComponents = [...this.components];
             newComponents[i] = newComponent1;
             newComponents[j] = newComponent2;
@@ -190,7 +196,11 @@ class Partitioning {
       const comp1 = this.components[index1];
       const comp2 = this.components[index2];
 
-      if (comp1.length + comp2.length <= this.maxDivisionSize) {
+      if (
+        comp1.reduce((acc, team) => acc + (team.weight || 1), 0) +
+          comp2.reduce((acc, team) => acc + (team.weight || 1), 0) <=
+        this.maxDivisionSize
+      ) {
         this.components[index1] = comp1.concat(comp2);
         this.components.splice(index2, 1);
 
@@ -253,7 +263,7 @@ class Partitioning {
     this.optimizeDivisions();
 
     return this.components.map((division, index) => ({
-      teams: division,
+      teams: division.flatMap(team => team.teamsIncluded || [team]),
       color: chroma.scale('Spectral').mode('lab').colors(this.components.length)[index],
     }));
   };
