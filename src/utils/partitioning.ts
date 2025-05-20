@@ -216,7 +216,10 @@ class Partitioning {
     let minDistance = Infinity;
 
     for (let i = 0; i < this.components.length; i++) {
-      if (this.components[i].length < this.maxDivisionSize) {
+      if (
+        this.calculateComponentWeight(this.components[i]) + (singleTeam?.teamsIncluded?.length || 1) <=
+        this.maxDivisionSize
+      ) {
         const distance = this.components[i]
           .map(team => this.distanceBetweenTeams(singleTeam, team))
           .reduce((a, b) => Math.min(a, b), Infinity);
@@ -232,24 +235,32 @@ class Partitioning {
   }
 
   private tryRecycleSmallestComponent(): void {
-    const smallestComponentIndex = this.components.reduce(
-      (minIndex, component, index) => (component.length < this.components[minIndex].length ? index : minIndex),
-      0
-    );
-    const smallestComponent = this.components[smallestComponentIndex];
-    this.components.splice(smallestComponentIndex, 1);
-
-    const singleTeamComponents = smallestComponent.map(team => [team]);
-
-    singleTeamComponents.forEach(singleTeam => {
-      const closestComponent = this.findClosestComponent(singleTeam[0]);
-
-      if (closestComponent) {
-        this.components[closestComponent.index].push(singleTeam[0]);
-      } else {
-        this.components.push(singleTeam);
-      }
+    const componentsByWeight = this.components.sort((a, b) => {
+      const weightA = this.calculateComponentWeight(a);
+      const weightB = this.calculateComponentWeight(b);
+      return weightA - weightB;
     });
+    const componentsDeepCopy = this.components.map(component => [...component]);
+
+    for (let i = 0; i < componentsByWeight.length; i++) {
+      var success = true;
+      const smallestComponentTeams = this.components[i];
+      this.components.splice(i, 1);
+
+      smallestComponentTeams.forEach(singleTeam => {
+        const closestComponent = this.findClosestComponent(singleTeam);
+
+        if (closestComponent) {
+          this.components[closestComponent.index].push(singleTeam);
+        } else {
+          this.components = componentsDeepCopy;
+          success = false;
+        }
+      });
+      if (success) {
+        break;
+      }
+    }
   }
 
   public getDivisions = (): Division[] => {
