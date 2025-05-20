@@ -32,8 +32,8 @@ export const splitIntoConferences = (components: Division[]): Division[][] => {
 
   const half = Math.ceil(divisionsWithCentroids.length / 2);
   const result = [
-    divisionsWithCentroids.slice(0, half).map(d => d.division),
     divisionsWithCentroids.slice(half).map(d => d.division),
+    divisionsWithCentroids.slice(0, half).map(d => d.division),
   ];
 
   return result;

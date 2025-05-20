@@ -11,7 +11,7 @@ export const MIN_LONGITUDE = -180;
 export const DEFAULT_DIVISION_COUNT = 8;
 
 // Division View
-export const CONFERENCE_NAMES = ['Eastern Conference', 'Western Conference'];
+export const CONFERENCE_NAMES = ['Western Conference', 'Eastern Conference'];
 
 // Map View
 export const TILE_LAYER_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
