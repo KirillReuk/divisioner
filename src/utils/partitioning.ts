@@ -1,12 +1,12 @@
-import { Division, Rivalry, Team, TeamWithPseudo } from './types';
+import { Division, Rivalry, TeamWithPseudo, Team } from './types';
 import { haversineDistance } from '../utils/distance';
 import chroma from 'chroma-js';
 
 type PotentialSwap = {
   i: number;
   j: number;
-  team1: Team;
-  team2: Team;
+  team1: TeamWithPseudo;
+  team2: TeamWithPseudo;
 } | null;
 
 const calculateCentroid = (division: Division): { lat: number; lon: number } => {
@@ -45,16 +45,16 @@ class Partitioning {
   maxDivisionSize: number;
   distanceMatrix: number[][];
   components: TeamWithPseudo[][];
+  private teamIndexMap: Map<string, number>;
 
   constructor(teams: Team[], divisionCount: number, rivalries: Rivalry[]) {
-    const pseudoTeamsFromRivalries = rivalries.map(rivalry => ({
+    const pseudoTeamsFromRivalries: TeamWithPseudo[] = rivalries.map(rivalry => ({
       name: 'Rivalry: ' + rivalry.teams.map(team => team.name).join(' vs. '),
       location: 'Anywhere!',
       latitude: rivalry.teams.reduce((acc, team) => acc + team.latitude, 0) / rivalry.teams.length,
       longitude: rivalry.teams.reduce((acc, team) => acc + team.longitude, 0) / rivalry.teams.length,
       teamsIncluded: rivalry.teams,
-      weight: rivalry.teams.length,
-    })) as TeamWithPseudo[];
+    }));
     const nonRivaledTeams = teams.filter(
       team => !rivalries.some(rivalry => rivalry.teams.some(rivalTeam => rivalTeam.name === team.name))
     );
@@ -69,10 +69,11 @@ class Partitioning {
     this.distanceMatrix = this.precomputeDistances();
 
     this.components = this.generateInitialComponents(teamsWithIndex);
+    this.teamIndexMap = new Map(this.teams.map((team, idx) => [team.name, idx]));
   }
 
-  private generateInitialComponents = (teams: Team[]): Team[][] => {
-    const result: Team[][] = [];
+  private generateInitialComponents = (teams: TeamWithPseudo[]): TeamWithPseudo[][] => {
+    const result: TeamWithPseudo[][] = [];
     teams.forEach(team => {
       result.push([team]);
     });
@@ -80,8 +81,8 @@ class Partitioning {
     return result;
   };
 
-  private distanceBetweenTeams = (team1: Team, team2: Team): number => {
-    const getTeamIndex = (teamToFind: Team): number => this.teams.findIndex(team => team.name === teamToFind.name);
+  private distanceBetweenTeams = (team1: TeamWithPseudo, team2: TeamWithPseudo): number => {
+    const getTeamIndex = (teamToFind: TeamWithPseudo) => this.teamIndexMap.get(teamToFind.name) ?? -1;
 
     return this.distanceMatrix[getTeamIndex(team1)][getTeamIndex(team2)];
   };
@@ -104,7 +105,7 @@ class Partitioning {
     return distances;
   };
 
-  private calculateComponentDistance = (component: Team[]): number => {
+  private calculateComponentDistance = (component: TeamWithPseudo[]): number => {
     let totalDistance = 0;
     for (let i = 0; i < component.length; i++) {
       for (let j = i + 1; j < component.length; j++) {
@@ -118,8 +119,8 @@ class Partitioning {
     return this.components.reduce((total, component) => total + this.calculateComponentDistance(component), 0);
   }
 
-  private calculateComponentWeight = (component: Team[]): number => {
-    return component.reduce((total, team) => total + (team.weight || 1), 0);
+  private calculateComponentWeight = (component: TeamWithPseudo[]): number => {
+    return component.reduce((total, team) => total + (team.teamsIncluded?.length || 1), 0);
   };
 
   private findBestSwap(): PotentialSwap | null {
@@ -197,8 +198,8 @@ class Partitioning {
       const comp2 = this.components[index2];
 
       if (
-        comp1.reduce((acc, team) => acc + (team.weight || 1), 0) +
-          comp2.reduce((acc, team) => acc + (team.weight || 1), 0) <=
+        comp1.reduce((acc, team) => acc + (team.teamsIncluded?.length || 1), 0) +
+          comp2.reduce((acc, team) => acc + (team.teamsIncluded?.length || 1), 0) <=
         this.maxDivisionSize
       ) {
         this.components[index1] = comp1.concat(comp2);
@@ -210,7 +211,7 @@ class Partitioning {
     return false;
   }
 
-  private findClosestComponent(singleTeam: Team): { index: number; distance: number } | null {
+  private findClosestComponent(singleTeam: TeamWithPseudo): { index: number; distance: number } | null {
     let closestComponentIndex = -1;
     let minDistance = Infinity;
 

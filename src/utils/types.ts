@@ -3,7 +3,6 @@ export interface Team {
   location: string;
   latitude: number;
   longitude: number;
-  weight?: number;
 }
 export interface TeamWithPseudo extends Team {
   teamsIncluded?: Team[];
