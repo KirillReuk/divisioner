@@ -235,31 +235,27 @@ class Partitioning {
   }
 
   private tryRecycleSmallestComponent(): void {
-    const componentsByWeight = this.components.sort((a, b) => {
-      const weightA = this.calculateComponentWeight(a);
-      const weightB = this.calculateComponentWeight(b);
-      return weightA - weightB;
-    });
+    const sortedComponents = this.components
+      .map((component, idx) => ({ component, idx }))
+      .sort((a, b) => this.calculateComponentWeight(a.component) - this.calculateComponentWeight(b.component));
     const componentsDeepCopy = this.components.map(component => [...component]);
 
-    for (let i = 0; i < componentsByWeight.length; i++) {
-      var success = true;
-      const smallestComponentTeams = this.components[i];
-      this.components.splice(i, 1);
+    for (const { component: smallestComponent, idx: originalIdx } of sortedComponents) {
+      let recycleSuccess = true;
+      this.components = this.components.filter((_, idx) => idx !== originalIdx);
 
-      smallestComponentTeams.forEach(singleTeam => {
-        const closestComponent = this.findClosestComponent(singleTeam);
-
-        if (closestComponent) {
-          this.components[closestComponent.index].push(singleTeam);
+      for (const team of smallestComponent) {
+        const closest = this.findClosestComponent(team);
+        if (closest && closest.index !== undefined) {
+          this.components[closest.index].push(team);
         } else {
-          this.components = componentsDeepCopy;
-          success = false;
+          this.components = componentsDeepCopy.map(component => [...component]);
+          recycleSuccess = false;
+          break;
         }
-      });
-      if (success) {
-        break;
       }
+
+      if (recycleSuccess) break;
     }
   }
 
