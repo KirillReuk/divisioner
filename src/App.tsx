@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Division, Rivalry, Tab, Team } from './utils/types';
 import MapView from './divisionsTab/MapView';
 import TeamView from './inputTab/TeamViewer';
@@ -9,6 +9,7 @@ import Partitioning, { splitIntoConferences } from './utils/partitioning';
 import RivalryView from './rivalryTab/RivalryView';
 import { DEFAULT_DIVISION_COUNT } from './data/constants';
 import PresetModal from './PresetModal';
+import IntroModal from './IntroModal';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('teams');
@@ -18,6 +19,19 @@ const App: React.FC = () => {
   const [rivalries, setRivalries] = useState<Rivalry[]>([]);
   const [divisionsCount, setDivisionsCount] = useState<number>(DEFAULT_DIVISION_COUNT);
   const [showPresetModal, setShowPresetModal] = useState(false);
+  const [showIntroModal, setShowIntroModal] = useState(false);
+
+  useEffect(() => {
+    const hasSeenIntro = localStorage.getItem('hasSeenIntro');
+    if (!hasSeenIntro) {
+      setShowIntroModal(true);
+    }
+  }, []);
+
+  const handleCloseIntro = () => {
+    setShowIntroModal(false);
+    localStorage.setItem('hasSeenIntro', 'true');
+  };
 
   const renderTabButton = (tab: Tab, tabName: string, disabled?: boolean): JSX.Element => (
     <button
@@ -39,6 +53,7 @@ const App: React.FC = () => {
 
   return (
     <>
+      {showIntroModal && <IntroModal onClose={handleCloseIntro} />}
       <PresetModal
         isOpen={showPresetModal}
         onClose={() => setShowPresetModal(false)}
