@@ -6,6 +6,7 @@ import debounce from 'lodash.debounce';
 import { DEFAULT_TEAM, MAX_LATITUDE, MAX_LONGITUDE, MIN_LATITUDE, MIN_LONGITUDE } from '../data/constants';
 import { Atom } from 'lucide-react';
 import clsx from 'clsx';
+import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
 
 interface EditableTeamsProps {
   teams: Team[];
@@ -16,6 +17,18 @@ interface EditableTeamsProps {
 }
 
 type FieldsToValidate = 'latitude' | 'longitude';
+
+const MapClickHandler: React.FC<{
+  onClick: (lat: number, lng: number) => void;
+}> = ({ onClick }) => {
+  useMapEvents({
+    click(e) {
+      const { lat, lng } = e.latlng;
+      onClick(lat, lng);
+    },
+  });
+  return null;
+};
 
 const TeamView: React.FC<EditableTeamsProps> = ({
   teams,
@@ -31,6 +44,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({
   const [pendingCoords, setPendingCoords] = useState<{ index: number; latitude: number; longitude: number } | null>(
     null
   );
+  const [mapPickerIndex, setMapPickerIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!pendingCoords) return;
@@ -83,6 +97,20 @@ const TeamView: React.FC<EditableTeamsProps> = ({
     }
   };
 
+  const handleMapPick = async (index: number, lat: number, lng: number) => {
+    const results = await fetchCoordinates(lat, lng);
+    if (results) {
+      const updatedTeams = [...teams];
+      updatedTeams[index] = {
+        ...updatedTeams[index],
+        latitude: lat,
+        longitude: lng,
+        location: results[0].formatted,
+      };
+      setTeams(updatedTeams);
+    }
+  };
+
   return (
     <div className={clsx('p-4 bg-gray-100 shadow-md', { 'w-fit': showRivalry })}>
       <div className="relative mb-4">
@@ -128,61 +156,84 @@ const TeamView: React.FC<EditableTeamsProps> = ({
         </thead>
         <tbody>
           {teams.map((team, index) => (
-            <tr className="border-b border-t border-300 border-black" key={index}>
-              <td>
-                <input
-                  type="text"
-                  value={team.name}
-                  onChange={e => handleTeamNameChange(index, e.target.value)}
-                  className="p-2 rounded w-full bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out"
-                  placeholder="Team Name"
-                />
-              </td>
-              <td className={clsx({ hidden: showRivalry })}>
-                <LocationSearchInput
-                  key={'location-search-' + index}
-                  index={index}
-                  onSelect={(index, location, latitude, longitude) => {
-                    const updatedTeams = [...teams];
-                    updatedTeams[index] = { ...updatedTeams[index], location, latitude, longitude };
-                    setTeams(updatedTeams);
-                  }}
-                  location={team.location}
-                />
-              </td>
-              <td>
-                <input
-                  type="number"
-                  value={team.latitude}
-                  onChange={e => {
-                    handleCoordinatesChange(index, 'latitude', parseFloat(e.target.value));
-                    validateLatitude(parseFloat(e.target.value));
-                  }}
-                  className="rounded w-1/2 p-2 bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out"
-                  placeholder="Latitude"
-                  step="0.001"
-                />
-                <input
-                  type="number"
-                  value={team.longitude}
-                  onChange={e => {
-                    handleCoordinatesChange(index, 'longitude', parseFloat(e.target.value));
-                    validateLongitude(parseFloat(e.target.value));
-                  }}
-                  className="rounded w-1/2 p-2 bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out"
-                  placeholder="Longitude"
-                />
-              </td>
-              <td className="text-end">
-                <button
-                  onClick={() => setTeams(teams.filter((_, i) => i !== index))}
-                  className="px-4 bg-white-500 text-black rounded align-middle"
-                  aria-label={`Remove team ${team.name}`}
-                >
-                  x
-                </button>
-              </td>
-            </tr>
+            <React.Fragment key={index}>
+              <tr className="border-b border-t border-300 border-black last:border-b-0">
+                <td>
+                  <input
+                    type="text"
+                    name={`team-name-${index}`}
+                    value={team.name}
+                    onChange={e => handleTeamNameChange(index, e.target.value)}
+                    className="p-2 rounded w-full bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out"
+                    placeholder="Team Name"
+                  />
+                </td>
+                <td className={clsx({ hidden: showRivalry })}>
+                  <LocationSearchInput
+                    key={'location-search-' + index}
+                    index={index}
+                    onSelect={(index, location, latitude, longitude) => {
+                      const updatedTeams = [...teams];
+                      updatedTeams[index] = { ...updatedTeams[index], location, latitude, longitude };
+                      setTeams(updatedTeams);
+                    }}
+                    location={team.location}
+                    onFocus={() => setMapPickerIndex(index)}
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    name={`latitude-${index}`}
+                    value={team.latitude.toFixed(3)}
+                    onChange={e => {
+                      handleCoordinatesChange(index, 'latitude', parseFloat(e.target.value));
+                      validateLatitude(parseFloat(e.target.value));
+                    }}
+                    className="rounded w-1/2 p-2 bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out"
+                    placeholder="Latitude"
+                    step="0.001"
+                  />
+                  <input
+                    type="text"
+                    name={`longitude-${index}`}
+                    value={team.longitude.toFixed(3)}
+                    onChange={e => {
+                      handleCoordinatesChange(index, 'longitude', parseFloat(e.target.value));
+                      validateLongitude(parseFloat(e.target.value));
+                    }}
+                    className="rounded w-1/2 p-2 bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out"
+                    placeholder="Longitude"
+                  />
+                </td>
+                <td className="text-end">
+                  <button
+                    onClick={() => setTeams(teams.filter((_, i) => i !== index))}
+                    className="px-4 bg-white-500 text-black rounded align-middle"
+                    aria-label={`Remove team ${team.name}`}
+                  >
+                    x
+                  </button>
+                </td>
+              </tr>
+              {mapPickerIndex === index && (
+                <tr>
+                  <td colSpan={4}>
+                    <div className="h-96 w-full rounded border mt-2">
+                      <MapContainer
+                        center={[team.latitude, team.longitude]}
+                        zoom={4}
+                        style={{ height: '100%', width: '100%' }}
+                      >
+                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                        <MapClickHandler onClick={(lat, lng) => handleMapPick(index, lat, lng)} />
+                        <Marker position={[team.latitude, team.longitude]} />
+                      </MapContainer>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </React.Fragment>
           ))}
         </tbody>
       </table>

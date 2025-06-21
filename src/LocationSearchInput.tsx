@@ -6,6 +6,7 @@ interface LocationSearchRowProps {
   index: number;
   onSelect: (index: number, formatted: string, lat: number, lng: number) => void;
   location?: string;
+  onFocus?: () => void;
 }
 
 interface LocationOption {
@@ -15,7 +16,7 @@ interface LocationOption {
   lng: number;
 }
 
-const LocationSearchInput: React.FC<LocationSearchRowProps> = ({ index, onSelect, location }) => {
+const LocationSearchInput: React.FC<LocationSearchRowProps> = ({ index, onSelect, location, onFocus }) => {
   const [selectedOption, setSelectedOption] = useState<LocationOption | null>(null);
 
   useEffect(() => {
@@ -66,6 +67,7 @@ const LocationSearchInput: React.FC<LocationSearchRowProps> = ({ index, onSelect
         container: base => ({ ...base, padding: '0.5rem', width: '100%' }),
         singleValue: base => ({ ...base, textAlign: 'left' }),
       }}
+      onFocus={onFocus}
     />
   );
 };
