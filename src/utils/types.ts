@@ -13,7 +13,7 @@ export type Division = {
   color: string;
 };
 
-export type Tab = 'teams' | 'rivalries' | 'divisions';
+export type Tab = 'teams' | 'divisions';
 
 export type Rivalry = {
   teams: Team[];

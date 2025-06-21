@@ -58,8 +58,7 @@ const RivalryView: React.FC<EditableRivalryProps> = ({ teams, rivalries, setRiva
 
   return (
     <div className="p-4 bg-gray-100 shadow-md">
-      <h2 className="text-2xl font-bold">Rivalries</h2>
-      <h5 className="text-gray-400 mb-4">({rivalries.length} rivalries in total)</h5>
+      <h2 className="text-2xl font-bold mb-12">Rivalries</h2>
 
       <div className="space-y-4">
         {rivalries.map((rivalry, rivalryIndex) => (

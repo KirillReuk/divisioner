@@ -1,20 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import { Team } from '../utils/types';
+import { Tab, Team } from '../utils/types';
 import LocationSearchInput from '../LocationSearchInput';
 import { fetchCoordinates } from '../utils/geocoding';
 import debounce from 'lodash.debounce';
 import { DEFAULT_TEAM, MAX_LATITUDE, MAX_LONGITUDE, MIN_LATITUDE, MIN_LONGITUDE } from '../data/constants';
 import { Atom } from 'lucide-react';
+import clsx from 'clsx';
 
 interface EditableTeamsProps {
   teams: Team[];
   setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
   setShowPresetModal: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowRivalry: React.Dispatch<React.SetStateAction<boolean>>;
+  showRivalry?: boolean;
 }
 
 type FieldsToValidate = 'latitude' | 'longitude';
 
-const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams, setShowPresetModal }) => {
+const TeamView: React.FC<EditableTeamsProps> = ({
+  teams,
+  setTeams,
+  setShowPresetModal,
+  setShowRivalry,
+  showRivalry,
+}) => {
   const [errors, setErrors] = useState<Record<FieldsToValidate, boolean>>({
     latitude: false,
     longitude: false,
@@ -75,21 +84,46 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams, setShowPreset
   };
 
   return (
-    <div className="p-4 bg-gray-100 shadow-md">
-      <button
-        onClick={() => setShowPresetModal(true)}
-        className="text-sm px-2 bg-white rounded border border-black float-left flex items-center gap-1"
+    <div className={clsx('p-4 bg-gray-100 shadow-md', { 'w-fit': showRivalry })}>
+      <div className="relative mb-4">
+        <h2 className="text-2xl font-bold">Teams</h2>
+        <h5 className="absolute left-0 top-0 text-gray-400 text-right">{teams.length} teams in total</h5>{' '}
+      </div>
+      <div className="flex justify-between items-center">
+        <div className="float-left">
+          <button
+            onClick={() => setShowPresetModal(true)}
+            className="text-sm px-2 bg-white rounded border border-black flex items-center gap-1"
+          >
+            <Atom className="w-4 h-4" />
+            Use a Preset
+          </button>
+        </div>
+        <button
+          onClick={() => setShowRivalry(showRivalry => !showRivalry)}
+          className="text-sm px-2 bg-white rounded border border-black flex items-center gap-1 float-right"
+        >
+          <Atom className="w-4 h-4" />
+          {`${showRivalry ? 'Close' : 'Open'} Rivalries`}
+        </button>
+      </div>
+      <table
+        className={clsx('table-auto transition-all duration-300', !showRivalry ? 'max-w-full w-full' : 'max-w-[34rem]')}
       >
-        <Atom className="w-4 h-4" />
-        Use a Preset
-      </button>
-      <h5 className="text-gray-400 mb-4 text-right float-right">{teams.length} teams in total</h5>
-      <table className="table-auto w-full">
         <thead>
           <tr>
-            <th className="text-lg text-left font-medium p-2 w-1/5">Team Name</th>
-            <th className="text-lg text-left font-medium p-2">Location</th>
-            <th className="text-lg text-left font-medium p-2 w-1/6">Coordinates</th>
+            <th className={clsx('text-lg text-left font-medium p-2', { 'w-1/5': !showRivalry, 'w-1/2': showRivalry })}>
+              Team Name
+            </th>
+            <th className={clsx('text-lg text-left font-medium p-2', { hidden: showRivalry })}>Location</th>
+            <th
+              className={clsx('text-lg text-left font-medium p-2', {
+                'w-1/6': !showRivalry,
+              })}
+            >
+              Coordinates
+            </th>
+            <th className=""></th>
           </tr>
         </thead>
         <tbody>
@@ -104,7 +138,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams, setShowPreset
                   placeholder="Team Name"
                 />
               </td>
-              <td>
+              <td className={clsx({ hidden: showRivalry })}>
                 <LocationSearchInput
                   key={'location-search-' + index}
                   index={index}
@@ -139,7 +173,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({ teams, setTeams, setShowPreset
                   placeholder="Longitude"
                 />
               </td>
-              <td className="text-end w-10">
+              <td className="text-end">
                 <button
                   onClick={() => setTeams(teams.filter((_, i) => i !== index))}
                   className="px-4 bg-white-500 text-black rounded align-middle"

@@ -41,11 +41,11 @@ const DivisionCountInput: React.FC<EditableTeamsProps> = ({
       <button
         onClick={() => {
           generateConferences(teams, divisionsCount, rivalries);
-          setActiveTab('rivalries');
+          setActiveTab('divisions');
         }}
         className="flex-1 bg-blue-500 text-white rounded h-8"
       >
-        Set Up Rivalries
+        Generate Divisions
       </button>
     </div>
   );

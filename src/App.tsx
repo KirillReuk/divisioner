@@ -18,6 +18,7 @@ const App: React.FC = () => {
   const [teams, setTeams] = useState<Team[]>([]);
   const [rivalries, setRivalries] = useState<Rivalry[]>([]);
   const [divisionsCount, setDivisionsCount] = useState<number>(DEFAULT_DIVISION_COUNT);
+  const [showRivalry, setShowRivalry] = useState(false);
   const [showPresetModal, setShowPresetModal] = useState(false);
   const [showIntroModal, setShowIntroModal] = useState(false);
 
@@ -62,7 +63,6 @@ const App: React.FC = () => {
 
       <div className="flex justify-start mb-4 gap-2">
         {renderTabButton('teams', 'Teams')}
-        {renderTabButton('rivalries', 'Rivalries')}
         {renderTabButton('divisions', 'Divisions', divisions.length === 0)}
       </div>
       {activeTab === 'teams' && (
@@ -76,25 +76,22 @@ const App: React.FC = () => {
               setDivisionsCount={setDivisionsCount}
               setActiveTab={setActiveTab}
             />
-            <TeamView teams={teams} setTeams={setTeams} setShowPresetModal={setShowPresetModal} />
-          </div>
-        </div>
-      )}
-      {activeTab === 'rivalries' && (
-        <div className="flex">
-          <div className="flex-1">
-            <div className="flex items-center p-4 bg-gray-100 mb-4">
-              <button
-                onClick={() => {
-                  generateConferences(teams, divisionsCount, rivalries);
-                  setActiveTab('divisions');
-                }}
-                className="flex-1 bg-blue-500 text-white rounded h-8"
-              >
-                Generate Divisions
-              </button>
+            <div className="flex">
+              <div className="flex-1">
+                <TeamView
+                  teams={teams}
+                  setTeams={setTeams}
+                  setShowPresetModal={setShowPresetModal}
+                  showRivalry={showRivalry}
+                  setShowRivalry={setShowRivalry}
+                />
+              </div>
+              {showRivalry && (
+                <div className="flex-1">
+                  <RivalryView teams={teams} rivalries={rivalries} setRivalries={setRivalries} />
+                </div>
+              )}
             </div>
-            <RivalryView teams={teams} rivalries={rivalries} setRivalries={setRivalries} />
           </div>
         </div>
       )}
