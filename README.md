@@ -1,50 +1,60 @@
-# React + TypeScript + Vite
+# ⚡ Auto-Divisioner
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An interactive tool for dividing sports teams into divisions based on their geographic locations. Built with React and Leaflet, the app helps visualize and organize teams efficiently — great for custom leagues, expansion scenarios, or geography-based clustering.
 
-Currently, two official plugins are available:
+## ✨ Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🔍 Input teams with names and locations (type or pick from a map)
+- 📍 Click on a map to set coordinates
+- 📦 Load preset team lists (NBA, Euroleague, etc.)
+- 🧠 Automatically generate divisions and conferences by proximity
+- 🗺️ View divisions on an interactive map
+- 🎨 Each division is color-coded consistently across the app
+- 🔁 Toggle rivalry matrix view
+- 🧾 Responsive and mobile-friendly UI
 
-## Expanding the ESLint configuration
+## 🚀 Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+### 1. Clone the repo
 
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```bash
+git clone https://github.com/your-username/auto-divisioner.git
+cd auto-divisioner
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+### 2. Install dependencies
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+```bash
+npm install
+# or
+yarn
 ```
+
+### 3. Start the development server
+
+```bash
+npm run dev
+# or
+yarn dev
+```
+
+
+## 📦 Presets
+Includes built-in presets like:
+
+- NBA teams
+- Euroleague teams
+- More coming soon...
+
+## 📌 Tech Stack
+
+- React + TypeScript
+- Tailwind CSS
+- React Leaflet (with OpenStreetMap tiles)
+- Headless UI for modals
+- Lucide icons
+
+## 📄 License
+MIT
+
+Made with 🏀 by Kirill Reuk
