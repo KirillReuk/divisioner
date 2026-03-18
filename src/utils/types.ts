@@ -1,5 +1,6 @@
 export interface Team {
   name: string;
+  shortName?: string;
   location: string;
   latitude: number;
   longitude: number;

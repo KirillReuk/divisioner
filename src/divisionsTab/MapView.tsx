@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Tooltip, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { Division } from '../utils/types';
@@ -34,9 +34,11 @@ const MapView: React.FC<MapViewProps> = ({ divisions }) => {
 
       {divisions.map((division, divisionIndex) =>
         division.teams.map((team, teamIndex) => {
+          const tooltipDirection = (divisionIndex + teamIndex) % 2 === 0 ? 'right' : 'left';
+          const tooltipLabel = team.shortName ?? team.name;
           const icon = L.divIcon({
             className: 'custom-icon',
-            html: `<div style="background-color: ${division.color}; width: 10px; height: 10px; border-radius: 50%;"></div>`,
+            html: `<div style="background-color:${division.color};width:10px;height:10px;border-radius:50%;border:2px solid rgba(0,0,0,0.55);box-shadow:0 0 0 1px rgba(255,255,255,0.55);"></div>`,
             iconSize: MARKER_ICON_SIZE,
             iconAnchor: MARKER_ICON_ANCHOR,
             popupAnchor: MARKER_POPUP_ANCHOR,
@@ -44,7 +46,16 @@ const MapView: React.FC<MapViewProps> = ({ divisions }) => {
 
           return (
             <Marker key={`team-${divisionIndex}-${teamIndex}`} position={[team.latitude, team.longitude]} icon={icon}>
-              <Popup>{team.name}</Popup>
+              <Tooltip
+                permanent
+                direction={tooltipDirection}
+                offset={[0, 0]}
+                opacity={1}
+                interactive={false}
+                className="team-label-tooltip"
+              >
+                {tooltipLabel}
+              </Tooltip>
             </Marker>
           );
         })

@@ -62,6 +62,7 @@ const App: React.FC = () => {
         onSelectPreset={presetTeams => {
           setTeams(presetTeams);
           setMapPickerIndex(null);
+          setRivalries([]);
         }}
       />
 

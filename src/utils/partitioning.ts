@@ -199,7 +199,7 @@ class Partitioning {
 
       if (
         comp1.reduce((acc, team) => acc + (team.teamsIncluded?.length || 1), 0) +
-          comp2.reduce((acc, team) => acc + (team.teamsIncluded?.length || 1), 0) <=
+        comp2.reduce((acc, team) => acc + (team.teamsIncluded?.length || 1), 0) <=
         this.maxDivisionSize
       ) {
         this.components[index1] = comp1.concat(comp2);
