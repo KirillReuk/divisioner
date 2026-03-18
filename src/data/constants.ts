@@ -15,12 +15,12 @@ export const CONFERENCE_NAMES = ['Western Conference', 'Eastern Conference'];
 
 // Map View
 export const TILE_LAYER_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-export const MARKER_ICON_SIZE: [number, number] = [20, 20];
-export const MARKER_ICON_ANCHOR: [number, number] = [10, 10];
-export const MARKER_POPUP_ANCHOR: [number, number] = [0, -10];
+export const MARKER_ICON_SIZE: [number, number] = [10, 10];
+export const MARKER_ICON_ANCHOR: [number, number] = [5, 5];
+export const MARKER_POPUP_ANCHOR: [number, number] = [0, -5];
 
 // Partitioning
-export const MAX_DIVISION_SIZE = 10; // Example value
+export const MAX_DIVISION_SIZE = 10;
 
 // Geocoding
 export const GEOCODING_API_URL = 'https://api.opencagedata.com/geocode/v1/json';

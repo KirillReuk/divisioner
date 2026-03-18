@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Tab, Team } from '../utils/types';
+import { Team } from '../utils/types';
 import LocationSearchInput from '../LocationSearchInput';
 import { fetchCoordinates } from '../utils/geocoding';
 import debounce from 'lodash.debounce';
@@ -37,10 +37,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({
   setShowRivalry,
   showRivalry,
 }) => {
-  const [errors, setErrors] = useState<Record<FieldsToValidate, boolean>>({
-    latitude: false,
-    longitude: false,
-  });
+  const [errors, setErrors] = useState<Record<number, Record<FieldsToValidate, boolean>>>({});
   const [pendingCoords, setPendingCoords] = useState<{ index: number; latitude: number; longitude: number } | null>(
     null
   );
@@ -77,10 +74,16 @@ const TeamView: React.FC<EditableTeamsProps> = ({
     }));
   };
 
-  const validateLatitude = (value: number) =>
-    setErrors({ ...errors, latitude: value < MIN_LATITUDE || value > MAX_LATITUDE });
-  const validateLongitude = (value: number) =>
-    setErrors({ ...errors, longitude: value < MIN_LONGITUDE || value > MAX_LONGITUDE });
+  const validateLatitude = (index: number, value: number) =>
+    setErrors(prev => ({
+      ...prev,
+      [index]: { ...prev[index], latitude: value < MIN_LATITUDE || value > MAX_LATITUDE || isNaN(value) },
+    }));
+  const validateLongitude = (index: number, value: number) =>
+    setErrors(prev => ({
+      ...prev,
+      [index]: { ...prev[index], longitude: value < MIN_LONGITUDE || value > MAX_LONGITUDE || isNaN(value) },
+    }));
 
   const updateCoordinatesResults = async (index: number, latitude: number, longitude: number) => {
     try {
@@ -136,8 +139,17 @@ const TeamView: React.FC<EditableTeamsProps> = ({
         </button>
       </div>
       <table
-        className={clsx('table-auto transition-all duration-300', !showRivalry ? 'max-w-full w-full' : 'max-w-[34rem]')}
+        className={clsx(
+          'table-fixed transition-all duration-300',
+          !showRivalry ? 'max-w-full w-full' : 'max-w-[34rem]'
+        )}
       >
+        <colgroup>
+          <col className={clsx(showRivalry ? 'w-[50%]' : 'w-[20%]')} />
+          <col className={clsx({ hidden: showRivalry }, 'w-[55%]')} />
+          <col className={clsx(showRivalry ? 'w-[45%]' : 'w-[20%]')} />
+          <col className="w-[5%]" />
+        </colgroup>
         <thead>
           <tr>
             <th className={clsx('text-lg text-left font-medium p-2', { 'w-1/5': !showRivalry, 'w-1/2': showRivalry })}>
@@ -182,29 +194,46 @@ const TeamView: React.FC<EditableTeamsProps> = ({
                   />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    name={`latitude-${index}`}
-                    value={team.latitude.toFixed(3)}
-                    onChange={e => {
-                      handleCoordinatesChange(index, 'latitude', parseFloat(e.target.value));
-                      validateLatitude(parseFloat(e.target.value));
-                    }}
-                    className="rounded w-1/2 p-2 bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out"
-                    placeholder="Latitude"
-                    step="0.001"
-                  />
-                  <input
-                    type="text"
-                    name={`longitude-${index}`}
-                    value={team.longitude.toFixed(3)}
-                    onChange={e => {
-                      handleCoordinatesChange(index, 'longitude', parseFloat(e.target.value));
-                      validateLongitude(parseFloat(e.target.value));
-                    }}
-                    className="rounded w-1/2 p-2 bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out"
-                    placeholder="Longitude"
-                  />
+                  <div className="flex flex-col">
+                    <div className="flex">
+                      <input
+                        type="number"
+                        name={`latitude-${index}`}
+                        value={team.latitude}
+                        min={MIN_LATITUDE}
+                        max={MAX_LATITUDE}
+                        step="0.001"
+                        onChange={e => {
+                          const value = parseFloat(e.target.value);
+                          validateLatitude(index, value);
+                          handleCoordinatesChange(index, 'latitude', value);
+                        }}
+                        className={clsx(
+                          'rounded w-1/2 p-2 bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out',
+                          { 'border-2 border-red-500': errors[index]?.latitude }
+                        )}
+                        placeholder="Latitude"
+                      />
+                      <input
+                        type="number"
+                        name={`longitude-${index}`}
+                        value={team.longitude}
+                        min={MIN_LONGITUDE}
+                        max={MAX_LONGITUDE}
+                        step="0.001"
+                        onChange={e => {
+                          const value = parseFloat(e.target.value);
+                          validateLongitude(index, value);
+                          handleCoordinatesChange(index, 'longitude', value);
+                        }}
+                        className={clsx(
+                          'rounded w-1/2 p-2 bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out',
+                          { 'border-2 border-red-500': errors[index]?.longitude }
+                        )}
+                        placeholder="Longitude"
+                      />
+                    </div>
+                  </div>
                 </td>
                 <td className="text-end">
                   <button

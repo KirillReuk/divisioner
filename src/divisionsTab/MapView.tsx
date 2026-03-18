@@ -36,7 +36,7 @@ const MapView: React.FC<MapViewProps> = ({ divisions }) => {
         division.teams.map((team, teamIndex) => {
           const icon = L.divIcon({
             className: 'custom-icon',
-            html: `<div style="background-color: ${division.color}; width: 20px; height: 20px; border-radius: 50%;"></div>`,
+            html: `<div style="background-color: ${division.color}; width: 10px; height: 10px; border-radius: 50%;"></div>`,
             iconSize: MARKER_ICON_SIZE,
             iconAnchor: MARKER_ICON_ANCHOR,
             popupAnchor: MARKER_POPUP_ANCHOR,
