@@ -1,4 +1,5 @@
 import React from 'react';
+import { X } from 'lucide-react';
 import { Rivalry, Team } from '../utils/types';
 
 interface EditableRivalryProps {
@@ -8,8 +9,6 @@ interface EditableRivalryProps {
 }
 
 const RivalryView: React.FC<EditableRivalryProps> = ({ teams, rivalries, setRivalries }) => {
-  const usedTeams = new Set(rivalries.flatMap(rivalry => rivalry.teams.map(team => team.name)));
-
   const handleTeamChange = (rivalryIndex: number, teamIndex: number, newTeam: Team) => {
     setRivalries(prev =>
       prev.map((rivalry, i) =>
@@ -57,59 +56,111 @@ const RivalryView: React.FC<EditableRivalryProps> = ({ teams, rivalries, setRiva
   };
 
   return (
-    <div className="p-4 bg-gray-100 shadow-md">
-      <h2 className="text-2xl font-bold mb-12">Rivalries</h2>
-
-      <div className="space-y-4">
-        {rivalries.map((rivalry, rivalryIndex) => (
-          <div key={`rivalry-${rivalryIndex}`} className="bg-white p-4 rounded shadow space-y-2">
-            <div className="flex flex-wrap gap-2">
-              {rivalry.teams.map((team, teamIndex) => (
-                <div key={teamIndex} className="flex items-center gap-1">
-                  <select
-                    value={team.name}
-                    onChange={e => {
-                      const selectedTeam = teams.find(team => team.name === e.target.value)!;
-                      handleTeamChange(rivalryIndex, teamIndex, selectedTeam);
-                    }}
-                    className="p-2 rounded border"
-                  >
-                    {teams
-                      .filter(team => team.name === team.name || !usedTeams.has(team.name))
-                      .map(team => (
-                        <option key={team.name} value={team.name}>
-                          {team.name}
-                        </option>
-                      ))}
-                  </select>
-                  {rivalry.teams.length > 2 && (
-                    <button
-                      onClick={() => removeTeamFromRivalry(rivalryIndex, teamIndex)}
-                      className="text-red-500 px-2"
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="flex gap-2 mt-2">
-              <button
-                onClick={() => addTeamToRivalry(rivalryIndex)}
-                className="bg-blue-500 text-white px-3 py-1 rounded"
-              >
-                + Add Team
-              </button>
-              <button onClick={() => removeRivalry(rivalryIndex)} className="bg-red-500 text-white px-3 py-1 rounded">
-                Delete Rivalry
-              </button>
-            </div>
-          </div>
-        ))}
+    <div className="p-4 bg-gray-100 shadow-md w-fit">
+      <div className="relative mb-4">
+        <h2 className="text-2xl font-bold">Rivalries</h2>
+        <h5 className="absolute left-0 top-0 text-gray-400">
+          {rivalries.length} rivalries in total
+        </h5>
       </div>
 
-      <button onClick={addRivalry} className="w-full mt-6 bg-green-600 text-white px-4 py-2 rounded">
-        + Add Rivalry
+      <table className="table-fixed">
+        <colgroup>
+          <col className="w-[95%]" />
+          <col className="w-[5%]" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th className="text-lg text-left font-medium p-2">Rivalry</th>
+            <th className="text-lg text-left font-medium p-2"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {rivalries.length === 0 && (
+            <tr>
+              <td colSpan={2} className="p-4 text-sm text-gray-500 text-center">
+                No rivalries yet. Click &quot;Add Rivalry&quot; to create your first one.
+              </td>
+            </tr>
+          )}
+
+          {rivalries.map((rivalry, rivalryIndex) => {
+            const usedTeams = new Set(rivalries.flatMap(r => r.teams.map(t => t.name)));
+
+            return (
+              <tr
+                key={`rivalry-${rivalryIndex}`}
+                className="border-b border-t border-black last:border-b-0"
+              >
+                <td className="p-2">
+                  <div className="flex flex-col gap-2">
+                    {rivalry.teams.map((team, teamIndex) => {
+                      const options = teams.filter(
+                        t => t.name === team.name || !usedTeams.has(t.name)
+                      );
+
+                      return (
+                        <div key={teamIndex} className="flex items-center gap-1">
+                          <select
+                            value={team.name}
+                            onChange={e => {
+                              const selectedTeam = teams.find(t => t.name === e.target.value)!;
+                              handleTeamChange(rivalryIndex, teamIndex, selectedTeam);
+                            }}
+                            className="p-2 rounded border bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out"
+                          >
+                            {options.map(optionTeam => (
+                              <option key={optionTeam.name} value={optionTeam.name}>
+                                {optionTeam.name}
+                              </option>
+                            ))}
+                          </select>
+                          {rivalry.teams.length > 2 && (
+                            <button
+                              type="button"
+                              onClick={() => removeTeamFromRivalry(rivalryIndex, teamIndex)}
+                              className="inline-flex items-center justify-center rounded p-1 text-gray-800 hover:bg-white focus:outline-none focus:ring-2 focus:ring-black"
+                              aria-label="Remove team from rivalry"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    {teams.length > rivalry.teams.length && (
+                      <button
+                        type="button"
+                        onClick={() => addTeamToRivalry(rivalryIndex)}
+                        className="self-start text-sm px-2 py-1 bg-white rounded border border-black disabled:opacity-50"
+                      >
+                        + Add Team to Rivalry
+                      </button>
+                    )}
+                  </div>
+                </td>
+                <td className="p-2 text-center align-top">
+                  <button
+                    type="button"
+                    onClick={() => removeRivalry(rivalryIndex)}
+                    className="inline-flex items-center justify-center rounded p-1 text-gray-800 hover:bg-white focus:outline-none focus:ring-2 focus:ring-black"
+                    aria-label="Delete rivalry"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+
+      <button
+        onClick={addRivalry}
+        className="w-full mt-4 bg-green-500 text-white px-4 py-2 rounded"
+      >
+        <span className="text-xl font-bold">+</span> Add Rivalry
       </button>
     </div>
   );
