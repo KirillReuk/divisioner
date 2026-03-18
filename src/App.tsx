@@ -6,10 +6,10 @@ import DivisionView from './divisionsTab/DivisionView';
 import './App.css';
 import DivisionCountInput from './inputTab/DivisionCountInput';
 import Partitioning, { splitIntoConferences } from './utils/partitioning';
-import RivalryView from './rivalryTab/RivalryView';
 import { DEFAULT_DIVISION_COUNT } from './data/constants';
 import PresetModal from './PresetModal';
 import IntroModal from './IntroModal';
+import RivalryModal from './rivalryTab/RivalryModal';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('teams');
@@ -65,6 +65,14 @@ const App: React.FC = () => {
         }}
       />
 
+      <RivalryModal
+        isOpen={showRivalry}
+        onClose={() => setShowRivalry(false)}
+        teams={teams}
+        rivalries={rivalries}
+        setRivalries={setRivalries}
+      />
+
       <div className="flex justify-start mb-4 gap-2">
         {renderTabButton('teams', 'Teams')}
         {renderTabButton('divisions', 'Divisions', divisions.length === 0)}
@@ -80,24 +88,14 @@ const App: React.FC = () => {
               setDivisionsCount={setDivisionsCount}
               setActiveTab={setActiveTab}
             />
-            <div className="flex">
-              <div className="flex-1">
-                <TeamView
-                  teams={teams}
-                  setTeams={setTeams}
-                  setShowPresetModal={setShowPresetModal}
-                  showRivalry={showRivalry}
-                  setShowRivalry={setShowRivalry}
-                  mapPickerIndex={mapPickerIndex}
-                  setMapPickerIndex={setMapPickerIndex}
-                />
-              </div>
-              {showRivalry && (
-                <div className="flex-1">
-                  <RivalryView teams={teams} rivalries={rivalries} setRivalries={setRivalries} />
-                </div>
-              )}
-            </div>
+            <TeamView
+              teams={teams}
+              setTeams={setTeams}
+              setShowPresetModal={setShowPresetModal}
+              setShowRivalry={setShowRivalry}
+              mapPickerIndex={mapPickerIndex}
+              setMapPickerIndex={setMapPickerIndex}
+            />
           </div>
         </div>
       )}

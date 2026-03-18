@@ -13,7 +13,6 @@ interface EditableTeamsProps {
   setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
   setShowPresetModal: React.Dispatch<React.SetStateAction<boolean>>;
   setShowRivalry: React.Dispatch<React.SetStateAction<boolean>>;
-  showRivalry?: boolean;
   mapPickerIndex: number | null;
   setMapPickerIndex: React.Dispatch<React.SetStateAction<number | null>>;
 }
@@ -37,7 +36,6 @@ const TeamView: React.FC<EditableTeamsProps> = ({
   setTeams,
   setShowPresetModal,
   setShowRivalry,
-  showRivalry,
   mapPickerIndex,
   setMapPickerIndex,
 }) => {
@@ -118,7 +116,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({
   };
 
   return (
-    <div className={clsx('p-4 bg-gray-100 shadow-md', { 'w-fit': showRivalry })}>
+    <div className="p-4 bg-gray-100 shadow-md">
       <div className="relative mb-4">
         <h2 className="text-2xl font-bold">Teams</h2>
         <h5 className="absolute left-0 top-0 text-gray-400 text-right">{teams.length} teams in total</h5>{' '}
@@ -134,35 +132,28 @@ const TeamView: React.FC<EditableTeamsProps> = ({
           </button>
         </div>
         <button
-          onClick={() => setShowRivalry(showRivalry => !showRivalry)}
+          onClick={() => setShowRivalry(true)}
           className="text-sm px-2 bg-white rounded border border-black flex items-center gap-1 float-right"
         >
           <Atom className="w-4 h-4" />
-          {`${showRivalry ? 'Close' : 'Open'} Rivalries`}
+          {'Open Rivalries'}
         </button>
       </div>
-      <table
-        className={clsx(
-          'table-fixed transition-all duration-300',
-          !showRivalry ? 'max-w-full w-full' : 'max-w-[34rem]'
-        )}
-      >
+      <table className="table-fixed max-w-full w-full transition-all duration-300">
         <colgroup>
-          <col className={clsx(showRivalry ? 'w-[50%]' : 'w-[20%]')} />
-          <col className={clsx({ hidden: showRivalry }, 'w-[55%]')} />
-          <col className={clsx(showRivalry ? 'w-[45%]' : 'w-[20%]')} />
+          <col className="w-[20%]" />
+          <col className="w-[55%]" />
+          <col className="w-[20%]" />
           <col className="w-[5%]" />
         </colgroup>
         <thead>
           <tr>
-            <th className={clsx('text-lg text-left font-medium p-2', { 'w-1/5': !showRivalry, 'w-1/2': showRivalry })}>
+            <th className="text-lg text-left font-medium p-2 w-1/2">
               Team Name
             </th>
-            <th className={clsx('text-lg text-left font-medium p-2', { hidden: showRivalry })}>Location</th>
+            <th className="text-lg text-left font-medium p-2">Location</th>
             <th
-              className={clsx('text-lg text-left font-medium p-2', {
-                'w-1/6': !showRivalry,
-              })}
+              className="text-lg text-left font-medium p-2 w-1/6"
             >
               Coordinates
             </th>
@@ -183,7 +174,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({
                     placeholder="Team Name"
                   />
                 </td>
-                <td className={clsx({ hidden: showRivalry })}>
+                <td>
                   <LocationSearchInput
                     key={'location-search-' + index}
                     index={index}
