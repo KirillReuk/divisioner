@@ -185,12 +185,6 @@ export const presets: Record<string, Team[]> = {
   ],
   EuroLeague: [
     {
-      name: 'ALBA Berlin',
-      location: 'Berlin, Germany',
-      latitude: 52.52,
-      longitude: 13.405,
-    },
-    {
       name: 'Anadolu Efes Istanbul',
       location: 'Istanbul, Turkey',
       latitude: 41.0082,
@@ -213,6 +207,12 @@ export const presets: Record<string, Team[]> = {
       location: 'Belgrade, Serbia',
       latitude: 44.7866,
       longitude: 20.4489,
+    },
+    {
+      name: 'Dubai Basketball',
+      location: 'Dubai, United Arab Emirates',
+      latitude: 25.2048,
+      longitude: 55.2708,
     },
     {
       name: 'EA7 Emporio Armani Milan',
@@ -251,6 +251,12 @@ export const presets: Record<string, Team[]> = {
       longitude: 34.7818,
     },
     {
+      name: 'Hapoel IBI Tel Aviv',
+      location: 'Tel Aviv, Israel',
+      latitude: 32.0853,
+      longitude: 34.7818,
+    },
+    {
       name: 'Olympiacos Piraeus',
       location: 'Piraeus, Greece',
       latitude: 37.942,
@@ -279,6 +285,12 @@ export const presets: Record<string, Team[]> = {
       location: 'Madrid, Spain',
       latitude: 40.4168,
       longitude: -3.7038,
+    },
+    {
+      name: 'Valencia Basket',
+      location: 'Valencia, Spain',
+      latitude: 39.4699,
+      longitude: -0.3763,
     },
     {
       name: 'Virtus Segafredo Bologna',
