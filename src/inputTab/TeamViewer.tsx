@@ -4,7 +4,7 @@ import LocationSearchInput from '../LocationSearchInput';
 import { fetchCoordinates } from '../utils/geocoding';
 import debounce from 'lodash.debounce';
 import { DEFAULT_TEAM, MAX_LATITUDE, MAX_LONGITUDE, MIN_LATITUDE, MIN_LONGITUDE } from '../data/constants';
-import { Atom } from 'lucide-react';
+import { Atom, X } from 'lucide-react';
 import clsx from 'clsx';
 import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
 
@@ -14,6 +14,8 @@ interface EditableTeamsProps {
   setShowPresetModal: React.Dispatch<React.SetStateAction<boolean>>;
   setShowRivalry: React.Dispatch<React.SetStateAction<boolean>>;
   showRivalry?: boolean;
+  mapPickerIndex: number | null;
+  setMapPickerIndex: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 type FieldsToValidate = 'latitude' | 'longitude';
@@ -36,12 +38,13 @@ const TeamView: React.FC<EditableTeamsProps> = ({
   setShowPresetModal,
   setShowRivalry,
   showRivalry,
+  mapPickerIndex,
+  setMapPickerIndex,
 }) => {
   const [errors, setErrors] = useState<Record<number, Record<FieldsToValidate, boolean>>>({});
   const [pendingCoords, setPendingCoords] = useState<{ index: number; latitude: number; longitude: number } | null>(
     null
   );
-  const [mapPickerIndex, setMapPickerIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!pendingCoords) return;
@@ -237,25 +240,39 @@ const TeamView: React.FC<EditableTeamsProps> = ({
                 </td>
                 <td className="text-end">
                   <button
-                    onClick={() => setTeams(teams.filter((_, i) => i !== index))}
-                    className="px-4 bg-white-500 text-black rounded align-middle"
+                    type="button"
+                    onClick={() => { setTeams(teams.filter((_, i) => i !== index)); setMapPickerIndex(null); }}
+                    className="inline-flex items-center justify-center rounded p-1 text-gray-800 hover:bg-white focus:outline-none focus:ring-2 focus:ring-black"
                     aria-label={`Remove team ${team.name}`}
+                    title="Remove team"
                   >
-                    x
+                    <X className="h-4 w-4" />
                   </button>
                 </td>
               </tr>
               {mapPickerIndex === index && (
                 <tr>
                   <td colSpan={4}>
-                    <div className="h-96 w-full rounded border mt-2">
+                    <div className="relative h-96 w-full rounded border mt-2 overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={e => {
+                          e.stopPropagation();
+                          setMapPickerIndex(null);
+                        }}
+                        className="absolute right-2 top-2 z-[1000] inline-flex items-center justify-center rounded bg-white/90 p-1 text-gray-800 shadow hover:bg-white focus:outline-none focus:ring-2 focus:ring-black"
+                        aria-label="Close map"
+                        title="Close map"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
                       <MapContainer
                         center={[team.latitude, team.longitude]}
                         zoom={4}
                         style={{ height: '100%', width: '100%' }}
                       >
                         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                        <MapClickHandler onClick={(lat, lng) => handleMapPick(index, lat, lng)} />
+                        <MapClickHandler onClick={(lat, lng) => handleMapPick(index, parseFloat(lat.toFixed(3)), parseFloat(lng.toFixed(3)))} />
                         <Marker position={[team.latitude, team.longitude]} />
                       </MapContainer>
                     </div>
@@ -267,7 +284,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({
         </tbody>
       </table>
       <button
-        onClick={() => setTeams([...teams, DEFAULT_TEAM])}
+        onClick={() => { setTeams([...teams, DEFAULT_TEAM]); setMapPickerIndex(null); }}
         className="w-full mt-4 bg-green-500 text-white px-4 py-2 rounded"
       >
         <span className="text-xl font-bold">+</span> Add Team

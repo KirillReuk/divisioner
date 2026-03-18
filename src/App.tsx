@@ -21,6 +21,7 @@ const App: React.FC = () => {
   const [showRivalry, setShowRivalry] = useState(false);
   const [showPresetModal, setShowPresetModal] = useState(false);
   const [showIntroModal, setShowIntroModal] = useState(false);
+  const [mapPickerIndex, setMapPickerIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const hasSeenIntro = localStorage.getItem('hasSeenIntro');
@@ -58,7 +59,10 @@ const App: React.FC = () => {
       <PresetModal
         isOpen={showPresetModal}
         onClose={() => setShowPresetModal(false)}
-        onSelectPreset={presetTeams => setTeams(presetTeams)}
+        onSelectPreset={presetTeams => {
+          setTeams(presetTeams);
+          setMapPickerIndex(null);
+        }}
       />
 
       <div className="flex justify-start mb-4 gap-2">
@@ -84,6 +88,8 @@ const App: React.FC = () => {
                   setShowPresetModal={setShowPresetModal}
                   showRivalry={showRivalry}
                   setShowRivalry={setShowRivalry}
+                  mapPickerIndex={mapPickerIndex}
+                  setMapPickerIndex={setMapPickerIndex}
                 />
               </div>
               {showRivalry && (
