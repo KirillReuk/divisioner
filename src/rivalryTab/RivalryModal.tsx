@@ -1,5 +1,5 @@
 import React from 'react';
-import { X } from 'lucide-react';
+import { UserMinus, Trash2 } from 'lucide-react';
 import { Rivalry, Team } from '../utils/types';
 import Modal from '../components/Modal/Modal';
 
@@ -60,10 +60,6 @@ const RivalryModal: React.FC<RivalryModalProps> = ({ isOpen, onClose, teams, riv
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Rivalries">
-      <div className="mb-4">
-        <h5 className="text-gray-400 pt-1">{rivalries.length} rivalries in total</h5>
-      </div>
-
       <table className="table-fixed">
         <colgroup>
           <col className="w-[95%]" />
@@ -95,14 +91,14 @@ const RivalryModal: React.FC<RivalryModalProps> = ({ isOpen, onClose, teams, riv
                       const options = teams.filter(t => t.name === team.name || !usedTeams.has(t.name));
 
                       return (
-                        <div key={teamIndex} className="flex items-center gap-1">
+                        <div key={teamIndex} className="flex items-center gap-1 w-full">
                           <select
                             value={team.name}
                             onChange={e => {
                               const selectedTeam = teams.find(t => t.name === e.target.value)!;
                               handleTeamChange(rivalryIndex, teamIndex, selectedTeam);
                             }}
-                            className="p-2 rounded border bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out"
+                            className="p-2 rounded border bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out flex-1 min-w-0"
                           >
                             {options.map(optionTeam => (
                               <option key={optionTeam.name} value={optionTeam.name}>
@@ -114,10 +110,11 @@ const RivalryModal: React.FC<RivalryModalProps> = ({ isOpen, onClose, teams, riv
                             <button
                               type="button"
                               onClick={() => removeTeamFromRivalry(rivalryIndex, teamIndex)}
-                              className="inline-flex items-center justify-center rounded p-1 text-gray-800 hover:bg-white focus:outline-none focus:ring-2 focus:ring-black"
-                              aria-label="Remove team from rivalry"
+                              className="inline-flex items-center justify-center rounded p-1 text-gray-800 hover:bg-white focus:outline-none focus:ring-2 focus:ring-black shrink-0"
+                              aria-label={`Remove team ${team.name} from rivalry ${rivalryIndex + 1}`}
+                              title="Remove team from rivalry"
                             >
-                              <X className="h-4 w-4" />
+                              <UserMinus className="h-4 w-4" />
                             </button>
                           )}
                         </div>
@@ -139,10 +136,11 @@ const RivalryModal: React.FC<RivalryModalProps> = ({ isOpen, onClose, teams, riv
                   <button
                     type="button"
                     onClick={() => removeRivalry(rivalryIndex)}
-                    className="inline-flex items-center justify-center rounded p-1 text-gray-800 hover:bg-white focus:outline-none focus:ring-2 focus:ring-black"
-                    aria-label="Delete rivalry"
+                    className="inline-flex items-center justify-center rounded p-1 text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-600"
+                    aria-label={`Delete rivalry ${rivalryIndex + 1}`}
+                    title="Delete rivalry"
                   >
-                    <X className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4" />
                   </button>
                 </td>
               </tr>
