@@ -1,5 +1,6 @@
 import React, { useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
 
 type ModalProps = {
   isOpen: boolean;
@@ -11,6 +12,7 @@ type ModalProps = {
   titleClassName?: string;
   descriptionClassName?: string;
   titleWrapperClassName?: string;
+  showCloseButton?: boolean;
 };
 
 const DEFAULT_OVERLAY_CLASS = 'fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50';
@@ -29,6 +31,7 @@ const Modal: React.FC<ModalProps> = ({
   titleClassName = DEFAULT_TITLE_CLASS,
   descriptionClassName = DEFAULT_DESCRIPTION_CLASS,
   titleWrapperClassName = DEFAULT_TITLE_WRAPPER_CLASS,
+  showCloseButton = true,
 }) => {
   const titleId = useId();
   const descriptionId = useId();
@@ -73,6 +76,19 @@ const Modal: React.FC<ModalProps> = ({
         aria-describedby={description ? descriptionId : undefined}
         tabIndex={-1}
       >
+        <div className="relative">
+          {showCloseButton ? (
+            <button
+              type="button"
+              className="absolute right-0 top-0 inline-flex items-center justify-center rounded p-1 text-gray-800 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black"
+              onClick={onClose}
+              aria-label="Close modal"
+              title="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          ) : null}
+        </div>
         <div className={titleWrapperClassName}>
           <h2 id={titleId} className={titleClassName}>
             {title}

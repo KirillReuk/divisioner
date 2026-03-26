@@ -11,14 +11,7 @@ interface PresetModalProps {
 
 const PresetModal: React.FC<PresetModalProps> = ({ isOpen, onClose, onSelectPreset }) => {
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Select a preset"
-      // panelClassName="bg-white p-6 rounded-lg shadow-md max-w-sm w-full"
-      // titleClassName="text-lg font-semibold"
-      // titleWrapperClassName="mb-4"
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title="Select a preset">
       <ul>
         {Object.entries(presets).map(([name, teamList]) => (
           <li key={name} className="mb-2">
@@ -34,9 +27,6 @@ const PresetModal: React.FC<PresetModalProps> = ({ isOpen, onClose, onSelectPres
           </li>
         ))}
       </ul>
-      <button className="mt-4 px-4 py-2 text-sm text-gray-600 hover:underline" onClick={onClose}>
-        Cancel
-      </button>
     </Modal>
   );
 };
