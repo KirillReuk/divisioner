@@ -1,27 +1,38 @@
-import { useEffect, useState } from 'react';
-import { Division, Rivalry, Tab, Team } from './utils/types';
+import { useEffect, useReducer, useState } from 'react';
+import { Rivalry, Tab, Team } from './utils/types';
 import MapView from './divisionsTab/MapView';
 import TeamView from './inputTab/TeamViewer';
 import DivisionView from './divisionsTab/DivisionView';
 import './App.css';
 import DivisionCountInput from './inputTab/DivisionCountInput';
 import Partitioning, { splitIntoConferences } from './utils/partitioning';
-import { DEFAULT_DIVISION_COUNT } from './data/constants';
 import PresetModal from './PresetModal';
 import IntroModal from './IntroModal';
 import RivalryModal from './rivalryTab/RivalryModal';
+import { initialTeamBuilderState, teamBuilderReducer } from './state/teamBuilderReducer';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('teams');
-  const [divisions, setDivisions] = useState<Division[]>([]);
-  const [conferences, setConferences] = useState<Division[][]>([]);
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [rivalries, setRivalries] = useState<Rivalry[]>([]);
-  const [divisionsCount, setDivisionsCount] = useState<number>(DEFAULT_DIVISION_COUNT);
   const [showRivalry, setShowRivalry] = useState(false);
   const [showPresetModal, setShowPresetModal] = useState(false);
   const [showIntroModal, setShowIntroModal] = useState(false);
-  const [mapPickerIndex, setMapPickerIndex] = useState<number | null>(null);
+  const [state, dispatch] = useReducer(teamBuilderReducer, initialTeamBuilderState);
+  const { divisions, conferences, teams, rivalries, divisionsCount, mapPickerIndex } = state;
+
+  const setTeams: React.Dispatch<React.SetStateAction<Team[]>> = value => {
+    const nextTeams = typeof value === 'function' ? value(teams) : value;
+    dispatch({ type: 'SET_TEAMS', payload: { teams: nextTeams } });
+  };
+
+  const setDivisionsCount: React.Dispatch<React.SetStateAction<number>> = value => {
+    const nextCount = typeof value === 'function' ? value(divisionsCount) : value;
+    dispatch({ type: 'SET_DIVISIONS_COUNT', payload: { count: nextCount } });
+  };
+
+  const setMapPickerIndex: React.Dispatch<React.SetStateAction<number | null>> = value => {
+    const nextIndex = typeof value === 'function' ? value(mapPickerIndex) : value;
+    dispatch({ type: 'SET_MAP_PICKER_INDEX', payload: { index: nextIndex } });
+  };
 
   useEffect(() => {
     const hasSeenIntro = localStorage.getItem('hasSeenIntro');
@@ -48,9 +59,8 @@ const App: React.FC = () => {
   const generateConferences = (teams: Team[], divisionCount: number, rivalries: Rivalry[]) => {
     const partitioning = new Partitioning(teams, divisionCount, rivalries);
     const divisions = partitioning.getDivisions();
-    setDivisions(divisions);
     const conferences = splitIntoConferences(divisions);
-    setConferences(conferences);
+    dispatch({ type: 'SET_GENERATED_STRUCTURE', payload: { divisions, conferences } });
   };
 
   return (
@@ -60,9 +70,7 @@ const App: React.FC = () => {
         isOpen={showPresetModal}
         onClose={() => setShowPresetModal(false)}
         onSelectPreset={presetTeams => {
-          setTeams(presetTeams);
-          setMapPickerIndex(null);
-          setRivalries([]);
+          dispatch({ type: 'APPLY_PRESET', payload: { teams: presetTeams } });
         }}
       />
 
@@ -71,7 +79,7 @@ const App: React.FC = () => {
         onClose={() => setShowRivalry(false)}
         teams={teams}
         rivalries={rivalries}
-        setRivalries={setRivalries}
+        dispatch={dispatch}
       />
 
       <div className="flex justify-start mb-4 gap-2">

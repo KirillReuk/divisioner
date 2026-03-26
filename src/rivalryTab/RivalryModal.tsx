@@ -2,24 +2,19 @@ import React from 'react';
 import { UserMinus, Trash2 } from 'lucide-react';
 import { Rivalry, Team } from '../utils/types';
 import Modal from '../components/Modal/Modal';
+import { TeamBuilderAction } from '../state/teamBuilderReducer';
 
 interface RivalryModalProps {
   isOpen: boolean;
   onClose: () => void;
   teams: Team[];
   rivalries: Rivalry[];
-  setRivalries: React.Dispatch<React.SetStateAction<Rivalry[]>>;
+  dispatch: React.Dispatch<TeamBuilderAction>;
 }
 
-const RivalryModal: React.FC<RivalryModalProps> = ({ isOpen, onClose, teams, rivalries, setRivalries }) => {
+const RivalryModal: React.FC<RivalryModalProps> = ({ isOpen, onClose, teams, rivalries, dispatch }) => {
   const handleTeamChange = (rivalryIndex: number, teamIndex: number, newTeam: Team) => {
-    setRivalries(prev =>
-      prev.map((rivalry, i) =>
-        i === rivalryIndex
-          ? { ...rivalry, teams: rivalry.teams.map((team, j) => (j === teamIndex ? newTeam : team)) }
-          : rivalry
-      )
-    );
+    dispatch({ type: 'UPDATE_RIVALRY_TEAM', payload: { rivalryIndex, teamIndex, team: newTeam } });
   };
 
   const addTeamToRivalry = (rivalryIndex: number) => {
@@ -28,21 +23,15 @@ const RivalryModal: React.FC<RivalryModalProps> = ({ isOpen, onClose, teams, riv
     );
     const fallback = availableTeams.find(team => !rivalries[rivalryIndex].teams.includes(team));
     if (!fallback) return;
-    setRivalries(prev =>
-      prev.map((rivalry, i) => (i === rivalryIndex ? { ...rivalry, teams: [...rivalry.teams, fallback] } : rivalry))
-    );
+    dispatch({ type: 'ADD_TEAM_TO_RIVALRY', payload: { rivalryIndex, team: fallback } });
   };
 
   const removeTeamFromRivalry = (rivalryIndex: number, teamIndex: number) => {
-    setRivalries(prev =>
-      prev.map((rivalry, i) =>
-        i === rivalryIndex ? { ...rivalry, teams: rivalry.teams.filter((_, j) => j !== teamIndex) } : rivalry
-      )
-    );
+    dispatch({ type: 'REMOVE_TEAM_FROM_RIVALRY', payload: { rivalryIndex, teamIndex } });
   };
 
   const removeRivalry = (rivalryIndex: number) => {
-    setRivalries(prev => prev.filter((_, i) => i !== rivalryIndex));
+    dispatch({ type: 'REMOVE_RIVALRY', payload: { rivalryIndex } });
   };
 
   const addRivalry = () => {
@@ -55,7 +44,7 @@ const RivalryModal: React.FC<RivalryModalProps> = ({ isOpen, onClose, teams, riv
     if (availableTeams.length < 2) return;
 
     const [team1, team2] = availableTeams;
-    setRivalries([...rivalries, { teams: [team1, team2] }]);
+    dispatch({ type: 'ADD_RIVALRY', payload: { rivalry: { teams: [team1, team2] } } });
   };
 
   return (
