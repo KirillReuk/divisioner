@@ -5,9 +5,9 @@ import { fetchCoordinates } from '../utils/geocoding';
 import { createDefaultTeam, MAX_LATITUDE, MAX_LONGITUDE, MIN_LATITUDE, MIN_LONGITUDE } from '../data/constants';
 import { Atom, X } from 'lucide-react';
 import clsx from 'clsx';
-import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
 import { useTeamValidation } from './useTeamValidation';
 import { useReverseGeocoding } from './useReverseGeocoding';
+import TeamMapPicker from './TeamMapPicker';
 
 interface EditableTeamsProps {
   teams: Team[];
@@ -17,18 +17,6 @@ interface EditableTeamsProps {
   mapPickerTeamId: string | null;
   setMapPickerTeamId: React.Dispatch<React.SetStateAction<string | null>>;
 }
-
-const MapClickHandler: React.FC<{
-  onClick: (lat: number, lng: number) => void;
-}> = ({ onClick }) => {
-  useMapEvents({
-    click(e) {
-      const { lat, lng } = e.latlng;
-      onClick(lat, lng);
-    },
-  });
-  return null;
-};
 
 const TeamView: React.FC<EditableTeamsProps> = ({
   teams,
@@ -185,33 +173,14 @@ const TeamView: React.FC<EditableTeamsProps> = ({
               {mapPickerTeamId === team.id && (
                 <tr>
                   <td colSpan={4}>
-                    <div className="relative h-96 w-full rounded border mt-2 overflow-hidden">
-                      <button
-                        type="button"
-                        onClick={e => {
-                          e.stopPropagation();
-                          setMapPickerTeamId(null);
-                        }}
-                        className="absolute right-2 top-2 z-[1000] inline-flex items-center justify-center rounded bg-white/90 p-1 text-gray-800 shadow hover:bg-white focus:outline-none focus:ring-2 focus:ring-black"
-                        aria-label="Close map"
-                        title="Close map"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                      <MapContainer
-                        center={[team.latitude, team.longitude]}
-                        zoom={4}
-                        style={{ height: '100%', width: '100%' }}
-                      >
-                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                        <MapClickHandler
-                          onClick={(lat, lng) =>
-                            handleMapPick(team.id, parseFloat(lat.toFixed(3)), parseFloat(lng.toFixed(3)))
-                          }
-                        />
-                        <Marker position={[team.latitude, team.longitude]} />
-                      </MapContainer>
-                    </div>
+                    <TeamMapPicker
+                      latitude={team.latitude}
+                      longitude={team.longitude}
+                      onPick={(lat, lng) =>
+                        handleMapPick(team.id, parseFloat(lat.toFixed(3)), parseFloat(lng.toFixed(3)))
+                      }
+                      onClose={() => setMapPickerTeamId(null)}
+                    />
                   </td>
                 </tr>
               )}
