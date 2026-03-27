@@ -7,6 +7,7 @@ import { createDefaultTeam, MAX_LATITUDE, MAX_LONGITUDE, MIN_LATITUDE, MIN_LONGI
 import { Atom, X } from 'lucide-react';
 import clsx from 'clsx';
 import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
+import { useTeamValidation } from './useTeamValidation';
 
 interface EditableTeamsProps {
   teams: Team[];
@@ -16,8 +17,6 @@ interface EditableTeamsProps {
   mapPickerTeamId: string | null;
   setMapPickerTeamId: React.Dispatch<React.SetStateAction<string | null>>;
 }
-
-type FieldsToValidate = 'latitude' | 'longitude';
 
 const MapClickHandler: React.FC<{
   onClick: (lat: number, lng: number) => void;
@@ -39,7 +38,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({
   mapPickerTeamId,
   setMapPickerTeamId,
 }) => {
-  const [errors, setErrors] = useState<Record<string, Record<FieldsToValidate, boolean>>>({});
+  const { errorsById, validateLatLng, ariaPropsForField } = useTeamValidation(teams);
   const [pendingCoords, setPendingCoords] = useState<{ teamId: string; latitude: number; longitude: number } | null>(
     null
   );
@@ -72,17 +71,6 @@ const TeamView: React.FC<EditableTeamsProps> = ({
       longitude: field === 'longitude' ? value : (prev?.longitude ?? currentTeam.longitude),
     }));
   };
-
-  const validateLatitude = (teamId: string, value: number) =>
-    setErrors(prev => ({
-      ...prev,
-      [teamId]: { ...prev[teamId], latitude: value < MIN_LATITUDE || value > MAX_LATITUDE || isNaN(value) },
-    }));
-  const validateLongitude = (teamId: string, value: number) =>
-    setErrors(prev => ({
-      ...prev,
-      [teamId]: { ...prev[teamId], longitude: value < MIN_LONGITUDE || value > MAX_LONGITUDE || isNaN(value) },
-    }));
 
   const updateCoordinatesResults = async (teamId: string, latitude: number, longitude: number) => {
     try {
@@ -188,12 +176,13 @@ const TeamView: React.FC<EditableTeamsProps> = ({
                         step="0.001"
                         onChange={e => {
                           const value = parseFloat(e.target.value);
-                          validateLatitude(team.id, value);
+                          validateLatLng(team.id, 'latitude', value);
                           handleCoordinatesChange(team.id, 'latitude', value);
                         }}
+                        {...ariaPropsForField(team.id, 'latitude')}
                         className={clsx(
                           'rounded w-1/2 p-2 bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out',
-                          { 'border-2 border-red-500': errors[team.id]?.latitude }
+                          { 'border-2 border-red-500': errorsById[team.id]?.latitude }
                         )}
                         placeholder="Latitude"
                       />
@@ -206,12 +195,13 @@ const TeamView: React.FC<EditableTeamsProps> = ({
                         step="0.001"
                         onChange={e => {
                           const value = parseFloat(e.target.value);
-                          validateLongitude(team.id, value);
+                          validateLatLng(team.id, 'longitude', value);
                           handleCoordinatesChange(team.id, 'longitude', value);
                         }}
+                        {...ariaPropsForField(team.id, 'longitude')}
                         className={clsx(
                           'rounded w-1/2 p-2 bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out',
-                          { 'border-2 border-red-500': errors[team.id]?.longitude }
+                          { 'border-2 border-red-500': errorsById[team.id]?.longitude }
                         )}
                         placeholder="Longitude"
                       />
