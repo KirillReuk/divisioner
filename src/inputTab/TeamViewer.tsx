@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Team } from '../utils/types';
 import LocationSearchInput from '../LocationSearchInput';
 import { fetchCoordinates } from '../utils/geocoding';
-import debounce from 'lodash.debounce';
 import { createDefaultTeam, MAX_LATITUDE, MAX_LONGITUDE, MIN_LATITUDE, MIN_LONGITUDE } from '../data/constants';
 import { Atom, X } from 'lucide-react';
 import clsx from 'clsx';
 import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
 import { useTeamValidation } from './useTeamValidation';
+import { useReverseGeocoding } from './useReverseGeocoding';
 
 interface EditableTeamsProps {
   teams: Team[];
@@ -39,55 +39,14 @@ const TeamView: React.FC<EditableTeamsProps> = ({
   setMapPickerTeamId,
 }) => {
   const { errorsById, validateLatLng, ariaPropsForField } = useTeamValidation(teams);
-  const [pendingCoords, setPendingCoords] = useState<{ teamId: string; latitude: number; longitude: number } | null>(
-    null
-  );
-
-  useEffect(() => {
-    if (!pendingCoords) return;
-
-    const debouncedFetch = debounce(() => {
-      updateCoordinatesResults(pendingCoords.teamId, pendingCoords.latitude, pendingCoords.longitude);
-    }, 500);
-
-    debouncedFetch();
-    return () => debouncedFetch.cancel();
-  }, [pendingCoords]);
+  const { handleCoordinatesChange } = useReverseGeocoding(teams, setTeams);
 
   const handleTeamNameChange = (teamId: string, value: string) =>
     setTeams(prevTeams => prevTeams.map(team => (team.id === teamId ? { ...team, name: value } : team)));
 
-  const handleCoordinatesChange = (teamId: string, field: 'latitude' | 'longitude', value: number) => {
-    const currentTeam = teams.find(team => team.id === teamId);
-    if (!currentTeam) return;
-
-    setTeams(prevTeams => {
-      return prevTeams.map(team => (team.id === teamId ? { ...team, [field]: value } : team));
-    });
-
-    setPendingCoords(prev => ({
-      teamId,
-      latitude: field === 'latitude' ? value : (prev?.latitude ?? currentTeam.latitude),
-      longitude: field === 'longitude' ? value : (prev?.longitude ?? currentTeam.longitude),
-    }));
-  };
-
-  const updateCoordinatesResults = async (teamId: string, latitude: number, longitude: number) => {
-    try {
-      const results = await fetchCoordinates(latitude, longitude);
-      if (results && results.length > 0) {
-        setTeams(prevTeams => {
-          return prevTeams.map(team => (team.id === teamId ? { ...team, location: results[0].formatted } : team));
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching coordinates:', error);
-    }
-  };
-
   const handleMapPick = async (teamId: string, lat: number, lng: number) => {
     const results = await fetchCoordinates(lat, lng);
-    if (results) {
+    if (results?.[0]) {
       setTeams(prevTeams =>
         prevTeams.map(team =>
           team.id === teamId ? { ...team, latitude: lat, longitude: lng, location: results[0].formatted } : team

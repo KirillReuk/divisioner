@@ -20,3 +20,5 @@ export type Tab = 'teams' | 'divisions';
 export type Rivalry = {
   teamIds: string[];
 };
+
+export type CoordinateField = 'latitude' | 'longitude';

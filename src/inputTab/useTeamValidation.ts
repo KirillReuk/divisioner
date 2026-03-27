@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { MAX_LATITUDE, MAX_LONGITUDE, MIN_LATITUDE, MIN_LONGITUDE } from '../data/constants';
-import { Team } from '../utils/types';
+import { CoordinateField, Team } from '../utils/types';
 
-type CoordinateField = 'latitude' | 'longitude';
 type TeamFieldErrors = Record<CoordinateField, boolean>;
 type ErrorsById = Record<string, TeamFieldErrors>;
 
