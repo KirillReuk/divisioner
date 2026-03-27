@@ -48,17 +48,23 @@ class Partitioning {
   private teamIndexMap: Map<string, number>;
 
   constructor(teams: Team[], divisionCount: number, rivalries: Rivalry[]) {
-    const pseudoTeamsFromRivalries: TeamWithPseudo[] = rivalries.map((rivalry, index) => ({
+    const teamsById = new Map(teams.map(team => [team.id, team]));
+    const rivalryTeams = rivalries
+      .map(rivalry =>
+        rivalry.teamIds.map(teamId => teamsById.get(teamId)).filter((team): team is Team => Boolean(team))
+      )
+      .filter(rivalryTeamsGroup => rivalryTeamsGroup.length >= 2);
+
+    const pseudoTeamsFromRivalries: TeamWithPseudo[] = rivalryTeams.map((rivalryTeamsGroup, index) => ({
       id: `rivalry-pseudo-${index}`,
-      name: 'Rivalry: ' + rivalry.teams.map(team => team.name).join(' vs. '),
+      name: 'Rivalry: ' + rivalryTeamsGroup.map(team => team.name).join(' vs. '),
       location: 'Anywhere!',
-      latitude: rivalry.teams.reduce((acc, team) => acc + team.latitude, 0) / rivalry.teams.length,
-      longitude: rivalry.teams.reduce((acc, team) => acc + team.longitude, 0) / rivalry.teams.length,
-      teamsIncluded: rivalry.teams,
+      latitude: rivalryTeamsGroup.reduce((acc, team) => acc + team.latitude, 0) / rivalryTeamsGroup.length,
+      longitude: rivalryTeamsGroup.reduce((acc, team) => acc + team.longitude, 0) / rivalryTeamsGroup.length,
+      teamsIncluded: rivalryTeamsGroup,
     }));
-    const nonRivaledTeams = teams.filter(
-      team => !rivalries.some(rivalry => rivalry.teams.some(rivalTeam => rivalTeam.name === team.name))
-    );
+    const rivalryTeamIds = new Set(rivalries.flatMap(rivalry => rivalry.teamIds));
+    const nonRivaledTeams = teams.filter(team => !rivalryTeamIds.has(team.id));
 
     const teamsWithIndex = pseudoTeamsFromRivalries.concat(nonRivaledTeams).map((team, index) => ({
       ...team,
@@ -70,7 +76,7 @@ class Partitioning {
     this.distanceMatrix = this.precomputeDistances();
 
     this.components = this.generateInitialComponents(teamsWithIndex);
-    this.teamIndexMap = new Map(this.teams.map((team, idx) => [team.name, idx]));
+    this.teamIndexMap = new Map(this.teams.map((team, idx) => [team.id, idx]));
   }
 
   private generateInitialComponents = (teams: TeamWithPseudo[]): TeamWithPseudo[][] => {
@@ -83,7 +89,7 @@ class Partitioning {
   };
 
   private distanceBetweenTeams = (team1: TeamWithPseudo, team2: TeamWithPseudo): number => {
-    const getTeamIndex = (teamToFind: TeamWithPseudo) => this.teamIndexMap.get(teamToFind.name) ?? -1;
+    const getTeamIndex = (teamToFind: TeamWithPseudo) => this.teamIndexMap.get(teamToFind.id) ?? -1;
 
     return this.distanceMatrix[getTeamIndex(team1)][getTeamIndex(team2)];
   };

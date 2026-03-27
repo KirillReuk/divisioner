@@ -18,8 +18,8 @@ export type TeamBuilderAction =
   | { type: 'APPLY_PRESET'; payload: { teams: Team[] } }
   | { type: 'ADD_RIVALRY'; payload: { rivalry: Rivalry } }
   | { type: 'REMOVE_RIVALRY'; payload: { rivalryIndex: number } }
-  | { type: 'UPDATE_RIVALRY_TEAM'; payload: { rivalryIndex: number; teamIndex: number; team: Team } }
-  | { type: 'ADD_TEAM_TO_RIVALRY'; payload: { rivalryIndex: number; team: Team } }
+  | { type: 'UPDATE_RIVALRY_TEAM'; payload: { rivalryIndex: number; teamIndex: number; teamId: string } }
+  | { type: 'ADD_TEAM_TO_RIVALRY'; payload: { rivalryIndex: number; teamId: string } }
   | { type: 'REMOVE_TEAM_FROM_RIVALRY'; payload: { rivalryIndex: number; teamIndex: number } }
   | { type: 'SET_GENERATED_STRUCTURE'; payload: { divisions: Division[]; conferences: Division[][] } };
 
@@ -35,7 +35,16 @@ export const initialTeamBuilderState: TeamBuilderState = {
 export const teamBuilderReducer = (state: TeamBuilderState, action: TeamBuilderAction): TeamBuilderState => {
   switch (action.type) {
     case 'SET_TEAMS':
-      return { ...state, teams: action.payload.teams };
+      return {
+        ...state,
+        teams: action.payload.teams,
+        rivalries: state.rivalries
+          .map(rivalry => ({
+            ...rivalry,
+            teamIds: rivalry.teamIds.filter(teamId => action.payload.teams.some(team => team.id === teamId)),
+          }))
+          .filter(rivalry => rivalry.teamIds.length >= 2),
+      };
     case 'SET_RIVALRIES':
       return { ...state, rivalries: action.payload.rivalries };
     case 'SET_DIVISIONS_COUNT':
@@ -66,7 +75,9 @@ export const teamBuilderReducer = (state: TeamBuilderState, action: TeamBuilderA
           i === action.payload.rivalryIndex
             ? {
                 ...rivalry,
-                teams: rivalry.teams.map((team, j) => (j === action.payload.teamIndex ? action.payload.team : team)),
+                teamIds: rivalry.teamIds.map((teamId, j) =>
+                  j === action.payload.teamIndex ? action.payload.teamId : teamId
+                ),
               }
             : rivalry
         ),
@@ -75,7 +86,9 @@ export const teamBuilderReducer = (state: TeamBuilderState, action: TeamBuilderA
       return {
         ...state,
         rivalries: state.rivalries.map((rivalry, i) =>
-          i === action.payload.rivalryIndex ? { ...rivalry, teams: [...rivalry.teams, action.payload.team] } : rivalry
+          i === action.payload.rivalryIndex
+            ? { ...rivalry, teamIds: [...rivalry.teamIds, action.payload.teamId] }
+            : rivalry
         ),
       };
     case 'REMOVE_TEAM_FROM_RIVALRY':
@@ -83,7 +96,7 @@ export const teamBuilderReducer = (state: TeamBuilderState, action: TeamBuilderA
         ...state,
         rivalries: state.rivalries.map((rivalry, i) =>
           i === action.payload.rivalryIndex
-            ? { ...rivalry, teams: rivalry.teams.filter((_, j) => j !== action.payload.teamIndex) }
+            ? { ...rivalry, teamIds: rivalry.teamIds.filter((_, j) => j !== action.payload.teamIndex) }
             : rivalry
         ),
       };
