@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import { MAX_LATITUDE, MAX_LONGITUDE, MIN_LATITUDE, MIN_LONGITUDE } from '../data/constants';
-import { CoordinateField, Team } from '../utils/types';
+import { CoordinateField } from '../utils/types';
 
 type TeamFieldErrors = Record<CoordinateField, boolean>;
-type ErrorsById = Record<string, TeamFieldErrors>;
 
 type AriaProps = {
   'aria-invalid': boolean;
@@ -22,29 +21,28 @@ const getCoordinateError = (field: CoordinateField, value: number): boolean => {
   }
 };
 
-export const useTeamValidation = (teams: Team[]) => {
-  const [errorsById, setErrorsById] = useState<ErrorsById>({});
+export const useTeamValidation = (teamId: string, latitude: number, longitude: number) => {
+  const [errors, setErrors] = useState<TeamFieldErrors>(() => ({
+    latitude: getCoordinateError('latitude', latitude),
+    longitude: getCoordinateError('longitude', longitude),
+  }));
 
   useEffect(() => {
-    const validTeamIds = new Set(teams.map(team => team.id));
-    setErrorsById(
-      prev => Object.fromEntries(Object.entries(prev).filter(([teamId]) => validTeamIds.has(teamId))) as ErrorsById
-    );
-  }, [teams]);
+    setErrors({
+      latitude: getCoordinateError('latitude', latitude),
+      longitude: getCoordinateError('longitude', longitude),
+    });
+  }, [latitude, longitude]);
 
-  const validateLatLng = (teamId: string, field: CoordinateField, value: number) => {
-    const defaultErrors = { latitude: false, longitude: false };
-    setErrorsById(prev => ({
+  const validateLatLng = (field: CoordinateField, value: number) => {
+    setErrors(prev => ({
       ...prev,
-      [teamId]: {
-        ...(prev[teamId] ?? defaultErrors),
-        [field]: getCoordinateError(field, value),
-      },
+      [field]: getCoordinateError(field, value),
     }));
   };
 
-  const getAriaPropsForField = (teamId: string, field: CoordinateField): AriaProps => {
-    const isInvalid = Boolean(errorsById[teamId]?.[field]);
+  const getAriaPropsForField = (field: CoordinateField): AriaProps => {
+    const isInvalid = Boolean(errors[field]);
     const messageId = `${field}-error-${teamId}`;
     return {
       'aria-invalid': isInvalid,
@@ -53,7 +51,7 @@ export const useTeamValidation = (teams: Team[]) => {
   };
 
   return {
-    errorsById,
+    errors,
     validateLatLng,
     getAriaPropsForField,
   };

@@ -1,7 +1,6 @@
 import React from 'react';
-import { CoordinateField, Team } from '../utils/types';
+import { Team } from '../utils/types';
 import { Atom } from 'lucide-react';
-import { useTeamValidation } from './useTeamValidation';
 import { useReverseGeocoding } from './useReverseGeocoding';
 import TeamMapPicker from './TeamMapPicker';
 import TeamRow from './TeamRow';
@@ -24,7 +23,6 @@ const TeamView: React.FC<EditableTeamsProps> = ({
   mapPickerTeamId,
   setMapPickerTeamId,
 }) => {
-  const { errorsById, validateLatLng, getAriaPropsForField } = useTeamValidation(teams);
   const { handleCoordinatesChange } = useReverseGeocoding(teams, setTeams);
   const {
     handleTeamNameChange,
@@ -55,11 +53,6 @@ const TeamView: React.FC<EditableTeamsProps> = ({
     document.addEventListener('mousedown', handleDocumentMouseDown);
     return () => document.removeEventListener('mousedown', handleDocumentMouseDown);
   }, [mapPickerTeamId, setMapPickerTeamId]);
-
-  const handleCoordinateInputChange = (teamId: string, field: CoordinateField, value: number) => {
-    validateLatLng(teamId, field, value);
-    handleCoordinatesChange(teamId, field, value);
-  };
 
   return (
     <div className="p-4 bg-gray-100 shadow-md">
@@ -106,12 +99,10 @@ const TeamView: React.FC<EditableTeamsProps> = ({
               <TeamRow
                 team={team}
                 rowRef={mapPickerTeamId === team.id ? parentRowRef : undefined}
-                teamErrors={errorsById[team.id]}
-                getAriaPropsForField={getAriaPropsForField}
                 onTeamNameChange={handleTeamNameChange}
                 onLocationSelect={handleLocationSelect}
                 onLocationFocus={handleLocationFocus}
-                onCoordinateChange={handleCoordinateInputChange}
+                onCoordinateChange={handleCoordinatesChange}
                 onRemove={handleRemoveTeam}
               />
               {mapPickerTeamId === team.id && (

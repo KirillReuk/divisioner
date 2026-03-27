@@ -4,17 +4,11 @@ import { X } from 'lucide-react';
 import LocationSearchInput from '../LocationSearchInput';
 import { MAX_LATITUDE, MAX_LONGITUDE, MIN_LATITUDE, MIN_LONGITUDE } from '../data/constants';
 import { CoordinateField, Team } from '../utils/types';
-
-type TeamFieldErrors = Record<CoordinateField, boolean>;
+import { useTeamValidation } from './useTeamValidation';
 
 interface TeamRowProps {
   team: Team;
   rowRef?: React.Ref<HTMLTableRowElement>;
-  teamErrors?: TeamFieldErrors;
-  getAriaPropsForField: (teamId: string, field: CoordinateField) => {
-    'aria-invalid': boolean;
-    'aria-describedby'?: string;
-  };
   onTeamNameChange: (teamId: string, value: string) => void;
   onLocationSelect: (teamId: string, location: string, latitude: number, longitude: number) => void;
   onLocationFocus: (teamId: string) => void;
@@ -25,14 +19,14 @@ interface TeamRowProps {
 const TeamRow: React.FC<TeamRowProps> = ({
   team,
   rowRef,
-  teamErrors,
-  getAriaPropsForField,
   onTeamNameChange,
   onLocationSelect,
   onLocationFocus,
   onCoordinateChange,
   onRemove,
 }) => {
+  const { errors, validateLatLng, getAriaPropsForField } = useTeamValidation(team.id, team.latitude, team.longitude);
+
   return (
     <tr ref={rowRef} className="border-b border-t border-300 border-black last:border-b-0">
       <td>
@@ -66,11 +60,12 @@ const TeamRow: React.FC<TeamRowProps> = ({
               step="0.001"
               onChange={e => {
                 const value = parseFloat(e.target.value);
+                validateLatLng('latitude', value);
                 onCoordinateChange(team.id, 'latitude', value);
               }}
-              {...getAriaPropsForField(team.id, 'latitude')}
+              {...getAriaPropsForField('latitude')}
               className={clsx('rounded w-1/2 p-2 bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out', {
-                'border-2 border-red-500': teamErrors?.latitude,
+                'border-2 border-red-500': errors.latitude,
               })}
               placeholder="Latitude"
             />
@@ -83,11 +78,12 @@ const TeamRow: React.FC<TeamRowProps> = ({
               step="0.001"
               onChange={e => {
                 const value = parseFloat(e.target.value);
+                validateLatLng('longitude', value);
                 onCoordinateChange(team.id, 'longitude', value);
               }}
-              {...getAriaPropsForField(team.id, 'longitude')}
+              {...getAriaPropsForField('longitude')}
               className={clsx('rounded w-1/2 p-2 bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out', {
-                'border-2 border-red-500': teamErrors?.longitude,
+                'border-2 border-red-500': errors.longitude,
               })}
               placeholder="Longitude"
             />

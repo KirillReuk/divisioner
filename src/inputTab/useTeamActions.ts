@@ -14,7 +14,9 @@ export function useTeamActions({ setTeams, setMapPickerTeamId }: UseTeamActionsP
 
   const handleLocationSelect = (teamId: string, location: string, latitude: number, longitude: number) => {
     setTeams(prevTeams =>
-      prevTeams.map(currentTeam => (currentTeam.id === teamId ? { ...currentTeam, location, latitude, longitude } : currentTeam))
+      prevTeams.map(currentTeam =>
+        currentTeam.id === teamId ? { ...currentTeam, location, latitude, longitude } : currentTeam
+      )
     );
   };
 
