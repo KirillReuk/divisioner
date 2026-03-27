@@ -18,7 +18,7 @@ const PresetModal: React.FC<PresetModalProps> = ({ isOpen, onClose, onSelectPres
             <button
               className="w-full text-left px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
               onClick={() => {
-                onSelectPreset(teamList);
+                onSelectPreset(teamList.map(team => ({ ...team, id: crypto.randomUUID() })));
                 onClose();
               }}
             >

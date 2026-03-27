@@ -3,7 +3,7 @@ import { Team } from '../utils/types';
 import LocationSearchInput from '../LocationSearchInput';
 import { fetchCoordinates } from '../utils/geocoding';
 import debounce from 'lodash.debounce';
-import { DEFAULT_TEAM, MAX_LATITUDE, MAX_LONGITUDE, MIN_LATITUDE, MIN_LONGITUDE } from '../data/constants';
+import { createDefaultTeam, MAX_LATITUDE, MAX_LONGITUDE, MIN_LATITUDE, MIN_LONGITUDE } from '../data/constants';
 import { Atom, X } from 'lucide-react';
 import clsx from 'clsx';
 import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
@@ -13,8 +13,8 @@ interface EditableTeamsProps {
   setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
   setShowPresetModal: React.Dispatch<React.SetStateAction<boolean>>;
   setShowRivalry: React.Dispatch<React.SetStateAction<boolean>>;
-  mapPickerIndex: number | null;
-  setMapPickerIndex: React.Dispatch<React.SetStateAction<number | null>>;
+  mapPickerTeamId: string | null;
+  setMapPickerTeamId: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 type FieldsToValidate = 'latitude' | 'longitude';
@@ -36,11 +36,11 @@ const TeamView: React.FC<EditableTeamsProps> = ({
   setTeams,
   setShowPresetModal,
   setShowRivalry,
-  mapPickerIndex,
-  setMapPickerIndex,
+  mapPickerTeamId,
+  setMapPickerTeamId,
 }) => {
-  const [errors, setErrors] = useState<Record<number, Record<FieldsToValidate, boolean>>>({});
-  const [pendingCoords, setPendingCoords] = useState<{ index: number; latitude: number; longitude: number } | null>(
+  const [errors, setErrors] = useState<Record<string, Record<FieldsToValidate, boolean>>>({});
+  const [pendingCoords, setPendingCoords] = useState<{ teamId: string; latitude: number; longitude: number } | null>(
     null
   );
 
@@ -48,52 +48,48 @@ const TeamView: React.FC<EditableTeamsProps> = ({
     if (!pendingCoords) return;
 
     const debouncedFetch = debounce(() => {
-      updateCoordinatesResults(pendingCoords.index, pendingCoords.latitude, pendingCoords.longitude);
+      updateCoordinatesResults(pendingCoords.teamId, pendingCoords.latitude, pendingCoords.longitude);
     }, 500);
 
     debouncedFetch();
     return () => debouncedFetch.cancel();
   }, [pendingCoords]);
 
-  const handleTeamNameChange = (index: number, value: string) => {
-    const updatedTeams = [...teams];
-    updatedTeams[index] = { ...updatedTeams[index], name: value };
-    setTeams(updatedTeams);
-  };
+  const handleTeamNameChange = (teamId: string, value: string) =>
+    setTeams(prevTeams => prevTeams.map(team => (team.id === teamId ? { ...team, name: value } : team)));
 
-  const handleCoordinatesChange = (index: number, field: keyof Team, value: number) => {
+  const handleCoordinatesChange = (teamId: string, field: 'latitude' | 'longitude', value: number) => {
+    const currentTeam = teams.find(team => team.id === teamId);
+    if (!currentTeam) return;
+
     setTeams(prevTeams => {
-      const updatedTeams = [...prevTeams];
-      updatedTeams[index] = { ...updatedTeams[index], [field]: value };
-      return updatedTeams;
+      return prevTeams.map(team => (team.id === teamId ? { ...team, [field]: value } : team));
     });
 
     setPendingCoords(prev => ({
-      index,
-      latitude: field === 'latitude' ? value : (prev?.latitude ?? teams[index].latitude),
-      longitude: field === 'longitude' ? value : (prev?.longitude ?? teams[index].longitude),
+      teamId,
+      latitude: field === 'latitude' ? value : (prev?.latitude ?? currentTeam.latitude),
+      longitude: field === 'longitude' ? value : (prev?.longitude ?? currentTeam.longitude),
     }));
   };
 
-  const validateLatitude = (index: number, value: number) =>
+  const validateLatitude = (teamId: string, value: number) =>
     setErrors(prev => ({
       ...prev,
-      [index]: { ...prev[index], latitude: value < MIN_LATITUDE || value > MAX_LATITUDE || isNaN(value) },
+      [teamId]: { ...prev[teamId], latitude: value < MIN_LATITUDE || value > MAX_LATITUDE || isNaN(value) },
     }));
-  const validateLongitude = (index: number, value: number) =>
+  const validateLongitude = (teamId: string, value: number) =>
     setErrors(prev => ({
       ...prev,
-      [index]: { ...prev[index], longitude: value < MIN_LONGITUDE || value > MAX_LONGITUDE || isNaN(value) },
+      [teamId]: { ...prev[teamId], longitude: value < MIN_LONGITUDE || value > MAX_LONGITUDE || isNaN(value) },
     }));
 
-  const updateCoordinatesResults = async (index: number, latitude: number, longitude: number) => {
+  const updateCoordinatesResults = async (teamId: string, latitude: number, longitude: number) => {
     try {
       const results = await fetchCoordinates(latitude, longitude);
       if (results && results.length > 0) {
         setTeams(prevTeams => {
-          const updatedTeams = [...prevTeams];
-          updatedTeams[index] = { ...updatedTeams[index], location: results[0].formatted };
-          return updatedTeams;
+          return prevTeams.map(team => (team.id === teamId ? { ...team, location: results[0].formatted } : team));
         });
       }
     } catch (error) {
@@ -101,17 +97,14 @@ const TeamView: React.FC<EditableTeamsProps> = ({
     }
   };
 
-  const handleMapPick = async (index: number, lat: number, lng: number) => {
+  const handleMapPick = async (teamId: string, lat: number, lng: number) => {
     const results = await fetchCoordinates(lat, lng);
     if (results) {
-      const updatedTeams = [...teams];
-      updatedTeams[index] = {
-        ...updatedTeams[index],
-        latitude: lat,
-        longitude: lng,
-        location: results[0].formatted,
-      };
-      setTeams(updatedTeams);
+      setTeams(prevTeams =>
+        prevTeams.map(team =>
+          team.id === teamId ? { ...team, latitude: lat, longitude: lng, location: results[0].formatted } : team
+        )
+      );
     }
   };
 
@@ -148,43 +141,39 @@ const TeamView: React.FC<EditableTeamsProps> = ({
         </colgroup>
         <thead>
           <tr>
-            <th className="text-lg text-left font-medium p-2 w-1/2">
-              Team Name
-            </th>
+            <th className="text-lg text-left font-medium p-2 w-1/2">Team Name</th>
             <th className="text-lg text-left font-medium p-2">Location</th>
-            <th
-              className="text-lg text-left font-medium p-2 w-1/6"
-            >
-              Coordinates
-            </th>
+            <th className="text-lg text-left font-medium p-2 w-1/6">Coordinates</th>
             <th className=""></th>
           </tr>
         </thead>
         <tbody>
-          {teams.map((team, index) => (
-            <React.Fragment key={index}>
+          {teams.map(team => (
+            <React.Fragment key={team.id}>
               <tr className="border-b border-t border-300 border-black last:border-b-0">
                 <td>
                   <input
                     type="text"
-                    name={`team-name-${index}`}
+                    name={`team-name-${team.id}`}
                     value={team.name}
-                    onChange={e => handleTeamNameChange(index, e.target.value)}
+                    onChange={e => handleTeamNameChange(team.id, e.target.value)}
                     className="p-2 rounded w-full bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out"
                     placeholder="Team Name"
                   />
                 </td>
                 <td>
                   <LocationSearchInput
-                    key={'location-search-' + index}
-                    index={index}
-                    onSelect={(index, location, latitude, longitude) => {
-                      const updatedTeams = [...teams];
-                      updatedTeams[index] = { ...updatedTeams[index], location, latitude, longitude };
-                      setTeams(updatedTeams);
-                    }}
+                    key={`location-search-${team.id}`}
+                    teamId={team.id}
+                    onSelect={(teamId, location, latitude, longitude) =>
+                      setTeams(prevTeams =>
+                        prevTeams.map(currentTeam =>
+                          currentTeam.id === teamId ? { ...currentTeam, location, latitude, longitude } : currentTeam
+                        )
+                      )
+                    }
                     location={team.location}
-                    onFocus={() => setMapPickerIndex(index)}
+                    onFocus={() => setMapPickerTeamId(team.id)}
                   />
                 </td>
                 <td>
@@ -192,37 +181,37 @@ const TeamView: React.FC<EditableTeamsProps> = ({
                     <div className="flex">
                       <input
                         type="number"
-                        name={`latitude-${index}`}
+                        name={`latitude-${team.id}`}
                         value={team.latitude}
                         min={MIN_LATITUDE}
                         max={MAX_LATITUDE}
                         step="0.001"
                         onChange={e => {
                           const value = parseFloat(e.target.value);
-                          validateLatitude(index, value);
-                          handleCoordinatesChange(index, 'latitude', value);
+                          validateLatitude(team.id, value);
+                          handleCoordinatesChange(team.id, 'latitude', value);
                         }}
                         className={clsx(
                           'rounded w-1/2 p-2 bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out',
-                          { 'border-2 border-red-500': errors[index]?.latitude }
+                          { 'border-2 border-red-500': errors[team.id]?.latitude }
                         )}
                         placeholder="Latitude"
                       />
                       <input
                         type="number"
-                        name={`longitude-${index}`}
+                        name={`longitude-${team.id}`}
                         value={team.longitude}
                         min={MIN_LONGITUDE}
                         max={MAX_LONGITUDE}
                         step="0.001"
                         onChange={e => {
                           const value = parseFloat(e.target.value);
-                          validateLongitude(index, value);
-                          handleCoordinatesChange(index, 'longitude', value);
+                          validateLongitude(team.id, value);
+                          handleCoordinatesChange(team.id, 'longitude', value);
                         }}
                         className={clsx(
                           'rounded w-1/2 p-2 bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out',
-                          { 'border-2 border-red-500': errors[index]?.longitude }
+                          { 'border-2 border-red-500': errors[team.id]?.longitude }
                         )}
                         placeholder="Longitude"
                       />
@@ -232,7 +221,10 @@ const TeamView: React.FC<EditableTeamsProps> = ({
                 <td className="text-end">
                   <button
                     type="button"
-                    onClick={() => { setTeams(teams.filter((_, i) => i !== index)); setMapPickerIndex(null); }}
+                    onClick={() => {
+                      setTeams(prevTeams => prevTeams.filter(currentTeam => currentTeam.id !== team.id));
+                      setMapPickerTeamId(null);
+                    }}
                     className="inline-flex items-center justify-center rounded p-1 text-gray-800 hover:bg-white focus:outline-none focus:ring-2 focus:ring-black"
                     aria-label={`Remove team ${team.name}`}
                     title="Remove team"
@@ -241,7 +233,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({
                   </button>
                 </td>
               </tr>
-              {mapPickerIndex === index && (
+              {mapPickerTeamId === team.id && (
                 <tr>
                   <td colSpan={4}>
                     <div className="relative h-96 w-full rounded border mt-2 overflow-hidden">
@@ -249,7 +241,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({
                         type="button"
                         onClick={e => {
                           e.stopPropagation();
-                          setMapPickerIndex(null);
+                          setMapPickerTeamId(null);
                         }}
                         className="absolute right-2 top-2 z-[1000] inline-flex items-center justify-center rounded bg-white/90 p-1 text-gray-800 shadow hover:bg-white focus:outline-none focus:ring-2 focus:ring-black"
                         aria-label="Close map"
@@ -263,7 +255,11 @@ const TeamView: React.FC<EditableTeamsProps> = ({
                         style={{ height: '100%', width: '100%' }}
                       >
                         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                        <MapClickHandler onClick={(lat, lng) => handleMapPick(index, parseFloat(lat.toFixed(3)), parseFloat(lng.toFixed(3)))} />
+                        <MapClickHandler
+                          onClick={(lat, lng) =>
+                            handleMapPick(team.id, parseFloat(lat.toFixed(3)), parseFloat(lng.toFixed(3)))
+                          }
+                        />
                         <Marker position={[team.latitude, team.longitude]} />
                       </MapContainer>
                     </div>
@@ -275,7 +271,10 @@ const TeamView: React.FC<EditableTeamsProps> = ({
         </tbody>
       </table>
       <button
-        onClick={() => { setTeams([...teams, DEFAULT_TEAM]); setMapPickerIndex(null); }}
+        onClick={() => {
+          setTeams(prevTeams => [...prevTeams, createDefaultTeam()]);
+          setMapPickerTeamId(null);
+        }}
         className="w-full mt-4 bg-green-500 text-white px-4 py-2 rounded"
       >
         <span className="text-xl font-bold">+</span> Add Team

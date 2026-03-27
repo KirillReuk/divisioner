@@ -1,6 +1,8 @@
 import { Team } from '../utils/types';
 
-export const presets: Record<string, Team[]> = {
+export type TeamPreset = Omit<Team, 'id'>;
+
+export const presets: Record<string, TeamPreset[]> = {
   NBA: [
     {
       name: 'Atlanta Hawks',

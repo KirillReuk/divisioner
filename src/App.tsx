@@ -17,7 +17,7 @@ const App: React.FC = () => {
   const [showPresetModal, setShowPresetModal] = useState(false);
   const [showIntroModal, setShowIntroModal] = useState(false);
   const [state, dispatch] = useReducer(teamBuilderReducer, initialTeamBuilderState);
-  const { divisions, conferences, teams, rivalries, divisionsCount, mapPickerIndex } = state;
+  const { divisions, conferences, teams, rivalries, divisionsCount, mapPickerTeamId } = state;
 
   const setTeams: React.Dispatch<React.SetStateAction<Team[]>> = value => {
     const nextTeams = typeof value === 'function' ? value(teams) : value;
@@ -29,9 +29,9 @@ const App: React.FC = () => {
     dispatch({ type: 'SET_DIVISIONS_COUNT', payload: { count: nextCount } });
   };
 
-  const setMapPickerIndex: React.Dispatch<React.SetStateAction<number | null>> = value => {
-    const nextIndex = typeof value === 'function' ? value(mapPickerIndex) : value;
-    dispatch({ type: 'SET_MAP_PICKER_INDEX', payload: { index: nextIndex } });
+  const setMapPickerTeamId: React.Dispatch<React.SetStateAction<string | null>> = value => {
+    const nextTeamId = typeof value === 'function' ? value(mapPickerTeamId) : value;
+    dispatch({ type: 'SET_MAP_PICKER_TEAM_ID', payload: { teamId: nextTeamId } });
   };
 
   useEffect(() => {
@@ -102,8 +102,8 @@ const App: React.FC = () => {
               setTeams={setTeams}
               setShowPresetModal={setShowPresetModal}
               setShowRivalry={setShowRivalry}
-              mapPickerIndex={mapPickerIndex}
-              setMapPickerIndex={setMapPickerIndex}
+              mapPickerTeamId={mapPickerTeamId}
+              setMapPickerTeamId={setMapPickerTeamId}
             />
           </div>
         </div>

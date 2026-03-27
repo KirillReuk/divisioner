@@ -1,7 +1,13 @@
 import { Team } from '../utils/types';
 
 // General Constants
-export const DEFAULT_TEAM: Team = { name: 'New Team', location: '', latitude: 0, longitude: 0 };
+export const createDefaultTeam = (): Team => ({
+  id: crypto.randomUUID(),
+  name: 'New Team',
+  location: '',
+  latitude: 0,
+  longitude: 0,
+});
 export const MAX_LATITUDE = 90;
 export const MIN_LATITUDE = -90;
 export const MAX_LONGITUDE = 180;

@@ -3,8 +3,8 @@ import AsyncSelect from 'react-select/async';
 import { fetchLocations } from './utils/geocoding';
 
 interface LocationSearchRowProps {
-  index: number;
-  onSelect: (index: number, formatted: string, lat: number, lng: number) => void;
+  teamId: string;
+  onSelect: (teamId: string, formatted: string, lat: number, lng: number) => void;
   location?: string;
   onFocus?: () => void;
 }
@@ -16,7 +16,7 @@ interface LocationOption {
   lng: number;
 }
 
-const LocationSearchInput: React.FC<LocationSearchRowProps> = ({ index, onSelect, location, onFocus }) => {
+const LocationSearchInput: React.FC<LocationSearchRowProps> = ({ teamId, onSelect, location, onFocus }) => {
   const [selectedOption, setSelectedOption] = useState<LocationOption | null>(null);
 
   useEffect(() => {
@@ -50,7 +50,7 @@ const LocationSearchInput: React.FC<LocationSearchRowProps> = ({ index, onSelect
   const handleChange = (option: LocationOption | null) => {
     setSelectedOption(option);
     if (option) {
-      onSelect(index, option.value, option.lat, option.lng);
+      onSelect(teamId, option.value, option.lat, option.lng);
     }
   };
 

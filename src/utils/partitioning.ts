@@ -48,7 +48,8 @@ class Partitioning {
   private teamIndexMap: Map<string, number>;
 
   constructor(teams: Team[], divisionCount: number, rivalries: Rivalry[]) {
-    const pseudoTeamsFromRivalries: TeamWithPseudo[] = rivalries.map(rivalry => ({
+    const pseudoTeamsFromRivalries: TeamWithPseudo[] = rivalries.map((rivalry, index) => ({
+      id: `rivalry-pseudo-${index}`,
       name: 'Rivalry: ' + rivalry.teams.map(team => team.name).join(' vs. '),
       location: 'Anywhere!',
       latitude: rivalry.teams.reduce((acc, team) => acc + team.latitude, 0) / rivalry.teams.length,
@@ -199,7 +200,7 @@ class Partitioning {
 
       if (
         comp1.reduce((acc, team) => acc + (team.teamsIncluded?.length || 1), 0) +
-        comp2.reduce((acc, team) => acc + (team.teamsIncluded?.length || 1), 0) <=
+          comp2.reduce((acc, team) => acc + (team.teamsIncluded?.length || 1), 0) <=
         this.maxDivisionSize
       ) {
         this.components[index1] = comp1.concat(comp2);

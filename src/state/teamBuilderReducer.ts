@@ -7,14 +7,14 @@ export type TeamBuilderState = {
   teams: Team[];
   rivalries: Rivalry[];
   divisionsCount: number;
-  mapPickerIndex: number | null;
+  mapPickerTeamId: string | null;
 };
 
 export type TeamBuilderAction =
   | { type: 'SET_TEAMS'; payload: { teams: Team[] } }
   | { type: 'SET_RIVALRIES'; payload: { rivalries: Rivalry[] } }
   | { type: 'SET_DIVISIONS_COUNT'; payload: { count: number } }
-  | { type: 'SET_MAP_PICKER_INDEX'; payload: { index: number | null } }
+  | { type: 'SET_MAP_PICKER_TEAM_ID'; payload: { teamId: string | null } }
   | { type: 'APPLY_PRESET'; payload: { teams: Team[] } }
   | { type: 'ADD_RIVALRY'; payload: { rivalry: Rivalry } }
   | { type: 'REMOVE_RIVALRY'; payload: { rivalryIndex: number } }
@@ -29,7 +29,7 @@ export const initialTeamBuilderState: TeamBuilderState = {
   teams: [],
   rivalries: [],
   divisionsCount: DEFAULT_DIVISION_COUNT,
-  mapPickerIndex: null,
+  mapPickerTeamId: null,
 };
 
 export const teamBuilderReducer = (state: TeamBuilderState, action: TeamBuilderAction): TeamBuilderState => {
@@ -40,13 +40,13 @@ export const teamBuilderReducer = (state: TeamBuilderState, action: TeamBuilderA
       return { ...state, rivalries: action.payload.rivalries };
     case 'SET_DIVISIONS_COUNT':
       return { ...state, divisionsCount: action.payload.count };
-    case 'SET_MAP_PICKER_INDEX':
-      return { ...state, mapPickerIndex: action.payload.index };
+    case 'SET_MAP_PICKER_TEAM_ID':
+      return { ...state, mapPickerTeamId: action.payload.teamId };
     case 'APPLY_PRESET':
       return {
         ...state,
         teams: action.payload.teams,
-        mapPickerIndex: null,
+        mapPickerTeamId: null,
         rivalries: [],
       };
     case 'ADD_RIVALRY':
