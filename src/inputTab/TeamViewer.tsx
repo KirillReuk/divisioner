@@ -1,5 +1,5 @@
 import React from 'react';
-import { Team } from '../utils/types';
+import { CoordinateField, Team } from '../utils/types';
 import { fetchCoordinates } from '../utils/geocoding';
 import { createDefaultTeam } from '../data/constants';
 import { Atom } from 'lucide-react';
@@ -62,6 +62,35 @@ const TeamView: React.FC<EditableTeamsProps> = ({
     }
   };
 
+  const handleLocationSelect = (teamId: string, location: string, latitude: number, longitude: number) => {
+    setTeams(prevTeams =>
+      prevTeams.map(currentTeam => (currentTeam.id === teamId ? { ...currentTeam, location, latitude, longitude } : currentTeam))
+    );
+  };
+
+  const handleLocationFocus = (teamId: string) => setMapPickerTeamId(teamId);
+
+  const handleCoordinateInputChange = (teamId: string, field: CoordinateField, value: number) => {
+    validateLatLng(teamId, field, value);
+    handleCoordinatesChange(teamId, field, value);
+  };
+
+  const handleRemoveTeam = (teamId: string) => {
+    setTeams(prevTeams => prevTeams.filter(currentTeam => currentTeam.id !== teamId));
+    setMapPickerTeamId(null);
+  };
+
+  const handleAddTeam = () => {
+    setTeams(prevTeams => [...prevTeams, createDefaultTeam()]);
+    setMapPickerTeamId(null);
+  };
+
+  const handleCloseMapPicker = () => setMapPickerTeamId(null);
+
+  const createMapPickHandler = (teamId: string) => (lat: number, lng: number) => {
+    void handleMapPick(teamId, parseFloat(lat.toFixed(3)), parseFloat(lng.toFixed(3)));
+  };
+
   return (
     <div className="p-4 bg-gray-100 shadow-md">
       <div className="relative mb-4">
@@ -110,22 +139,10 @@ const TeamView: React.FC<EditableTeamsProps> = ({
                 teamErrors={errorsById[team.id]}
                 getAriaPropsForField={getAriaPropsForField}
                 onTeamNameChange={handleTeamNameChange}
-                onLocationSelect={(teamId, location, latitude, longitude) =>
-                  setTeams(prevTeams =>
-                    prevTeams.map(currentTeam =>
-                      currentTeam.id === teamId ? { ...currentTeam, location, latitude, longitude } : currentTeam
-                    )
-                  )
-                }
-                onLocationFocus={teamId => setMapPickerTeamId(teamId)}
-                onCoordinateChange={(teamId, field, value) => {
-                  validateLatLng(teamId, field, value);
-                  handleCoordinatesChange(teamId, field, value);
-                }}
-                onRemove={teamId => {
-                  setTeams(prevTeams => prevTeams.filter(currentTeam => currentTeam.id !== teamId));
-                  setMapPickerTeamId(null);
-                }}
+                onLocationSelect={handleLocationSelect}
+                onLocationFocus={handleLocationFocus}
+                onCoordinateChange={handleCoordinateInputChange}
+                onRemove={handleRemoveTeam}
               />
               {mapPickerTeamId === team.id && (
                 <tr ref={mapPickerTeamId === team.id ? mapRowRef : undefined}>
@@ -133,10 +150,8 @@ const TeamView: React.FC<EditableTeamsProps> = ({
                     <TeamMapPicker
                       latitude={team.latitude}
                       longitude={team.longitude}
-                      onPick={(lat, lng) =>
-                        handleMapPick(team.id, parseFloat(lat.toFixed(3)), parseFloat(lng.toFixed(3)))
-                      }
-                      onClose={() => setMapPickerTeamId(null)}
+                      onPick={createMapPickHandler(team.id)}
+                      onClose={handleCloseMapPicker}
                     />
                   </td>
                 </tr>
@@ -145,13 +160,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({
           ))}
         </tbody>
       </table>
-      <button
-        onClick={() => {
-          setTeams(prevTeams => [...prevTeams, createDefaultTeam()]);
-          setMapPickerTeamId(null);
-        }}
-        className="w-full mt-4 bg-green-500 text-white px-4 py-2 rounded"
-      >
+      <button onClick={handleAddTeam} className="w-full mt-4 bg-green-500 text-white px-4 py-2 rounded">
         <span className="text-xl font-bold">+</span> Add Team
       </button>
     </div>
