@@ -1,12 +1,11 @@
 import React from 'react';
 import { CoordinateField, Team } from '../utils/types';
-import { fetchCoordinates } from '../utils/geocoding';
-import { createDefaultTeam } from '../data/constants';
 import { Atom } from 'lucide-react';
 import { useTeamValidation } from './useTeamValidation';
 import { useReverseGeocoding } from './useReverseGeocoding';
 import TeamMapPicker from './TeamMapPicker';
 import TeamRow from './TeamRow';
+import { useTeamActions } from './useTeamActions';
 
 interface EditableTeamsProps {
   teams: Team[];
@@ -27,6 +26,15 @@ const TeamView: React.FC<EditableTeamsProps> = ({
 }) => {
   const { errorsById, validateLatLng, getAriaPropsForField } = useTeamValidation(teams);
   const { handleCoordinatesChange } = useReverseGeocoding(teams, setTeams);
+  const {
+    handleTeamNameChange,
+    handleLocationSelect,
+    handleLocationFocus,
+    handleRemoveTeam,
+    handleAddTeam,
+    handleCloseMapPicker,
+    createMapPickHandler,
+  } = useTeamActions({ setTeams, setMapPickerTeamId });
   const parentRowRef = React.useRef<HTMLTableRowElement | null>(null);
   const mapRowRef = React.useRef<HTMLTableRowElement | null>(null);
 
@@ -48,47 +56,9 @@ const TeamView: React.FC<EditableTeamsProps> = ({
     return () => document.removeEventListener('mousedown', handleDocumentMouseDown);
   }, [mapPickerTeamId, setMapPickerTeamId]);
 
-  const handleTeamNameChange = (teamId: string, value: string) =>
-    setTeams(prevTeams => prevTeams.map(team => (team.id === teamId ? { ...team, name: value } : team)));
-
-  const handleMapPick = async (teamId: string, lat: number, lng: number) => {
-    const results = await fetchCoordinates(lat, lng);
-    if (results?.[0]) {
-      setTeams(prevTeams =>
-        prevTeams.map(team =>
-          team.id === teamId ? { ...team, latitude: lat, longitude: lng, location: results[0].formatted } : team
-        )
-      );
-    }
-  };
-
-  const handleLocationSelect = (teamId: string, location: string, latitude: number, longitude: number) => {
-    setTeams(prevTeams =>
-      prevTeams.map(currentTeam => (currentTeam.id === teamId ? { ...currentTeam, location, latitude, longitude } : currentTeam))
-    );
-  };
-
-  const handleLocationFocus = (teamId: string) => setMapPickerTeamId(teamId);
-
   const handleCoordinateInputChange = (teamId: string, field: CoordinateField, value: number) => {
     validateLatLng(teamId, field, value);
     handleCoordinatesChange(teamId, field, value);
-  };
-
-  const handleRemoveTeam = (teamId: string) => {
-    setTeams(prevTeams => prevTeams.filter(currentTeam => currentTeam.id !== teamId));
-    setMapPickerTeamId(null);
-  };
-
-  const handleAddTeam = () => {
-    setTeams(prevTeams => [...prevTeams, createDefaultTeam()]);
-    setMapPickerTeamId(null);
-  };
-
-  const handleCloseMapPicker = () => setMapPickerTeamId(null);
-
-  const createMapPickHandler = (teamId: string) => (lat: number, lng: number) => {
-    void handleMapPick(teamId, parseFloat(lat.toFixed(3)), parseFloat(lng.toFixed(3)));
   };
 
   return (
