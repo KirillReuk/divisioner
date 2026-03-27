@@ -1,13 +1,12 @@
 import React from 'react';
 import { Team } from '../utils/types';
-import LocationSearchInput from '../LocationSearchInput';
 import { fetchCoordinates } from '../utils/geocoding';
-import { createDefaultTeam, MAX_LATITUDE, MAX_LONGITUDE, MIN_LATITUDE, MIN_LONGITUDE } from '../data/constants';
-import { Atom, X } from 'lucide-react';
-import clsx from 'clsx';
+import { createDefaultTeam } from '../data/constants';
+import { Atom } from 'lucide-react';
 import { useTeamValidation } from './useTeamValidation';
 import { useReverseGeocoding } from './useReverseGeocoding';
 import TeamMapPicker from './TeamMapPicker';
+import TeamRow from './TeamRow';
 
 interface EditableTeamsProps {
   teams: Team[];
@@ -105,94 +104,29 @@ const TeamView: React.FC<EditableTeamsProps> = ({
         <tbody>
           {teams.map(team => (
             <React.Fragment key={team.id}>
-              <tr
-                ref={mapPickerTeamId === team.id ? parentRowRef : undefined}
-                className="border-b border-t border-300 border-black last:border-b-0"
-              >
-                <td>
-                  <input
-                    type="text"
-                    name={`team-name-${team.id}`}
-                    value={team.name}
-                    onChange={e => handleTeamNameChange(team.id, e.target.value)}
-                    className="p-2 rounded w-full bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out"
-                    placeholder="Team Name"
-                  />
-                </td>
-                <td>
-                  <LocationSearchInput
-                    key={`location-search-${team.id}`}
-                    teamId={team.id}
-                    onSelect={(teamId, location, latitude, longitude) =>
-                      setTeams(prevTeams =>
-                        prevTeams.map(currentTeam =>
-                          currentTeam.id === teamId ? { ...currentTeam, location, latitude, longitude } : currentTeam
-                        )
-                      )
-                    }
-                    location={team.location}
-                    onFocus={() => setMapPickerTeamId(team.id)}
-                  />
-                </td>
-                <td>
-                  <div className="flex flex-col">
-                    <div className="flex">
-                      <input
-                        type="number"
-                        name={`latitude-${team.id}`}
-                        value={team.latitude}
-                        min={MIN_LATITUDE}
-                        max={MAX_LATITUDE}
-                        step="0.001"
-                        onChange={e => {
-                          const value = parseFloat(e.target.value);
-                          validateLatLng(team.id, 'latitude', value);
-                          handleCoordinatesChange(team.id, 'latitude', value);
-                        }}
-                        {...getAriaPropsForField(team.id, 'latitude')}
-                        className={clsx(
-                          'rounded w-1/2 p-2 bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out',
-                          { 'border-2 border-red-500': errorsById[team.id]?.latitude }
-                        )}
-                        placeholder="Latitude"
-                      />
-                      <input
-                        type="number"
-                        name={`longitude-${team.id}`}
-                        value={team.longitude}
-                        min={MIN_LONGITUDE}
-                        max={MAX_LONGITUDE}
-                        step="0.001"
-                        onChange={e => {
-                          const value = parseFloat(e.target.value);
-                          validateLatLng(team.id, 'longitude', value);
-                          handleCoordinatesChange(team.id, 'longitude', value);
-                        }}
-                        {...getAriaPropsForField(team.id, 'longitude')}
-                        className={clsx(
-                          'rounded w-1/2 p-2 bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out',
-                          { 'border-2 border-red-500': errorsById[team.id]?.longitude }
-                        )}
-                        placeholder="Longitude"
-                      />
-                    </div>
-                  </div>
-                </td>
-                <td className="text-end">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTeams(prevTeams => prevTeams.filter(currentTeam => currentTeam.id !== team.id));
-                      setMapPickerTeamId(null);
-                    }}
-                    className="inline-flex items-center justify-center rounded p-1 text-gray-800 hover:bg-white focus:outline-none focus:ring-2 focus:ring-black"
-                    aria-label={`Remove team ${team.name}`}
-                    title="Remove team"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </td>
-              </tr>
+              <TeamRow
+                team={team}
+                rowRef={mapPickerTeamId === team.id ? parentRowRef : undefined}
+                teamErrors={errorsById[team.id]}
+                getAriaPropsForField={getAriaPropsForField}
+                onTeamNameChange={handleTeamNameChange}
+                onLocationSelect={(teamId, location, latitude, longitude) =>
+                  setTeams(prevTeams =>
+                    prevTeams.map(currentTeam =>
+                      currentTeam.id === teamId ? { ...currentTeam, location, latitude, longitude } : currentTeam
+                    )
+                  )
+                }
+                onLocationFocus={teamId => setMapPickerTeamId(teamId)}
+                onCoordinateChange={(teamId, field, value) => {
+                  validateLatLng(teamId, field, value);
+                  handleCoordinatesChange(teamId, field, value);
+                }}
+                onRemove={teamId => {
+                  setTeams(prevTeams => prevTeams.filter(currentTeam => currentTeam.id !== teamId));
+                  setMapPickerTeamId(null);
+                }}
+              />
               {mapPickerTeamId === team.id && (
                 <tr ref={mapPickerTeamId === team.id ? mapRowRef : undefined}>
                   <td colSpan={4}>
