@@ -38,7 +38,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({
   mapPickerTeamId,
   setMapPickerTeamId,
 }) => {
-  const { errorsById, validateLatLng, ariaPropsForField } = useTeamValidation(teams);
+  const { errorsById, validateLatLng, getAriaPropsForField } = useTeamValidation(teams);
   const { handleCoordinatesChange } = useReverseGeocoding(teams, setTeams);
 
   const handleTeamNameChange = (teamId: string, value: string) =>
@@ -138,7 +138,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({
                           validateLatLng(team.id, 'latitude', value);
                           handleCoordinatesChange(team.id, 'latitude', value);
                         }}
-                        {...ariaPropsForField(team.id, 'latitude')}
+                        {...getAriaPropsForField(team.id, 'latitude')}
                         className={clsx(
                           'rounded w-1/2 p-2 bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out',
                           { 'border-2 border-red-500': errorsById[team.id]?.latitude }
@@ -157,7 +157,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({
                           validateLatLng(team.id, 'longitude', value);
                           handleCoordinatesChange(team.id, 'longitude', value);
                         }}
-                        {...ariaPropsForField(team.id, 'longitude')}
+                        {...getAriaPropsForField(team.id, 'longitude')}
                         className={clsx(
                           'rounded w-1/2 p-2 bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out',
                           { 'border-2 border-red-500': errorsById[team.id]?.longitude }

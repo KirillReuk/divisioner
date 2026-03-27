@@ -43,7 +43,7 @@ export const useTeamValidation = (teams: Team[]) => {
     }));
   };
 
-  const ariaPropsForField = (teamId: string, field: CoordinateField): AriaProps => {
+  const getAriaPropsForField = (teamId: string, field: CoordinateField): AriaProps => {
     const isInvalid = Boolean(errorsById[teamId]?.[field]);
     const messageId = `${field}-error-${teamId}`;
     return {
@@ -55,6 +55,6 @@ export const useTeamValidation = (teams: Team[]) => {
   return {
     errorsById,
     validateLatLng,
-    ariaPropsForField,
+    getAriaPropsForField,
   };
 };
