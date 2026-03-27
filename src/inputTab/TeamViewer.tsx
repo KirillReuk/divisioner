@@ -28,6 +28,26 @@ const TeamView: React.FC<EditableTeamsProps> = ({
 }) => {
   const { errorsById, validateLatLng, getAriaPropsForField } = useTeamValidation(teams);
   const { handleCoordinatesChange } = useReverseGeocoding(teams, setTeams);
+  const parentRowRef = React.useRef<HTMLTableRowElement | null>(null);
+  const mapRowRef = React.useRef<HTMLTableRowElement | null>(null);
+
+  React.useEffect(() => {
+    if (!mapPickerTeamId) return;
+
+    const handleDocumentMouseDown = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+
+      const clickedInsideParentRow = Boolean(parentRowRef.current?.contains(target));
+      const clickedInsideMapRow = Boolean(mapRowRef.current?.contains(target));
+      if (!clickedInsideParentRow && !clickedInsideMapRow) {
+        setMapPickerTeamId(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleDocumentMouseDown);
+    return () => document.removeEventListener('mousedown', handleDocumentMouseDown);
+  }, [mapPickerTeamId, setMapPickerTeamId]);
 
   const handleTeamNameChange = (teamId: string, value: string) =>
     setTeams(prevTeams => prevTeams.map(team => (team.id === teamId ? { ...team, name: value } : team)));
@@ -85,7 +105,10 @@ const TeamView: React.FC<EditableTeamsProps> = ({
         <tbody>
           {teams.map(team => (
             <React.Fragment key={team.id}>
-              <tr className="border-b border-t border-300 border-black last:border-b-0">
+              <tr
+                ref={mapPickerTeamId === team.id ? parentRowRef : undefined}
+                className="border-b border-t border-300 border-black last:border-b-0"
+              >
                 <td>
                   <input
                     type="text"
@@ -171,7 +194,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({
                 </td>
               </tr>
               {mapPickerTeamId === team.id && (
-                <tr>
+                <tr ref={mapPickerTeamId === team.id ? mapRowRef : undefined}>
                   <td colSpan={4}>
                     <TeamMapPicker
                       latitude={team.latitude}
