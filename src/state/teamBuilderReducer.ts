@@ -15,7 +15,7 @@ export type TeamBuilderAction =
   | { type: 'SET_RIVALRIES'; payload: { rivalries: Rivalry[] } }
   | { type: 'SET_DIVISIONS_COUNT'; payload: { count: number } }
   | { type: 'SET_MAP_PICKER_TEAM_ID'; payload: { teamId: string | null } }
-  | { type: 'APPLY_PRESET'; payload: { teams: Team[] } }
+  | { type: 'APPLY_PRESET'; payload: { teams: Team[]; divisionsCount?: number } }
   | { type: 'ADD_RIVALRY'; payload: { rivalry: Rivalry } }
   | { type: 'REMOVE_RIVALRY'; payload: { rivalryIndex: number } }
   | { type: 'UPDATE_RIVALRY_TEAM'; payload: { rivalryIndex: number; teamIndex: number; teamId: string } }
@@ -55,6 +55,7 @@ export const teamBuilderReducer = (state: TeamBuilderState, action: TeamBuilderA
       return {
         ...state,
         teams: action.payload.teams,
+        divisionsCount: action.payload.divisionsCount ?? state.divisionsCount,
         mapPickerTeamId: null,
         rivalries: [],
       };

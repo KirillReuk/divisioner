@@ -69,8 +69,8 @@ const App: React.FC = () => {
       <PresetModal
         isOpen={showPresetModal}
         onClose={() => setShowPresetModal(false)}
-        onSelectPreset={presetTeams => {
-          dispatch({ type: 'APPLY_PRESET', payload: { teams: presetTeams } });
+        onSelectPreset={({ teams: presetTeams, divisionsCount }) => {
+          dispatch({ type: 'APPLY_PRESET', payload: { teams: presetTeams, divisionsCount } });
         }}
       />
 
