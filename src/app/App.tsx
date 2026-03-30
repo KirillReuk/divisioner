@@ -15,6 +15,7 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('teams');
   const [showRivalry, setShowRivalry] = useState(false);
   const [showPresetModal, setShowPresetModal] = useState(false);
+  const [presetModalWelcome, setPresetModalWelcome] = useState(false);
   const [showIntroModal, setShowIntroModal] = useState(false);
   const [state, dispatch] = useReducer(teamBuilderReducer, initialTeamBuilderState);
   const { divisions, conferences, teams, rivalries, divisionsCount, mapPickerTeamId } = state;
@@ -38,12 +39,27 @@ const App: React.FC = () => {
     const hasSeenIntro = localStorage.getItem('hasSeenIntro');
     if (!hasSeenIntro) {
       setShowIntroModal(true);
+    } else {
+      setPresetModalWelcome(true);
+      setShowPresetModal(true);
     }
   }, []);
 
   const handleCloseIntro = () => {
     setShowIntroModal(false);
     localStorage.setItem('hasSeenIntro', 'true');
+    setPresetModalWelcome(true);
+    setShowPresetModal(true);
+  };
+
+  const openPresetModalPlain = () => {
+    setPresetModalWelcome(false);
+    setShowPresetModal(true);
+  };
+
+  const closePresetModal = () => {
+    setShowPresetModal(false);
+    setPresetModalWelcome(false);
   };
 
   const renderTabButton = (tab: Tab, tabName: string, disabled?: boolean): JSX.Element => (
@@ -68,7 +84,8 @@ const App: React.FC = () => {
       {showIntroModal && <IntroModal onClose={handleCloseIntro} />}
       <PresetModal
         isOpen={showPresetModal}
-        onClose={() => setShowPresetModal(false)}
+        variant={presetModalWelcome ? 'welcome' : 'plain'}
+        onClose={closePresetModal}
         onSelectPreset={({ teams: presetTeams, divisionsCount }) => {
           dispatch({ type: 'APPLY_PRESET', payload: { teams: presetTeams, divisionsCount } });
         }}
@@ -101,7 +118,7 @@ const App: React.FC = () => {
             <TeamView
               teams={teams}
               setTeams={setTeams}
-              setShowPresetModal={setShowPresetModal}
+              onOpenPresetModal={openPresetModalPlain}
               setShowRivalry={setShowRivalry}
               mapPickerTeamId={mapPickerTeamId}
               setMapPickerTeamId={setMapPickerTeamId}

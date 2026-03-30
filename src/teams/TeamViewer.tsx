@@ -9,7 +9,7 @@ import { useTeamActions } from './useTeamActions';
 interface EditableTeamsProps {
   teams: Team[];
   setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
-  setShowPresetModal: React.Dispatch<React.SetStateAction<boolean>>;
+  onOpenPresetModal: () => void;
   setShowRivalry: React.Dispatch<React.SetStateAction<boolean>>;
   mapPickerTeamId: string | null;
   setMapPickerTeamId: React.Dispatch<React.SetStateAction<string | null>>;
@@ -18,7 +18,7 @@ interface EditableTeamsProps {
 const TeamView: React.FC<EditableTeamsProps> = ({
   teams,
   setTeams,
-  setShowPresetModal,
+  onOpenPresetModal,
   setShowRivalry,
   mapPickerTeamId,
   setMapPickerTeamId,
@@ -63,7 +63,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({
       <div className="flex justify-between items-center">
         <div className="float-left">
           <button
-            onClick={() => setShowPresetModal(true)}
+            onClick={onOpenPresetModal}
             className="text-sm px-2 bg-white rounded border border-black flex items-center gap-1"
           >
             <Atom className="w-4 h-4" />
