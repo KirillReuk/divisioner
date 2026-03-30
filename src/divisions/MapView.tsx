@@ -36,10 +36,7 @@ const MapView: React.FC<MapViewProps> = ({ divisions }) => {
     return items;
   }, [divisions]);
 
-  const fitBoundsLatLngs = useMemo(
-    () => markers.map(m => m.position),
-    [markers]
-  );
+  const fitBoundsLatLngs = useMemo(() => markers.map(m => m.position), [markers]);
 
   return (
     <MapContainer style={{ height: '600px', width: '100%' }}>

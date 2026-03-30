@@ -1,15 +1,15 @@
 import { useEffect, useReducer, useState } from 'react';
-import { Rivalry, Tab, Team } from './utils/types';
-import MapView from './divisionsTab/MapView';
-import TeamView from './inputTab/TeamViewer';
-import DivisionView from './divisionsTab/DivisionView';
+import { Rivalry, Tab, Team } from '../utils/types';
+import MapView from '../divisions/MapView';
+import TeamView from '../teams/TeamViewer';
+import DivisionView from '../divisions/DivisionView';
 import './App.css';
-import DivisionCountInput from './inputTab/DivisionCountInput';
-import Partitioning, { splitIntoConferences } from './utils/partitioning';
-import PresetModal from './PresetModal';
-import IntroModal from './IntroModal';
-import RivalryModal from './rivalryTab/RivalryModal';
-import { initialTeamBuilderState, teamBuilderReducer } from './state/teamBuilderReducer';
+import DivisionCountInput from '../teams/DivisionCountInput';
+import Partitioning, { splitIntoConferences } from '../utils/partitioning';
+import PresetModal from '../components/PresetModal';
+import IntroModal from '../components/IntroModal';
+import RivalryModal from '../rivals/RivalryModal';
+import { initialTeamBuilderState, teamBuilderReducer } from '../app/teamBuilderReducer';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('teams');

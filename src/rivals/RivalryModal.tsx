@@ -2,7 +2,7 @@ import React from 'react';
 import { UserMinus, Trash2 } from 'lucide-react';
 import { Rivalry, Team } from '../utils/types';
 import Modal from '../components/Modal/Modal';
-import { TeamBuilderAction } from '../state/teamBuilderReducer';
+import { TeamBuilderAction } from '../app/teamBuilderReducer';
 
 interface RivalryModalProps {
   isOpen: boolean;

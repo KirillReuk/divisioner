@@ -1,4 +1,4 @@
-import { API_KEY } from '../config';
+import { API_KEY } from '../app/config';
 import { GEOCODING_API_URL } from '../data/constants';
 
 type GeocodingResult = {

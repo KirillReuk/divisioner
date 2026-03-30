@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import AsyncSelect from 'react-select/async';
-import { fetchLocations } from './utils/geocoding';
+import { fetchLocations } from '../utils/geocoding';
 
 interface LocationSearchRowProps {
   teamId: string;

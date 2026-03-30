@@ -1,7 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import { X } from 'lucide-react';
-import LocationSearchInput from '../LocationSearchInput';
+import LocationSearchInput from '../components/LocationSearchInput';
 import { MAX_LATITUDE, MAX_LONGITUDE, MIN_LATITUDE, MIN_LONGITUDE } from '../data/constants';
 import { CoordinateField, Team } from '../utils/types';
 import { useTeamValidation } from './useTeamValidation';

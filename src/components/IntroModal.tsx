@@ -1,6 +1,6 @@
 import React from 'react';
 import { Info } from 'lucide-react';
-import Modal from './components/Modal/Modal';
+import Modal from '../components/Modal/Modal';
 
 interface IntroModalProps {
   onClose: () => void;
