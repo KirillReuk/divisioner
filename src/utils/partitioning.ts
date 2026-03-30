@@ -46,9 +46,34 @@ class Partitioning {
   distanceMatrix: number[][];
   components: TeamWithPseudo[][];
   private teamIndexMap: Map<string, number>;
+  private readonly optimizationTimeBudgetMs = 500;
+  private readonly maxOptimizationSwaps = 1000;
 
   constructor(teams: Team[], divisionCount: number, rivalries: Rivalry[]) {
+    this.divisionCount = divisionCount;
+    this.maxDivisionSize = Math.ceil(teams.length / divisionCount);
+
     const teamsById = new Map(teams.map(team => [team.id, team]));
+    for (const rivalry of rivalries) {
+      const resolvedCount = rivalry.teamIds.filter(id => teamsById.has(id)).length;
+      if (resolvedCount > this.maxDivisionSize) {
+        throw new Error(
+          `Partitioning: a rivalry cannot have more than ${this.maxDivisionSize} teams (max division size); one rivalry has ${resolvedCount}.`
+        );
+      }
+    }
+
+    const seenRivalryTeamIds = new Set<string>();
+    for (const rivalry of rivalries) {
+      for (const teamId of rivalry.teamIds) {
+        if (seenRivalryTeamIds.has(teamId)) {
+          throw new Error(
+            `Partitioning: team id "${teamId}" appears in more than one rivalry; rivalries must be disjoint.`
+          );
+        }
+        seenRivalryTeamIds.add(teamId);
+      }
+    }
     const rivalryTeams = rivalries
       .map(rivalry =>
         rivalry.teamIds.map(teamId => teamsById.get(teamId)).filter((team): team is Team => Boolean(team))
@@ -71,8 +96,6 @@ class Partitioning {
       index,
     }));
     this.teams = teamsWithIndex;
-    this.divisionCount = divisionCount;
-    this.maxDivisionSize = Math.ceil(teams.length / divisionCount);
     this.distanceMatrix = this.precomputeDistances();
 
     this.components = this.generateInitialComponents(teamsWithIndex);
@@ -88,10 +111,20 @@ class Partitioning {
     return result;
   };
 
-  private distanceBetweenTeams = (team1: TeamWithPseudo, team2: TeamWithPseudo): number => {
-    const getTeamIndex = (teamToFind: TeamWithPseudo) => this.teamIndexMap.get(teamToFind.id) ?? -1;
+  private getTeamMatrixIndex(team: TeamWithPseudo): number {
+    const idx = this.teamIndexMap.get(team.id);
+    if (idx === undefined) {
+      throw new Error(
+        `Partitioning: unknown team id "${team.id}" for distance matrix (expected a team from this partition run).`
+      );
+    }
+    return idx;
+  }
 
-    return this.distanceMatrix[getTeamIndex(team1)][getTeamIndex(team2)];
+  private distanceBetweenTeams = (team1: TeamWithPseudo, team2: TeamWithPseudo): number => {
+    const i = this.getTeamMatrixIndex(team1);
+    const j = this.getTeamMatrixIndex(team2);
+    return this.distanceMatrix[i][j];
   };
 
   private precomputeDistances = (): number[][] => {
@@ -172,7 +205,8 @@ class Partitioning {
   }
 
   private optimizeDivisions = () => {
-    while (true) {
+    const deadline = Date.now() + this.optimizationTimeBudgetMs;
+    for (let swaps = 0; swaps < this.maxOptimizationSwaps && Date.now() < deadline; swaps++) {
       const bestSwap = this.findBestSwap();
 
       if (!bestSwap) {

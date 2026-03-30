@@ -8,18 +8,21 @@ interface RivalryModalProps {
   isOpen: boolean;
   onClose: () => void;
   teams: Team[];
+  divisionsCount: number;
   rivalries: Rivalry[];
   dispatch: React.Dispatch<TeamBuilderAction>;
 }
 
-const RivalryModal: React.FC<RivalryModalProps> = ({ isOpen, onClose, teams, rivalries, dispatch }) => {
+const RivalryModal: React.FC<RivalryModalProps> = ({ isOpen, onClose, teams, divisionsCount, rivalries, dispatch }) => {
   const teamById = new Map(teams.map(team => [team.id, team]));
+  const maxRivalrySize = Math.ceil(teams.length / divisionsCount);
 
   const handleTeamChange = (rivalryIndex: number, teamIndex: number, teamId: string) => {
     dispatch({ type: 'UPDATE_RIVALRY_TEAM', payload: { rivalryIndex, teamIndex, teamId } });
   };
 
   const addTeamToRivalry = (rivalryIndex: number) => {
+    if (rivalries[rivalryIndex].teamIds.length >= maxRivalrySize) return;
     const usedTeamIds = new Set(rivalries.flatMap(rivalry => rivalry.teamIds));
     const fallback = teams.find(
       team => !usedTeamIds.has(team.id) && !rivalries[rivalryIndex].teamIds.includes(team.id)
@@ -121,14 +124,24 @@ const RivalryModal: React.FC<RivalryModalProps> = ({ isOpen, onClose, teams, riv
                       );
                     })}
 
-                    {teams.length > rivalry.teamIds.length && (
-                      <button
-                        type="button"
-                        onClick={() => addTeamToRivalry(rivalryIndex)}
-                        className="self-start text-sm px-2 py-1 bg-white rounded border border-black disabled:opacity-50"
-                      >
-                        + Add Team to Rivalry
-                      </button>
+                    {(teams.length > rivalry.teamIds.length || rivalry.teamIds.length >= maxRivalrySize) && (
+                      <div className="flex flex-col gap-1 self-start">
+                        <button
+                          type="button"
+                          onClick={() => addTeamToRivalry(rivalryIndex)}
+                          disabled={rivalry.teamIds.length >= maxRivalrySize}
+                          aria-describedby={
+                            rivalry.teamIds.length >= maxRivalrySize
+                              ? `rivalry-${rivalryIndex}-max-size-hint`
+                              : undefined
+                          }
+                          className="text-sm px-2 py-1 bg-white rounded border border-black disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {rivalry.teamIds.length >= maxRivalrySize
+                            ? 'Max rivalry size reached'
+                            : '+ Add Team to Rivalry'}
+                        </button>
+                      </div>
                     )}
                   </div>
                 </td>

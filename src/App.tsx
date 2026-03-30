@@ -78,6 +78,7 @@ const App: React.FC = () => {
         isOpen={showRivalry}
         onClose={() => setShowRivalry(false)}
         teams={teams}
+        divisionsCount={divisionsCount}
         rivalries={rivalries}
         dispatch={dispatch}
       />
