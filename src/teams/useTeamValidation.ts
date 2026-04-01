@@ -9,7 +9,7 @@ type AriaProps = {
   'aria-describedby'?: string;
 };
 
-const getCoordinateError = (field: CoordinateField, value: number): boolean => {
+export const getCoordinateError = (field: CoordinateField, value: number): boolean => {
   if (isNaN(value)) return true;
   switch (field) {
     case 'latitude':
