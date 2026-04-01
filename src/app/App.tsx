@@ -6,9 +6,9 @@ import DivisionView from '../divisions/DivisionView';
 import './App.css';
 import DivisionCountInput from '../teams/DivisionCountInput';
 import Partitioning, { splitIntoConferences } from '../utils/partitioning';
-import PresetModal from '../components/PresetModal';
-import IntroModal from '../components/IntroModal';
-import RivalryModal from '../rivals/RivalryModal';
+import PresetModal from '../components/Modal/PresetModal';
+import IntroModal from '../components/Modal/IntroModal';
+import RivalryModal from '../components/Modal/RivalryModal';
 import { initialTeamBuilderState, teamBuilderReducer } from '../app/teamBuilderReducer';
 
 const App: React.FC = () => {
