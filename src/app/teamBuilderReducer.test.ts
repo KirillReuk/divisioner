@@ -63,12 +63,31 @@ describe('teamBuilderReducer', () => {
     expect(next.mapPickerTeamId).toBe('pick-me');
   });
 
+  it('SET_TEAMS clears generated divisions and conferences', () => {
+    const divisions: Division[] = [{ teams: [team('a')], color: '#fff' }];
+    const s0 = stateWith({
+      teams: [team('a')],
+      divisions,
+      conferences: [[divisions[0]]],
+    });
+    const next = teamBuilderReducer(s0, {
+      type: 'SET_TEAMS',
+      payload: { teams: [team('a'), team('b')] },
+    });
+    expect(next.divisions).toEqual([]);
+    expect(next.conferences).toEqual([]);
+    expect(next.teams).toHaveLength(2);
+  });
+
   it('APPLY_PRESET sets teams, clears rivalries and map picker, and keeps divisionsCount when omitted', () => {
+    const divisions: Division[] = [{ teams: [team('old')], color: '#fff' }];
     const s0 = stateWith({
       teams: [team('old')],
       rivalries: [{ teamIds: ['old', 'x'] }],
       divisionsCount: 6,
       mapPickerTeamId: 'old',
+      divisions,
+      conferences: [[divisions[0]]],
     });
     const presetTeams = [team('n1'), team('n2')];
     const next = teamBuilderReducer(s0, {
@@ -79,6 +98,8 @@ describe('teamBuilderReducer', () => {
     expect(next.rivalries).toEqual([]);
     expect(next.mapPickerTeamId).toBeNull();
     expect(next.divisionsCount).toBe(6);
+    expect(next.divisions).toEqual([]);
+    expect(next.conferences).toEqual([]);
   });
 
   it('APPLY_PRESET can override divisionsCount', () => {

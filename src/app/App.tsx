@@ -62,11 +62,13 @@ const App: React.FC = () => {
     setPresetModalWelcome(false);
   };
 
-  const renderTabButton = (tab: Tab, tabName: string, disabled?: boolean): JSX.Element => (
+  const renderTabButton = (tab: Tab, tabName: string, disabled?: boolean, title?: string): JSX.Element => (
     <button
+      type="button"
       onClick={() => setActiveTab(tab)}
       className={`px-4 py-2 ${activeTab === tab ? 'bg-blue-500 text-white' : 'bg-gray-300'} ${disabled && 'text-gray-400'}`}
       disabled={disabled}
+      title={title}
     >
       {tabName}
     </button>
@@ -102,7 +104,14 @@ const App: React.FC = () => {
 
       <div className="flex justify-start mb-4 gap-2">
         {renderTabButton('teams', 'Teams')}
-        {renderTabButton('divisions', 'Divisions', divisions.length === 0)}
+        {renderTabButton(
+          'divisions',
+          'Divisions',
+          divisions.length === 0,
+          divisions.length === 0
+            ? 'Generate new divisions on the Teams tab — editing teams or rivalries clears the last result.'
+            : undefined
+        )}
       </div>
       {activeTab === 'teams' && (
         <div className="flex">

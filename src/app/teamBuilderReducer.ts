@@ -32,11 +32,17 @@ export const initialTeamBuilderState: TeamBuilderState = {
   mapPickerTeamId: null,
 };
 
+const invalidateStructure = (): Pick<TeamBuilderState, 'divisions' | 'conferences'> => ({
+  divisions: [],
+  conferences: [],
+});
+
 export const teamBuilderReducer = (state: TeamBuilderState, action: TeamBuilderAction): TeamBuilderState => {
   switch (action.type) {
     case 'SET_TEAMS':
       return {
         ...state,
+        ...invalidateStructure(),
         teams: action.payload.teams,
         rivalries: state.rivalries
           .map(rivalry => ({
@@ -46,14 +52,19 @@ export const teamBuilderReducer = (state: TeamBuilderState, action: TeamBuilderA
           .filter(rivalry => rivalry.teamIds.length >= 2),
       };
     case 'SET_RIVALRIES':
-      return { ...state, rivalries: action.payload.rivalries.slice(0, MAX_RIVALRIES) };
+      return {
+        ...state,
+        ...invalidateStructure(),
+        rivalries: action.payload.rivalries.slice(0, MAX_RIVALRIES),
+      };
     case 'SET_DIVISIONS_COUNT':
-      return { ...state, divisionsCount: action.payload.count };
+      return { ...state, ...invalidateStructure(), divisionsCount: action.payload.count };
     case 'SET_MAP_PICKER_TEAM_ID':
       return { ...state, mapPickerTeamId: action.payload.teamId };
     case 'APPLY_PRESET':
       return {
         ...state,
+        ...invalidateStructure(),
         teams: action.payload.teams,
         divisionsCount: action.payload.divisionsCount ?? state.divisionsCount,
         mapPickerTeamId: null,
@@ -65,16 +76,19 @@ export const teamBuilderReducer = (state: TeamBuilderState, action: TeamBuilderA
       }
       return {
         ...state,
+        ...invalidateStructure(),
         rivalries: [...state.rivalries, action.payload.rivalry],
       };
     case 'REMOVE_RIVALRY':
       return {
         ...state,
+        ...invalidateStructure(),
         rivalries: state.rivalries.filter((_, i) => i !== action.payload.rivalryIndex),
       };
     case 'UPDATE_RIVALRY_TEAM':
       return {
         ...state,
+        ...invalidateStructure(),
         rivalries: state.rivalries.map((rivalry, i) =>
           i === action.payload.rivalryIndex
             ? {
@@ -89,6 +103,7 @@ export const teamBuilderReducer = (state: TeamBuilderState, action: TeamBuilderA
     case 'ADD_TEAM_TO_RIVALRY':
       return {
         ...state,
+        ...invalidateStructure(),
         rivalries: state.rivalries.map((rivalry, i) =>
           i === action.payload.rivalryIndex
             ? { ...rivalry, teamIds: [...rivalry.teamIds, action.payload.teamId] }
@@ -98,6 +113,7 @@ export const teamBuilderReducer = (state: TeamBuilderState, action: TeamBuilderA
     case 'REMOVE_TEAM_FROM_RIVALRY':
       return {
         ...state,
+        ...invalidateStructure(),
         rivalries: state.rivalries.map((rivalry, i) =>
           i === action.payload.rivalryIndex
             ? { ...rivalry, teamIds: rivalry.teamIds.filter((_, j) => j !== action.payload.teamIndex) }
