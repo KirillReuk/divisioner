@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { MAX_RIVALRIES } from '../data/constants';
 import {
   initialTeamBuilderState,
   teamBuilderReducer,
@@ -95,6 +96,32 @@ describe('teamBuilderReducer', () => {
       payload: { rivalry: r },
     });
     expect(next.rivalries).toEqual([r]);
+  });
+
+  it('ADD_RIVALRY does nothing when already at MAX_RIVALRIES', () => {
+    const rivalries = Array.from({ length: MAX_RIVALRIES }, (_, i) => ({
+      teamIds: [`t${i}a`, `t${i}b`],
+    }));
+    const s0 = stateWith({ rivalries });
+    const next = teamBuilderReducer(s0, {
+      type: 'ADD_RIVALRY',
+      payload: { rivalry: { teamIds: ['x', 'y'] } },
+    });
+    expect(next.rivalries).toEqual(rivalries);
+    expect(next.rivalries).toHaveLength(MAX_RIVALRIES);
+  });
+
+  it('SET_RIVALRIES keeps at most MAX_RIVALRIES entries', () => {
+    const many = Array.from({ length: MAX_RIVALRIES + 5 }, (_, i) => ({
+      teamIds: [`a${i}`, `b${i}`],
+    }));
+    const next = teamBuilderReducer(initialTeamBuilderState, {
+      type: 'SET_RIVALRIES',
+      payload: { rivalries: many },
+    });
+    expect(next.rivalries).toHaveLength(MAX_RIVALRIES);
+    expect(next.rivalries[0]).toEqual(many[0]);
+    expect(next.rivalries[MAX_RIVALRIES - 1]).toEqual(many[MAX_RIVALRIES - 1]);
   });
 
   it('REMOVE_RIVALRY drops by index', () => {

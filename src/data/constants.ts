@@ -28,5 +28,8 @@ export const MARKER_POPUP_ANCHOR: [number, number] = [0, -5];
 // Partitioning
 export const MAX_DIVISION_SIZE = 10;
 
+/** Max rivalry groups; also size of the precomputed Spectral palette for rivalry row colors. */
+export const MAX_RIVALRIES = 50;
+
 // Geocoding
 export const GEOCODING_API_URL = 'https://api.opencagedata.com/geocode/v1/json';

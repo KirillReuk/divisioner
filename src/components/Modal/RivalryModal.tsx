@@ -1,5 +1,6 @@
 import React from 'react';
 import { UserMinus, Trash2 } from 'lucide-react';
+import { MAX_RIVALRIES } from '../../data/constants';
 import { Rivalry, Team } from '../../utils/types';
 import Modal from './Modal';
 import { TeamBuilderAction } from '../../app/teamBuilderReducer';
@@ -40,6 +41,7 @@ const RivalryModal: React.FC<RivalryModalProps> = ({ isOpen, onClose, teams, div
   };
 
   const addRivalry = () => {
+    if (rivalries.length >= MAX_RIVALRIES) return;
     if (teams.length < 2) {
       alert('To create a rivalry you need at least 2 teams');
       return;
@@ -54,7 +56,7 @@ const RivalryModal: React.FC<RivalryModalProps> = ({ isOpen, onClose, teams, div
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Rivalries">
+    <Modal isOpen={isOpen} onClose={onClose} title="Rivalries" showCloseButton={false}>
       <table className="table-fixed">
         <colgroup>
           <col className="w-[95%]" />
@@ -69,8 +71,16 @@ const RivalryModal: React.FC<RivalryModalProps> = ({ isOpen, onClose, teams, div
         <tbody>
           {rivalries.length === 0 && (
             <tr>
-              <td colSpan={2} className="p-4 text-sm text-gray-500 text-center">
-                No rivalries yet. Click &quot;Add Rivalry&quot; to create your first one.
+              <td colSpan={2} className="p-4 text-sm text-center">
+                <div className="flex flex-col gap-2 text-gray-500 max-w-md mx-auto">
+                  <p>
+                    Rivalries make sure that teams in the same rivalry stay in the same division when divisions are
+                    built.
+                  </p>
+                  <p className="text-gray-500">
+                    No rivalries yet. Click &quot;Add Rivalry&quot; to create your first one.
+                  </p>
+                </div>
               </td>
             </tr>
           )}
@@ -162,9 +172,26 @@ const RivalryModal: React.FC<RivalryModalProps> = ({ isOpen, onClose, teams, div
         </tbody>
       </table>
 
-      <button onClick={addRivalry} className="w-full mt-4 bg-green-500 text-white px-4 py-2 rounded">
-        <span className="text-xl font-bold">+</span> Add Rivalry
-      </button>
+      <div className="mt-4 flex flex-col gap-2">
+        <button
+          type="button"
+          onClick={addRivalry}
+          disabled={rivalries.length >= MAX_RIVALRIES}
+          title={
+            rivalries.length >= MAX_RIVALRIES ? `At most ${MAX_RIVALRIES} rivalries` : undefined
+          }
+          className="w-full text-sm py-1.5 px-3 bg-green-500 text-white rounded font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          <span className="text-base font-bold">+</span> Add Rivalry
+        </button>
+        <button
+          type="button"
+          onClick={onClose}
+          className="w-full text-sm py-1.5 px-3 rounded border border-gray-300 bg-white text-gray-800 hover:bg-gray-50"
+        >
+          All done
+        </button>
+      </div>
     </Modal>
   );
 };

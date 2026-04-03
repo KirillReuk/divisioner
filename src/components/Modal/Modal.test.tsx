@@ -70,6 +70,33 @@ describe('Modal', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it('calls onClose when the backdrop is clicked', () => {
+    const onClose = vi.fn();
+    render(
+      <Modal isOpen onClose={onClose} title="T">
+        x
+      </Modal>
+    );
+
+    const dialog = screen.getByRole('dialog');
+    const overlay = dialog.parentElement;
+    expect(overlay).not.toBeNull();
+    fireEvent.click(overlay!);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not call onClose when the modal panel content is clicked', () => {
+    const onClose = vi.fn();
+    render(
+      <Modal isOpen onClose={onClose} title="T">
+        <button type="button">Inside</button>
+      </Modal>
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Inside' }));
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
   it('calls onClose when Escape is pressed', () => {
     const onClose = vi.fn();
     render(

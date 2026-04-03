@@ -1,6 +1,6 @@
 import { Division, Rivalry, TeamWithPseudo, Team } from './types';
 import { haversineDistance } from '../utils/distance';
-import chroma from 'chroma-js';
+import { getSpectralScaleColors } from './spectralColors';
 
 type PotentialSwap = {
   i: number;
@@ -311,9 +311,10 @@ class Partitioning {
 
     this.optimizeDivisions();
 
+    const colors = getSpectralScaleColors(this.components.length);
     return this.components.map((division, index) => ({
       teams: division.flatMap(team => team.teamsIncluded || [team]),
-      color: chroma.scale('Spectral').mode('lab').colors(this.components.length)[index],
+      color: colors[index],
     }));
   };
 }

@@ -117,6 +117,7 @@ const App: React.FC = () => {
             />
             <TeamView
               teams={teams}
+              rivalries={rivalries}
               setTeams={setTeams}
               onOpenPresetModal={openPresetModalPlain}
               setShowRivalry={setShowRivalry}

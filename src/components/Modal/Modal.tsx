@@ -15,7 +15,6 @@ type ModalProps = {
   showCloseButton?: boolean;
 };
 
-const DEFAULT_OVERLAY_CLASS = 'fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50';
 const DEFAULT_PANEL_CLASS = 'bg-white p-6 rounded-lg shadow-md max-w-sm w-full';
 const DEFAULT_TITLE_CLASS = 'text-lg font-semibold';
 const DEFAULT_DESCRIPTION_CLASS = 'mb-4 text-gray-700';
@@ -63,10 +62,20 @@ const Modal: React.FC<ModalProps> = ({
     };
   }, [isOpen, onClose]);
 
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   if (!isOpen) return null;
 
   return createPortal(
-    <div className={DEFAULT_OVERLAY_CLASS}>
+    <div
+      className={'fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50'}
+      onClick={handleOverlayClick}
+      role="presentation"
+    >
       <div
         ref={panelRef}
         className={panelClassName}

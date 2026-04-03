@@ -1,5 +1,6 @@
 import React from 'react';
-import { Team } from '../utils/types';
+import { Rivalry, Team } from '../utils/types';
+import { RIVALRY_ROW_TINTS } from '../utils/spectralColors';
 import { Atom } from 'lucide-react';
 import { useReverseGeocoding } from './useReverseGeocoding';
 import TeamMapPicker from './TeamMapPicker';
@@ -8,6 +9,7 @@ import { useTeamActions } from './useTeamActions';
 
 interface EditableTeamsProps {
   teams: Team[];
+  rivalries: Rivalry[];
   setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
   onOpenPresetModal: () => void;
   setShowRivalry: React.Dispatch<React.SetStateAction<boolean>>;
@@ -17,6 +19,7 @@ interface EditableTeamsProps {
 
 const TeamView: React.FC<EditableTeamsProps> = ({
   teams,
+  rivalries,
   setTeams,
   onOpenPresetModal,
   setShowRivalry,
@@ -33,6 +36,16 @@ const TeamView: React.FC<EditableTeamsProps> = ({
     handleCloseMapPicker,
     createMapPickHandler,
   } = useTeamActions({ setTeams, setMapPickerTeamId });
+  const canOpenRivalries = teams.length >= 2;
+  const teamIdToRivalryIndex = React.useMemo(() => {
+    const map = new Map<string, number>();
+    rivalries.forEach((rivalry, rivalryIndex) => {
+      for (const teamId of rivalry.teamIds) {
+        map.set(teamId, rivalryIndex);
+      }
+    });
+    return map;
+  }, [rivalries]);
   const parentRowRef = React.useRef<HTMLTableRowElement | null>(null);
   const mapRowRef = React.useRef<HTMLTableRowElement | null>(null);
 
@@ -71,8 +84,13 @@ const TeamView: React.FC<EditableTeamsProps> = ({
           </button>
         </div>
         <button
+          type="button"
+          disabled={!canOpenRivalries}
           onClick={() => setShowRivalry(true)}
-          className="text-sm px-2 bg-white rounded border border-black flex items-center gap-1 float-right"
+          title={canOpenRivalries ? undefined : 'To create a rivalry you need at least 2 teams'}
+          className={`text-sm px-2 rounded border flex items-center gap-1 float-right disabled:opacity-60 disabled:cursor-not-allowed ${
+            canOpenRivalries ? 'bg-white border-black' : 'bg-gray-200 border-gray-400 text-gray-500'
+          }`}
         >
           <Atom className="w-4 h-4" />
           {'Open Rivalries'}
@@ -94,10 +112,15 @@ const TeamView: React.FC<EditableTeamsProps> = ({
           </tr>
         </thead>
         <tbody>
-          {teams.map(team => (
+          {teams.map(team => {
+            const rivalryIndex = teamIdToRivalryIndex.get(team.id) ?? null;
+            const rivalryRowStyle =
+              rivalryIndex != null ? RIVALRY_ROW_TINTS[rivalryIndex] ?? null : null;
+            return (
             <React.Fragment key={team.id}>
               <TeamRow
                 team={team}
+                rivalryRowStyle={rivalryRowStyle}
                 rowRef={mapPickerTeamId === team.id ? parentRowRef : undefined}
                 onTeamNameChange={handleTeamNameChange}
                 onLocationSelect={handleLocationSelect}
@@ -118,7 +141,8 @@ const TeamView: React.FC<EditableTeamsProps> = ({
                 </tr>
               )}
             </React.Fragment>
-          ))}
+            );
+          })}
         </tbody>
       </table>
       <button onClick={handleAddTeam} className="w-full mt-4 bg-green-500 text-white px-4 py-2 rounded">

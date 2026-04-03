@@ -1,4 +1,4 @@
-import { DEFAULT_DIVISION_COUNT } from '../data/constants';
+import { DEFAULT_DIVISION_COUNT, MAX_RIVALRIES } from '../data/constants';
 import { Division, Rivalry, Team } from '../utils/types';
 
 export type TeamBuilderState = {
@@ -46,7 +46,7 @@ export const teamBuilderReducer = (state: TeamBuilderState, action: TeamBuilderA
           .filter(rivalry => rivalry.teamIds.length >= 2),
       };
     case 'SET_RIVALRIES':
-      return { ...state, rivalries: action.payload.rivalries };
+      return { ...state, rivalries: action.payload.rivalries.slice(0, MAX_RIVALRIES) };
     case 'SET_DIVISIONS_COUNT':
       return { ...state, divisionsCount: action.payload.count };
     case 'SET_MAP_PICKER_TEAM_ID':
@@ -60,6 +60,9 @@ export const teamBuilderReducer = (state: TeamBuilderState, action: TeamBuilderA
         rivalries: [],
       };
     case 'ADD_RIVALRY':
+      if (state.rivalries.length >= MAX_RIVALRIES) {
+        return state;
+      }
       return {
         ...state,
         rivalries: [...state.rivalries, action.payload.rivalry],

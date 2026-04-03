@@ -4,10 +4,12 @@ import { X } from 'lucide-react';
 import LocationSearchInput from '../components/LocationSearchInput';
 import { MAX_LATITUDE, MAX_LONGITUDE, MIN_LATITUDE, MIN_LONGITUDE } from '../data/constants';
 import { CoordinateField, Team } from '../utils/types';
+import type { SpectralRowTint } from '../utils/spectralColors';
 import { useTeamValidation } from './useTeamValidation';
 
 interface TeamRowProps {
   team: Team;
+  rivalryRowStyle: SpectralRowTint | null;
   rowRef?: React.Ref<HTMLTableRowElement>;
   onTeamNameChange: (teamId: string, value: string) => void;
   onLocationSelect: (teamId: string, location: string, latitude: number, longitude: number) => void;
@@ -18,6 +20,7 @@ interface TeamRowProps {
 
 const TeamRow: React.FC<TeamRowProps> = ({
   team,
+  rivalryRowStyle,
   rowRef,
   onTeamNameChange,
   onLocationSelect,
@@ -27,15 +30,36 @@ const TeamRow: React.FC<TeamRowProps> = ({
 }) => {
   const { errors, validateLatLng, getAriaPropsForField } = useTeamValidation(team.id, team.latitude, team.longitude);
 
+  const rowStyle: React.CSSProperties | undefined = rivalryRowStyle
+    ? {
+        backgroundColor: rivalryRowStyle.backgroundColor,
+        borderLeftWidth: 4,
+        borderLeftStyle: 'solid',
+        borderLeftColor: rivalryRowStyle.borderLeftColor,
+      }
+    : undefined;
+
+  const fieldBgStyle: React.CSSProperties | undefined = rivalryRowStyle
+    ? { backgroundColor: rivalryRowStyle.backgroundColor }
+    : undefined;
+
   return (
-    <tr ref={rowRef} className="border-b border-t border-300 border-black last:border-b-0">
+    <tr
+      ref={rowRef}
+      className="border-b border-t border-300 border-black last:border-b-0"
+      style={rowStyle}
+    >
       <td>
         <input
           type="text"
           name={`team-name-${team.id}`}
           value={team.name}
           onChange={e => onTeamNameChange(team.id, e.target.value)}
-          className="p-2 rounded w-full bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out"
+          className={clsx(
+            'p-2 rounded w-full duration-300 ease-out',
+            rivalryRowStyle ? 'focus:!bg-white hover:!bg-white' : 'bg-gray-100 focus:bg-white hover:bg-white'
+          )}
+          style={fieldBgStyle}
           placeholder="Team Name"
         />
       </td>
@@ -64,9 +88,12 @@ const TeamRow: React.FC<TeamRowProps> = ({
                 onCoordinateChange(team.id, 'latitude', value);
               }}
               {...getAriaPropsForField('latitude')}
-              className={clsx('rounded w-1/2 p-2 bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out', {
-                'border-2 border-red-500': errors.latitude,
-              })}
+              className={clsx(
+                'rounded w-1/2 p-2 duration-300 ease-out',
+                errors.latitude ? 'border-2 border-red-500' : '',
+                rivalryRowStyle ? 'focus:!bg-white hover:!bg-white' : 'bg-gray-100 focus:bg-white hover:bg-white'
+              )}
+              style={fieldBgStyle}
               placeholder="Latitude"
             />
             <input
@@ -82,9 +109,12 @@ const TeamRow: React.FC<TeamRowProps> = ({
                 onCoordinateChange(team.id, 'longitude', value);
               }}
               {...getAriaPropsForField('longitude')}
-              className={clsx('rounded w-1/2 p-2 bg-gray-100 focus:bg-white hover:bg-white duration-300 ease-out', {
-                'border-2 border-red-500': errors.longitude,
-              })}
+              className={clsx(
+                'rounded w-1/2 p-2 duration-300 ease-out',
+                errors.longitude ? 'border-2 border-red-500' : '',
+                rivalryRowStyle ? 'focus:!bg-white hover:!bg-white' : 'bg-gray-100 focus:bg-white hover:bg-white'
+              )}
+              style={fieldBgStyle}
               placeholder="Longitude"
             />
           </div>
