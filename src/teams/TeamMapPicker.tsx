@@ -1,5 +1,5 @@
-import React from 'react';
-import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
+import React, { useEffect } from 'react';
+import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from 'react-leaflet';
 import { X } from 'lucide-react';
 
 interface TeamMapPickerProps {
@@ -21,6 +21,16 @@ const MapClickHandler: React.FC<{
   return null;
 };
 
+const RecenterOnCoordinates: React.FC<{ latitude: number; longitude: number }> = ({ latitude, longitude }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    map.flyTo([latitude, longitude], undefined, { duration: 0.6 });
+  }, [latitude, longitude, map]);
+
+  return null;
+};
+
 const TeamMapPicker: React.FC<TeamMapPickerProps> = ({ latitude, longitude, onPick, onClose }) => {
   return (
     <div className="relative h-96 w-full rounded border mt-2 overflow-hidden">
@@ -38,6 +48,7 @@ const TeamMapPicker: React.FC<TeamMapPickerProps> = ({ latitude, longitude, onPi
       </button>
       <MapContainer center={[latitude, longitude]} zoom={4} style={{ height: '100%', width: '100%' }}>
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <RecenterOnCoordinates latitude={latitude} longitude={longitude} />
         <MapClickHandler onClick={onPick} />
         <Marker position={[latitude, longitude]} />
       </MapContainer>
