@@ -105,9 +105,9 @@ const TeamView: React.FC<EditableTeamsProps> = ({
         </colgroup>
         <thead>
           <tr>
-            <th className="text-lg text-left font-medium p-2 w-1/2">Team Name</th>
-            <th className="text-lg text-left font-medium p-2">Location</th>
-            <th className="text-lg text-left font-medium p-2 w-1/6">Coordinates</th>
+            <th className="text-lg text-left font-medium p-2 w-2/5">Team Name</th>
+            <th className="text-lg text-left font-medium p-2 w-2/5">Location</th>
+            <th className="text-lg text-left font-medium p-2 w-1/10">Coordinates</th>
             <th className=""></th>
           </tr>
         </thead>

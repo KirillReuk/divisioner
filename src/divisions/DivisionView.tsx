@@ -12,7 +12,7 @@ const DivisionView: React.FC<EditableTeamsProps> = ({ conferences }) => {
     <div className="p-4 bg-gray-100 rounded-lg shadow-md">
       <div className="flex gap-4">
         {conferences.map((conference, conferenceIndex) => (
-          <div className="flex-1">
+          <div className="flex-1" key={`conference-${conferenceIndex}`}>
             <h2 className="font-bold mb-4">{CONFERENCE_NAMES[conferenceIndex]}</h2>
             {conference?.map((division, index) => (
               <div

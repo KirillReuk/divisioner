@@ -100,7 +100,10 @@ const RivalryModal: React.FC<RivalryModalProps> = ({ isOpen, onClose, teams, div
               const usedTeamIds = new Set(rivalries.flatMap((r, index) => (index === rivalryIndex ? [] : r.teamIds)));
 
               return (
-                <tr key={`rivalry-${rivalryIndex}`} className="border-b border-t border-black last:border-b-0">
+                <tr
+                  key={`rivalry-${rivalryIndex}`}
+                  className="border-b border-t border-black first:border-t-0 last:border-b-0"
+                >
                   <td className="p-2">
                     <div className="flex flex-col gap-2">
                       {rivalry.teamIds.map((teamId, teamIndex) => {
