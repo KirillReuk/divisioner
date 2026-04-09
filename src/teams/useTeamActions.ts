@@ -13,9 +13,11 @@ export function useTeamActions({ setTeams, setMapPickerTeamId }: UseTeamActionsP
   };
 
   const handleLocationSelect = (teamId: string, location: string, latitude: number, longitude: number) => {
+    const lat = parseFloat(latitude.toFixed(3));
+    const lng = parseFloat(longitude.toFixed(3));
     setTeams(prevTeams =>
       prevTeams.map(currentTeam =>
-        currentTeam.id === teamId ? { ...currentTeam, location, latitude, longitude } : currentTeam
+        currentTeam.id === teamId ? { ...currentTeam, location, latitude: lat, longitude: lng } : currentTeam
       )
     );
   };

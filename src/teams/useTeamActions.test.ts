@@ -53,10 +53,17 @@ describe('useTeamActions', () => {
     expect(teams).toEqual([makeTeam('a', { name: 'Alpha' }), makeTeam('b')]);
   });
 
-  it('updates selected location and coordinates', () => {
+  it('updates selected location and coordinates, rounding lat/lon to 3 decimals', () => {
     const newPlace = { location: 'Paris, France', latitude: 48.8566, longitude: 2.3522 };
     actions.handleLocationSelect('b', newPlace.location, newPlace.latitude, newPlace.longitude);
-    expect(teams).toEqual([makeTeam('a'), makeTeam('b', newPlace)]);
+    expect(teams).toEqual([
+      makeTeam('a'),
+      makeTeam('b', {
+        location: newPlace.location,
+        latitude: parseFloat(newPlace.latitude.toFixed(3)),
+        longitude: parseFloat(newPlace.longitude.toFixed(3)),
+      }),
+    ]);
   });
 
   it('sets map picker focus and can close it', () => {
