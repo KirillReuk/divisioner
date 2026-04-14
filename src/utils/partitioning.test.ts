@@ -83,4 +83,20 @@ describe('Partitioning', () => {
     expect(idsInPairDivision.has('a')).toBe(true);
     expect(idsInPairDivision.has('b')).toBe(true);
   });
+
+  it('getDivisions never returns an empty division', () => {
+    const teams = [
+      team('a', 0, 0),
+      team('b', 0.02, 0.02),
+      team('c', 5, 5),
+      team('d', 5.02, 5.02),
+      team('e', 40, 40),
+      team('f', 40.02, 40.02),
+      team('g', 60, 60),
+    ];
+    const p = new Partitioning(teams, 3, []);
+    const divisions = p.getDivisions();
+    expect(divisions).toHaveLength(3);
+    expect(divisions.every(d => d.teams.length >= 1)).toBe(true);
+  });
 });

@@ -3,10 +3,18 @@ import { haversineDistance } from '../utils/distance';
 import { getSpectralScaleColors } from './spectralColors';
 
 type PotentialSwap = {
-  i: number;
-  j: number;
+  from: number;
+  to: number;
   team1: TeamWithPseudo;
   team2: TeamWithPseudo;
+  newDistance: number;
+} | null;
+
+type PotentialMove = {
+  from: number;
+  to: number;
+  team: TeamWithPseudo;
+  newDistance: number;
 } | null;
 
 const calculateCentroid = (division: Division): { lat: number; lon: number } => {
@@ -159,18 +167,24 @@ class Partitioning {
     return this.components.reduce((total, component) => total + this.calculateComponentDistance(component), 0);
   }
 
+  private calculateTotalDistanceForComponents = (components: TeamWithPseudo[][]): number => {
+    return components.reduce((total, component) => total + this.calculateComponentDistance(component), 0);
+  };
+
+  private getTeamWeight = (team: TeamWithPseudo): number => team.teamsIncluded?.length || 1;
+
   private calculateComponentWeight = (component: TeamWithPseudo[]): number => {
-    return component.reduce((total, team) => total + (team.teamsIncluded?.length || 1), 0);
+    return component.reduce((total, team) => total + this.getTeamWeight(team), 0);
   };
 
   private findBestSwap(): PotentialSwap | null {
     let bestSwap: PotentialSwap = null;
     let bestDistance = this.calculateTotalDistance();
 
-    for (let i = 0; i < this.components.length; i++) {
-      for (let j = i + 1; j < this.components.length; j++) {
-        const component1 = this.components[i];
-        const component2 = this.components[j];
+    for (let from = 0; from < this.components.length; from++) {
+      for (let to = from + 1; to < this.components.length; to++) {
+        const component1 = this.components[from];
+        const component2 = this.components[to];
 
         component1.forEach(team1 => {
           component2.forEach(team2 => {
@@ -184,17 +198,14 @@ class Partitioning {
               return;
             }
             const newComponents = [...this.components];
-            newComponents[i] = newComponent1;
-            newComponents[j] = newComponent2;
+            newComponents[from] = newComponent1;
+            newComponents[to] = newComponent2;
 
-            const newDistance = newComponents.reduce(
-              (total, component) => total + this.calculateComponentDistance(component),
-              0
-            );
+            const newDistance = this.calculateTotalDistanceForComponents(newComponents);
 
             if (newDistance < bestDistance) {
               bestDistance = newDistance;
-              bestSwap = { i, j, team1, team2 };
+              bestSwap = { from, to, team1, team2, newDistance };
             }
           });
         });
@@ -204,18 +215,67 @@ class Partitioning {
     return bestSwap;
   }
 
+  private findBestMove(): PotentialMove | null {
+    let bestMove: PotentialMove = null;
+    let bestDistance = this.calculateTotalDistance();
+
+    for (let from = 0; from < this.components.length; from++) {
+      for (let to = 0; to < this.components.length; to++) {
+        if (from === to) {
+          continue;
+        }
+
+        const sourceComponent = this.components[from];
+        const targetComponent = this.components[to];
+
+        sourceComponent.forEach(team => {
+          const movedTeamWeight = this.getTeamWeight(team);
+          const newSourceComponent = sourceComponent.filter(sourceTeam => sourceTeam !== team);
+          const newTargetComponent = targetComponent.concat(team);
+
+          if (
+            this.calculateComponentWeight(sourceComponent) - movedTeamWeight < 1 ||
+            this.calculateComponentWeight(newTargetComponent) > this.maxDivisionSize
+          ) {
+            return;
+          }
+
+          const newComponents = [...this.components];
+          newComponents[from] = newSourceComponent;
+          newComponents[to] = newTargetComponent;
+
+          const newDistance = this.calculateTotalDistanceForComponents(newComponents);
+
+          if (newDistance < bestDistance) {
+            bestDistance = newDistance;
+            bestMove = { from, to, team, newDistance };
+          }
+        });
+      }
+    }
+
+    return bestMove;
+  }
+
   private optimizeDivisions = () => {
     const deadline = Date.now() + this.optimizationTimeBudgetMs;
     for (let swaps = 0; swaps < this.maxOptimizationSwaps && Date.now() < deadline; swaps++) {
       const bestSwap = this.findBestSwap();
+      const bestMove = this.findBestMove();
 
-      if (!bestSwap) {
+      if (!bestSwap && !bestMove) {
         break;
       }
 
-      const { i, j, team1, team2 } = bestSwap;
-      this.components[i] = this.components[i].filter(team => team !== team1).concat(team2);
-      this.components[j] = this.components[j].filter(team => team !== team2).concat(team1);
+      if (bestSwap && (bestMove === null || bestSwap.newDistance < bestMove.newDistance)) {
+        const { from, to, team1, team2 } = bestSwap;
+        this.components[from] = this.components[from].filter(team => team !== team1).concat(team2);
+        this.components[to] = this.components[to].filter(team => team !== team2).concat(team1);
+      } else if (bestMove) {
+        const { from, to, team } = bestMove;
+        this.components[from] = this.components[from].filter(sourceTeam => sourceTeam !== team);
+        this.components[to] = this.components[to].concat(team);
+      }
     }
   };
 
