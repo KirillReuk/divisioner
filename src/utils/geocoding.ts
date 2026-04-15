@@ -1,4 +1,3 @@
-import { API_KEY } from '../app/config';
 import { GEOCODING_API_URL } from '../data/constants';
 
 type GeocodingResult = {
@@ -8,6 +7,24 @@ type GeocodingResult = {
 
 type GeocodingResponse = {
   results: GeocodingResult[];
+};
+
+const OPENCAGE_API_KEY = import.meta.env.VITE_OPENCAGE_API_KEY;
+let hasWarnedAboutMissingApiKey = false;
+
+const getApiKey = (): string | null => {
+  if (OPENCAGE_API_KEY) {
+    return OPENCAGE_API_KEY;
+  }
+
+  if (!hasWarnedAboutMissingApiKey) {
+    console.warn(
+      'Geocoding is disabled because VITE_OPENCAGE_API_KEY is not configured. Add it to your environment to enable location search.'
+    );
+    hasWarnedAboutMissingApiKey = true;
+  }
+
+  return null;
 };
 
 const fetchGeocodingData = async (url: string): Promise<GeocodingResult[] | null> => {
@@ -25,11 +42,21 @@ const fetchGeocodingData = async (url: string): Promise<GeocodingResult[] | null
 };
 
 export const fetchLocations = async (searchQuery: string): Promise<GeocodingResult[] | null> => {
-  const url = `${GEOCODING_API_URL}?q=${encodeURIComponent(searchQuery)}&key=${API_KEY}`;
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    return null;
+  }
+
+  const url = `${GEOCODING_API_URL}?q=${encodeURIComponent(searchQuery)}&key=${apiKey}`;
   return fetchGeocodingData(url);
 };
 
 export const fetchCoordinates = async (lat: number, lng: number): Promise<GeocodingResult[] | null> => {
-  const url = `${GEOCODING_API_URL}?q=${encodeURIComponent(`${lat} ${lng}`)}&key=${API_KEY}`;
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    return null;
+  }
+
+  const url = `${GEOCODING_API_URL}?q=${encodeURIComponent(`${lat} ${lng}`)}&key=${apiKey}`;
   return fetchGeocodingData(url);
 };

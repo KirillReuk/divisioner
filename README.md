@@ -13,30 +13,26 @@ An interactive tool for dividing sports teams into divisions based on their geog
 - 🔁 Toggle rivalry matrix view
 - 🧾 Responsive and mobile-friendly UI
 
-## 🚀 Getting Started
-
-### 1. Clone the repo
-
-```bash
-git clone https://github.com/your-username/auto-divisioner.git
-cd auto-divisioner
-```
-
-### 2. Install dependencies
+## 🚀 Quick Start
 
 ```bash
 npm install
-# or
-yarn
+npm run dev
 ```
 
-### 3. Start the development server
+If you want geocoding enabled locally, create `.env.local`:
 
 ```bash
-npm run dev
-# or
-yarn dev
+VITE_OPENCAGE_API_KEY=your_opencage_api_key
 ```
+
+Without this variable, the app still runs, but geocoding search/reverse lookup is disabled.
+
+## Deployment
+
+This project deploys to GitHub Pages via GitHub Actions.
+
+For full setup and maintainer runbook (secrets, Pages settings, verification, troubleshooting), see [`docs/deploy.md`](docs/deploy.md).
 
 
 ## 📦 Presets
