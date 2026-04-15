@@ -44,11 +44,7 @@ const TeamRow: React.FC<TeamRowProps> = ({
     : undefined;
 
   return (
-    <tr
-      ref={rowRef}
-      className="border-b border-t border-300 border-black last:border-b-0"
-      style={rowStyle}
-    >
+    <tr ref={rowRef} className="border-b border-t border-300 border-black last:border-b-0" style={rowStyle}>
       <td>
         <input
           type="text"
@@ -72,52 +68,50 @@ const TeamRow: React.FC<TeamRowProps> = ({
           onFocus={() => onLocationFocus(team.id)}
         />
       </td>
-      <td>
-        <div className="flex flex-col">
-          <div className="flex">
-            <input
-              type="number"
-              name={`latitude-${team.id}`}
-              value={team.latitude}
-              min={MIN_LATITUDE}
-              max={MAX_LATITUDE}
-              step="0.001"
-              onChange={e => {
-                const value = parseFloat(e.target.value);
-                validateLatLng('latitude', value);
-                onCoordinateChange(team.id, 'latitude', value);
-              }}
-              {...getAriaPropsForField('latitude')}
-              className={clsx(
-                'rounded w-1/2 p-2 duration-300 ease-out',
-                errors.latitude ? 'border-2 border-red-500' : '',
-                rivalryRowStyle ? 'focus:!bg-white hover:!bg-white' : 'bg-gray-100 focus:bg-white hover:bg-white'
-              )}
-              style={fieldBgStyle}
-              placeholder="Latitude"
-            />
-            <input
-              type="number"
-              name={`longitude-${team.id}`}
-              value={team.longitude}
-              min={MIN_LONGITUDE}
-              max={MAX_LONGITUDE}
-              step="0.001"
-              onChange={e => {
-                const value = parseFloat(e.target.value);
-                validateLatLng('longitude', value);
-                onCoordinateChange(team.id, 'longitude', value);
-              }}
-              {...getAriaPropsForField('longitude')}
-              className={clsx(
-                'rounded w-1/2 p-2 duration-300 ease-out',
-                errors.longitude ? 'border-2 border-red-500' : '',
-                rivalryRowStyle ? 'focus:!bg-white hover:!bg-white' : 'bg-gray-100 focus:bg-white hover:bg-white'
-              )}
-              style={fieldBgStyle}
-              placeholder="Longitude"
-            />
-          </div>
+      <td className="min-w-[180px]">
+        <div className="flex">
+          <input
+            type="number"
+            name={`latitude-${team.id}`}
+            value={team.latitude}
+            min={MIN_LATITUDE}
+            max={MAX_LATITUDE}
+            step="0.001"
+            onChange={e => {
+              const value = parseFloat(e.target.value);
+              validateLatLng('latitude', value);
+              onCoordinateChange(team.id, 'latitude', value);
+            }}
+            {...getAriaPropsForField('latitude')}
+            className={clsx(
+              'rounded w-1/2 min-w-[90px] p-2 duration-300 ease-out',
+              errors.latitude ? 'border-2 border-red-500' : '',
+              rivalryRowStyle ? 'focus:!bg-white hover:!bg-white' : 'bg-gray-100 focus:bg-white hover:bg-white'
+            )}
+            style={fieldBgStyle}
+            placeholder="Latitude"
+          />
+          <input
+            type="number"
+            name={`longitude-${team.id}`}
+            value={team.longitude}
+            min={MIN_LONGITUDE}
+            max={MAX_LONGITUDE}
+            step="0.001"
+            onChange={e => {
+              const value = parseFloat(e.target.value);
+              validateLatLng('longitude', value);
+              onCoordinateChange(team.id, 'longitude', value);
+            }}
+            {...getAriaPropsForField('longitude')}
+            className={clsx(
+              'rounded w-1/2 min-w-[90px] p-2 duration-300 ease-out',
+              errors.longitude ? 'border-2 border-red-500' : '',
+              rivalryRowStyle ? 'focus:!bg-white hover:!bg-white' : 'bg-gray-100 focus:bg-white hover:bg-white'
+            )}
+            style={fieldBgStyle}
+            placeholder="Longitude"
+          />
         </div>
       </td>
       <td className="text-end">

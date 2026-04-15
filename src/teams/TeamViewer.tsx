@@ -96,51 +96,50 @@ const TeamView: React.FC<EditableTeamsProps> = ({
           {'Open Rivalries'}
         </button>
       </div>
-      <table className="table-fixed max-w-full w-full transition-all duration-300">
+      <table className="w-full min-w-[860px] transition-all duration-300">
         <colgroup>
           <col className="w-[20%]" />
           <col className="w-[55%]" />
           <col className="w-[20%]" />
-          <col className="w-[5%]" />
+          <col className="min-w-[24px]" />
         </colgroup>
         <thead>
           <tr>
-            <th className="text-lg text-left font-medium p-2 w-2/5">Team Name</th>
-            <th className="text-lg text-left font-medium p-2 w-2/5">Location</th>
-            <th className="text-lg text-left font-medium p-2 w-1/10">Coordinates</th>
-            <th className=""></th>
+            <th className="text-lg text-left font-medium p-2">Team Name</th>
+            <th className="text-lg text-left font-medium p-2">Location</th>
+            <th className="text-lg text-left font-medium p-2">Coordinates</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           {teams.map(team => {
             const rivalryIndex = teamIdToRivalryIndex.get(team.id) ?? null;
-            const rivalryRowStyle =
-              rivalryIndex != null ? RIVALRY_ROW_TINTS[rivalryIndex] ?? null : null;
+            const rivalryRowStyle = rivalryIndex === null ? null : (RIVALRY_ROW_TINTS[rivalryIndex] ?? null);
             return (
-            <React.Fragment key={team.id}>
-              <TeamRow
-                team={team}
-                rivalryRowStyle={rivalryRowStyle}
-                rowRef={mapPickerTeamId === team.id ? parentRowRef : undefined}
-                onTeamNameChange={handleTeamNameChange}
-                onLocationSelect={handleLocationSelect}
-                onLocationFocus={handleLocationFocus}
-                onCoordinateChange={handleCoordinatesChange}
-                onRemove={handleRemoveTeam}
-              />
-              {mapPickerTeamId === team.id && (
-                <tr ref={mapPickerTeamId === team.id ? mapRowRef : undefined}>
-                  <td colSpan={4}>
-                    <TeamMapPicker
-                      latitude={team.latitude}
-                      longitude={team.longitude}
-                      onPick={createMapPickHandler(team.id)}
-                      onClose={handleCloseMapPicker}
-                    />
-                  </td>
-                </tr>
-              )}
-            </React.Fragment>
+              <React.Fragment key={team.id}>
+                <TeamRow
+                  team={team}
+                  rivalryRowStyle={rivalryRowStyle}
+                  rowRef={mapPickerTeamId === team.id ? parentRowRef : undefined}
+                  onTeamNameChange={handleTeamNameChange}
+                  onLocationSelect={handleLocationSelect}
+                  onLocationFocus={handleLocationFocus}
+                  onCoordinateChange={handleCoordinatesChange}
+                  onRemove={handleRemoveTeam}
+                />
+                {mapPickerTeamId === team.id && (
+                  <tr ref={mapPickerTeamId === team.id ? mapRowRef : undefined}>
+                    <td colSpan={4}>
+                      <TeamMapPicker
+                        latitude={team.latitude}
+                        longitude={team.longitude}
+                        onPick={createMapPickHandler(team.id)}
+                        onClose={handleCloseMapPicker}
+                      />
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
             );
           })}
         </tbody>
