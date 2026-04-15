@@ -13,6 +13,9 @@ export const MIN_LATITUDE = -90;
 export const MAX_LONGITUDE = 180;
 export const MIN_LONGITUDE = -180;
 
+// Location Search Input
+export const MIN_LOCATION_SEARCH_INPUT_LENGTH = 3;
+
 // Division Count
 export const DEFAULT_DIVISION_COUNT = 8;
 

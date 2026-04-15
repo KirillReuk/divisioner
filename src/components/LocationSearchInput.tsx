@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AsyncSelect from 'react-select/async';
 import { fetchLocations } from '../utils/geocoding';
+import { MIN_LOCATION_SEARCH_INPUT_LENGTH } from '../data/constants';
 
 interface LocationSearchRowProps {
   teamId: string;
@@ -35,7 +36,7 @@ const LocationSearchInput: React.FC<LocationSearchRowProps> = ({ teamId, onSelec
   }, [location]);
 
   const loadOptions = async (inputValue: string) => {
-    if (inputValue.length < 3) return [];
+    if (inputValue.length < MIN_LOCATION_SEARCH_INPUT_LENGTH) return [];
     const results = await fetchLocations(inputValue);
     return (
       results?.map(result => ({
@@ -62,9 +63,13 @@ const LocationSearchInput: React.FC<LocationSearchRowProps> = ({ teamId, onSelec
       value={selectedOption}
       placeholder="Search location"
       isClearable
-      noOptionsMessage={({ inputValue }) => (inputValue.length < 3 ? 'Input at least 3 characters' : 'No results')}
+      noOptionsMessage={({ inputValue }) =>
+        inputValue.length < MIN_LOCATION_SEARCH_INPUT_LENGTH
+          ? `Input at least ${MIN_LOCATION_SEARCH_INPUT_LENGTH} characters`
+          : 'No results'
+      }
+      className="w-full py-2 lg:px-2"
       styles={{
-        container: base => ({ ...base, padding: '0.5rem', width: '100%' }),
         singleValue: base => ({ ...base, textAlign: 'left' }),
       }}
       onFocus={onFocus}
