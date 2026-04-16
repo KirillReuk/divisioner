@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from 'react-leaflet';
 import { X } from 'lucide-react';
+import { getDivisionerSvgIcon } from './mapSelectionIcon';
 
 interface TeamMapPickerProps {
   latitude: number;
@@ -50,7 +51,7 @@ const TeamMapPicker: React.FC<TeamMapPickerProps> = ({ latitude, longitude, onPi
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <RecenterOnCoordinates latitude={latitude} longitude={longitude} />
         <MapClickHandler onClick={onPick} />
-        <Marker position={[latitude, longitude]} />
+        <Marker position={[latitude, longitude]} icon={getDivisionerSvgIcon()} />
       </MapContainer>
     </div>
   );
