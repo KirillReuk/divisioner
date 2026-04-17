@@ -32,9 +32,7 @@ export function useReverseGeocoding(teams: Team[], setTeams: React.Dispatch<Reac
     const currentTeam = teams.find(team => team.id === teamId);
     if (!currentTeam) return;
 
-    setTeams(prevTeams => {
-      return prevTeams.map(team => (team.id === teamId ? { ...team, [field]: value } : team));
-    });
+    setTeams(prevTeams => prevTeams.map(team => (team.id === teamId ? { ...team, [field]: value } : team)));
 
     setPendingCoords(prev => ({
       teamId,

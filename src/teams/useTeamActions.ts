@@ -38,13 +38,18 @@ export function useTeamActions({ setTeams, setMapPickerTeamId }: UseTeamActionsP
 
   const handleMapPick = async (teamId: string, lat: number, lng: number) => {
     const results = await fetchCoordinates(lat, lng);
-    if (results?.[0]) {
-      setTeams(prevTeams =>
-        prevTeams.map(team =>
-          team.id === teamId ? { ...team, latitude: lat, longitude: lng, location: results[0].formatted } : team
-        )
-      );
-    }
+    setTeams(prevTeams =>
+      prevTeams.map(team =>
+        team.id === teamId
+          ? {
+              ...team,
+              latitude: lat,
+              longitude: lng,
+              location: results?.[0]?.formatted || 'Could not fetch location name',
+            }
+          : team
+      )
+    );
   };
 
   const createMapPickHandler = (teamId: string) => (lat: number, lng: number) => {

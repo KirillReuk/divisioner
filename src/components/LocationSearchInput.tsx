@@ -3,7 +3,7 @@ import AsyncSelect from 'react-select/async';
 import { fetchLocations } from '../utils/geocoding';
 import { MIN_LOCATION_SEARCH_INPUT_LENGTH } from '../data/constants';
 
-interface LocationSearchRowProps {
+interface LocationSearchInputProps {
   teamId: string;
   onSelect: (teamId: string, formatted: string, lat: number, lng: number) => void;
   location?: string;
@@ -13,26 +13,21 @@ interface LocationSearchRowProps {
 interface LocationOption {
   label: string;
   value: string;
-  lat: number;
-  lng: number;
+  lat?: number;
+  lng?: number;
 }
 
-const LocationSearchInput: React.FC<LocationSearchRowProps> = ({ teamId, onSelect, location, onFocus }) => {
+const LocationSearchInput: React.FC<LocationSearchInputProps> = ({ teamId, onSelect, location, onFocus }) => {
   const [selectedOption, setSelectedOption] = useState<LocationOption | null>(null);
 
   useEffect(() => {
-    const loadInitialLocation = async () => {
-      if (location) {
-        const option = {
-          label: location,
-          value: location,
-          lat: 0,
-          lng: 0,
-        };
-        setSelectedOption(option);
-      }
-    };
-    loadInitialLocation();
+    if (location !== undefined) {
+      setSelectedOption(prevSelectedOption => ({
+        ...(prevSelectedOption ?? {}),
+        label: location,
+        value: location,
+      }));
+    }
   }, [location]);
 
   const loadOptions = async (inputValue: string) => {
@@ -51,7 +46,7 @@ const LocationSearchInput: React.FC<LocationSearchRowProps> = ({ teamId, onSelec
   const handleChange = (option: LocationOption | null) => {
     setSelectedOption(option);
     if (option) {
-      onSelect(teamId, option.value, option.lat, option.lng);
+      onSelect(teamId, option.value, option.lat ?? 0, option.lng ?? 0);
     }
   };
 
@@ -62,7 +57,6 @@ const LocationSearchInput: React.FC<LocationSearchRowProps> = ({ teamId, onSelec
       onChange={handleChange}
       value={selectedOption}
       placeholder="Search location"
-      isClearable
       noOptionsMessage={({ inputValue }) =>
         inputValue.length < MIN_LOCATION_SEARCH_INPUT_LENGTH
           ? `Input at least ${MIN_LOCATION_SEARCH_INPUT_LENGTH} characters`
