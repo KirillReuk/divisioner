@@ -9,13 +9,21 @@ type AriaProps = {
   'aria-describedby'?: string;
 };
 
+export const isValidCoords = (latitude: number, longitude: number) =>
+  isValidLatitude(latitude) && isValidLongitude(longitude);
+
+const isValidLatitude = (latitude: number) =>
+  Number.isFinite(latitude) && latitude >= MIN_LATITUDE && latitude <= MAX_LATITUDE;
+
+const isValidLongitude = (longitude: number) =>
+  Number.isFinite(longitude) && longitude >= MIN_LONGITUDE && longitude <= MAX_LONGITUDE;
+
 export const getCoordinateError = (field: CoordinateField, value: number): boolean => {
-  if (isNaN(value)) return true;
   switch (field) {
     case 'latitude':
-      return value < MIN_LATITUDE || value > MAX_LATITUDE;
+      return !isValidLatitude(value);
     case 'longitude':
-      return value < MIN_LONGITUDE || value > MAX_LONGITUDE;
+      return !isValidLongitude(value);
     default:
       return false;
   }
