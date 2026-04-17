@@ -33,12 +33,13 @@ Without this variable, the app still runs, but geocoding search/reverse lookup i
 This project deploys to GitHub Pages via GitHub Actions.
 
 For full setup and maintainer runbook (secrets, Pages settings, verification, troubleshooting), see [`docs/deploy.md`](docs/deploy.md).
-
+Alternatively you can find a hosted version at https://kirillreuk.github.io/divisioner
 
 ## 📦 Presets
 Includes built-in presets like:
 
 - NBA teams
+- WNBA teams
 - Euroleague teams
 - More coming soon...
 
