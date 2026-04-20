@@ -109,12 +109,15 @@ describe('useTeamActions', () => {
     ]);
   });
 
-  it('map pick does not update teams when geocoding returns no results', async () => {
+  it('map pick updates team coordinates when geocoding returns no results', async () => {
     vi.mocked(fetchCoordinates).mockResolvedValueOnce(null);
 
     actions.createMapPickHandler('a')(10, 20);
     await flushAsync();
 
-    expect(teams).toEqual([makeTeam('a'), makeTeam('b')]);
+    expect(teams).toEqual([
+      makeTeam('a', { latitude: 10, longitude: 20, location: 'Could not fetch location name' }),
+      makeTeam('b'),
+    ]);
   });
 });
