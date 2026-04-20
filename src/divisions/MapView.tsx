@@ -6,6 +6,7 @@ import { Division } from '../utils/types';
 import { TILE_LAYER_URL } from '../data/constants';
 import FitBounds from './FitBounds';
 import { getMarkerIconForDivisionColor } from './markerIcon';
+import { normalizeCoordinate } from '../utils/geocoding';
 
 interface MapViewProps {
   divisions: Division[];
@@ -26,7 +27,7 @@ const MapView: React.FC<MapViewProps> = ({ divisions }) => {
       division.teams.forEach((team, teamIndex) => {
         items.push({
           key: `team-${divisionIndex}-${teamIndex}`,
-          position: [team.latitude, team.longitude],
+          position: [normalizeCoordinate(team.latitude), normalizeCoordinate(team.longitude)],
           icon: getMarkerIconForDivisionColor(division.color),
           tooltipLabel: team.shortName ?? team.name,
           tooltipDirection: (divisionIndex + teamIndex) % 2 === 0 ? 'right' : 'left',
