@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import debounce from 'lodash.debounce';
 import { CoordinateField, Team } from '../utils/types';
 import { fetchCoordinates } from '../utils/geocoding';
@@ -8,6 +8,8 @@ type PendingCoords = { teamId: string; latitude: number; longitude: number };
 
 export function useReverseGeocoding(teams: Team[], setTeams: React.Dispatch<React.SetStateAction<Team[]>>) {
   const pendingRef = useRef<PendingCoords | null>(null);
+  const teamsRef = useRef(teams);
+  teamsRef.current = teams;
   const setTeamsRef = useRef(setTeams);
   setTeamsRef.current = setTeams;
 
@@ -29,26 +31,31 @@ export function useReverseGeocoding(teams: Team[], setTeams: React.Dispatch<Reac
     return () => debouncedFetch.cancel();
   }, []);
 
-  const handleCoordinatesChange = (teamId: string, field: CoordinateField, value: number) => {
-    const currentTeam = teams.find(team => team.id === teamId);
-    if (!currentTeam) return;
+  const handleCoordinatesChange = useCallback(
+    (teamId: string, field: CoordinateField, value: number) => {
+      const currentTeam = teamsRef.current.find(team => team.id === teamId);
+      if (!currentTeam) return;
 
-    setTeams(prevTeams => prevTeams.map(team => (team.id === teamId ? { ...team, [field]: value } : team)));
+      setTeamsRef.current(prevTeams =>
+        prevTeams.map(team => (team.id === teamId ? { ...team, [field]: value } : team))
+      );
 
-    const prev = pendingRef.current;
+      const prev = pendingRef.current;
 
-    if (prev && prev.teamId !== teamId) {
-      debouncedFetch.flush();
-    }
+      if (prev && prev.teamId !== teamId) {
+        debouncedFetch.flush();
+      }
 
-    pendingRef.current = {
-      teamId,
-      latitude: field === 'latitude' ? value : prev?.teamId === teamId ? prev.latitude : currentTeam.latitude,
-      longitude: field === 'longitude' ? value : prev?.teamId === teamId ? prev.longitude : currentTeam.longitude,
-    };
+      pendingRef.current = {
+        teamId,
+        latitude: field === 'latitude' ? value : prev?.teamId === teamId ? prev.latitude : currentTeam.latitude,
+        longitude: field === 'longitude' ? value : prev?.teamId === teamId ? prev.longitude : currentTeam.longitude,
+      };
 
-    debouncedFetch();
-  };
+      debouncedFetch();
+    },
+    [debouncedFetch]
+  );
 
   return { handleCoordinatesChange };
 }

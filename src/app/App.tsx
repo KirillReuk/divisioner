@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from 'react';
+import { useCallback, useEffect, useReducer, useState } from 'react';
 import { Rivalry, Tab, Team } from '../utils/types';
 import MapView from '../divisions/MapView';
 import TeamView from '../teams/TeamViewer';
@@ -20,20 +20,17 @@ const App: React.FC = () => {
   const [state, dispatch] = useReducer(teamBuilderReducer, initialTeamBuilderState);
   const { divisions, conferences, teams, rivalries, divisionsCount, mapPickerTeamId } = state;
 
-  const setTeams: React.Dispatch<React.SetStateAction<Team[]>> = value => {
-    const nextTeams = typeof value === 'function' ? value(teams) : value;
-    dispatch({ type: 'SET_TEAMS', payload: { teams: nextTeams } });
-  };
+  const setTeams: React.Dispatch<React.SetStateAction<Team[]>> = useCallback(value => {
+    dispatch({ type: 'SET_TEAMS', payload: { value } });
+  }, []);
 
-  const setDivisionsCount: React.Dispatch<React.SetStateAction<number>> = value => {
-    const nextCount = typeof value === 'function' ? value(divisionsCount) : value;
-    dispatch({ type: 'SET_DIVISIONS_COUNT', payload: { count: nextCount } });
-  };
+  const setDivisionsCount: React.Dispatch<React.SetStateAction<number>> = useCallback(value => {
+    dispatch({ type: 'SET_DIVISIONS_COUNT', payload: { value } });
+  }, []);
 
-  const setMapPickerTeamId: React.Dispatch<React.SetStateAction<string | null>> = value => {
-    const nextTeamId = typeof value === 'function' ? value(mapPickerTeamId) : value;
-    dispatch({ type: 'SET_MAP_PICKER_TEAM_ID', payload: { teamId: nextTeamId } });
-  };
+  const setMapPickerTeamId: React.Dispatch<React.SetStateAction<string | null>> = useCallback(value => {
+    dispatch({ type: 'SET_MAP_PICKER_TEAM_ID', payload: { value } });
+  }, []);
 
   useEffect(() => {
     const hasSeenIntro = localStorage.getItem('hasSeenIntro');

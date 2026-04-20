@@ -136,4 +136,4 @@ const TeamRow: React.FC<TeamRowProps> = ({
   );
 };
 
-export default TeamRow;
+export default React.memo(TeamRow);
