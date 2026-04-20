@@ -60,3 +60,7 @@ export const fetchCoordinates = async (lat: number, lng: number): Promise<Geocod
   const url = `${GEOCODING_API_URL}?q=${encodeURIComponent(`${lat} ${lng}`)}&key=${apiKey}`;
   return fetchGeocodingData(url);
 };
+
+export const normalizeCoordinate = (coordinate: number) => {
+  return parseFloat((((((coordinate + 180) % 360) + 360) % 360) - 180).toFixed(3));
+};

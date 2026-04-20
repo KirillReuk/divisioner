@@ -1,5 +1,5 @@
 import { createDefaultTeam } from '../data/constants';
-import { fetchCoordinates } from '../utils/geocoding';
+import { fetchCoordinates, normalizeCoordinate } from '../utils/geocoding';
 import { Team } from '../utils/types';
 
 interface UseTeamActionsParams {
@@ -37,7 +37,7 @@ export function useTeamActions({ setTeams, setMapPickerTeamId }: UseTeamActionsP
   const handleCloseMapPicker = () => setMapPickerTeamId(null);
 
   const handleMapPick = async (teamId: string, lat: number, lng: number) => {
-    const results = await fetchCoordinates(lat, lng);
+    const results = await fetchCoordinates(normalizeCoordinate(lat), normalizeCoordinate(lng));
     setTeams(prevTeams =>
       prevTeams.map(team =>
         team.id === teamId
@@ -53,7 +53,7 @@ export function useTeamActions({ setTeams, setMapPickerTeamId }: UseTeamActionsP
   };
 
   const createMapPickHandler = (teamId: string) => (lat: number, lng: number) => {
-    void handleMapPick(teamId, parseFloat(lat.toFixed(3)), parseFloat(lng.toFixed(3)));
+    void handleMapPick(teamId, lat, lng);
   };
 
   return {

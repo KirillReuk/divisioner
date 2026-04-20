@@ -6,6 +6,7 @@ import { MAX_LATITUDE, MAX_LONGITUDE, MIN_LATITUDE, MIN_LONGITUDE } from '../dat
 import { CoordinateField, Team } from '../utils/types';
 import type { SpectralRowTint } from '../utils/spectralColors';
 import { useTeamValidation } from './useTeamValidation';
+import { normalizeCoordinate } from '../utils/geocoding';
 
 interface TeamRowProps {
   team: Team;
@@ -28,7 +29,13 @@ const TeamRow: React.FC<TeamRowProps> = ({
   onCoordinateChange,
   onRemove,
 }) => {
-  const { errors, validateLatLng, getAriaPropsForField } = useTeamValidation(team.id, team.latitude, team.longitude);
+  const normalizedLatitude = normalizeCoordinate(team.latitude);
+  const normalizedLongitude = normalizeCoordinate(team.longitude);
+  const { errors, validateLatLng, getAriaPropsForField } = useTeamValidation(
+    team.id,
+    normalizedLatitude,
+    normalizedLongitude
+  );
 
   const rowStyle: React.CSSProperties | undefined = rivalryRowStyle
     ? {
@@ -73,7 +80,7 @@ const TeamRow: React.FC<TeamRowProps> = ({
           <input
             type="number"
             name={`latitude-${team.id}`}
-            value={team.latitude}
+            value={normalizedLatitude}
             min={MIN_LATITUDE}
             max={MAX_LATITUDE}
             step="0.001"
@@ -94,7 +101,7 @@ const TeamRow: React.FC<TeamRowProps> = ({
           <input
             type="number"
             name={`longitude-${team.id}`}
-            value={team.longitude}
+            value={normalizedLongitude}
             min={MIN_LONGITUDE}
             max={MAX_LONGITUDE}
             step="0.001"
