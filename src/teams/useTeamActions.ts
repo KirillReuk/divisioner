@@ -36,7 +36,7 @@ export function useTeamActions({ setTeams, setMapPickerTeamId }: UseTeamActionsP
 
   const handleCloseMapPicker = () => setMapPickerTeamId(null);
 
-  const handleMapPick = async (teamId: string, lat: number, lng: number) => {
+  const createMapPickHandler = (teamId: string) => async (lat: number, lng: number) => {
     setTeams(prevTeams =>
       prevTeams.map(team =>
         team.id === teamId
@@ -61,10 +61,6 @@ export function useTeamActions({ setTeams, setMapPickerTeamId }: UseTeamActionsP
           : team
       )
     );
-  };
-
-  const createMapPickHandler = (teamId: string) => (lat: number, lng: number) => {
-    void handleMapPick(teamId, lat, lng);
   };
 
   return {
