@@ -6,7 +6,7 @@ interface EditableTeamsProps {
   divisionsCount: number;
   rivalries: Rivalry[];
   generateConferences: (teams: Team[], divisionCount: number, rivalries: Rivalry[]) => void;
-  setDivisionsCount: React.Dispatch<React.SetStateAction<number>>;
+  setDivisionsCount: React.Dispatch<number>;
   setActiveTab: React.Dispatch<React.SetStateAction<Tab>>;
 }
 

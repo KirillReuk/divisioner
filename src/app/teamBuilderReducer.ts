@@ -10,13 +10,11 @@ export type TeamBuilderState = {
   mapPickerTeamId: string | null;
 };
 
-type SetPayload<T> = { value: T | ((previousValue: T) => T) };
-
 export type TeamBuilderAction =
-  | { type: 'SET_TEAMS'; payload: SetPayload<Team[]> }
+  | { type: 'SET_TEAMS'; payload: { teams: Team[] | ((previousTeams: Team[]) => Team[]) } }
   | { type: 'SET_RIVALRIES'; payload: { rivalries: Rivalry[] } }
-  | { type: 'SET_DIVISIONS_COUNT'; payload: SetPayload<number> }
-  | { type: 'SET_MAP_PICKER_TEAM_ID'; payload: SetPayload<string | null> }
+  | { type: 'SET_DIVISIONS_COUNT'; payload: { count: number } }
+  | { type: 'SET_MAP_PICKER_TEAM_ID'; payload: { teamId: string | null } }
   | { type: 'APPLY_PRESET'; payload: { teams: Team[]; divisionsCount?: number } }
   | { type: 'ADD_RIVALRY'; payload: { rivalry: Rivalry } }
   | { type: 'REMOVE_RIVALRY'; payload: { rivalryIndex: number } }
@@ -43,7 +41,7 @@ export const teamBuilderReducer = (state: TeamBuilderState, action: TeamBuilderA
   switch (action.type) {
     case 'SET_TEAMS': {
       const nextTeams =
-        typeof action.payload.value === 'function' ? action.payload.value(state.teams) : action.payload.value;
+        typeof action.payload.teams === 'function' ? action.payload.teams(state.teams) : action.payload.teams;
       return {
         ...state,
         ...invalidateStructure(),
@@ -62,16 +60,10 @@ export const teamBuilderReducer = (state: TeamBuilderState, action: TeamBuilderA
         ...invalidateStructure(),
         rivalries: action.payload.rivalries.slice(0, MAX_RIVALRIES),
       };
-    case 'SET_DIVISIONS_COUNT': {
-      const nextCount =
-        typeof action.payload.value === 'function' ? action.payload.value(state.divisionsCount) : action.payload.value;
-      return { ...state, ...invalidateStructure(), divisionsCount: nextCount };
-    }
-    case 'SET_MAP_PICKER_TEAM_ID': {
-      const nextTeamId =
-        typeof action.payload.value === 'function' ? action.payload.value(state.mapPickerTeamId) : action.payload.value;
-      return { ...state, mapPickerTeamId: nextTeamId };
-    }
+    case 'SET_DIVISIONS_COUNT':
+      return { ...state, ...invalidateStructure(), divisionsCount: action.payload.count };
+    case 'SET_MAP_PICKER_TEAM_ID':
+      return { ...state, mapPickerTeamId: action.payload.teamId };
     case 'APPLY_PRESET':
       return {
         ...state,

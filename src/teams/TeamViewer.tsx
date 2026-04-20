@@ -14,7 +14,7 @@ interface EditableTeamsProps {
   onOpenPresetModal: () => void;
   setShowRivalry: React.Dispatch<React.SetStateAction<boolean>>;
   mapPickerTeamId: string | null;
-  setMapPickerTeamId: React.Dispatch<React.SetStateAction<string | null>>;
+  setMapPickerTeamId: React.Dispatch<string | null>;
 }
 
 const TeamView: React.FC<EditableTeamsProps> = ({

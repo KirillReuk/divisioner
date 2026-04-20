@@ -21,15 +21,15 @@ const App: React.FC = () => {
   const { divisions, conferences, teams, rivalries, divisionsCount, mapPickerTeamId } = state;
 
   const setTeams: React.Dispatch<React.SetStateAction<Team[]>> = useCallback(value => {
-    dispatch({ type: 'SET_TEAMS', payload: { value } });
+    dispatch({ type: 'SET_TEAMS', payload: { teams: value } });
   }, []);
 
-  const setDivisionsCount: React.Dispatch<React.SetStateAction<number>> = useCallback(value => {
-    dispatch({ type: 'SET_DIVISIONS_COUNT', payload: { value } });
+  const setDivisionsCount: React.Dispatch<number> = useCallback(value => {
+    dispatch({ type: 'SET_DIVISIONS_COUNT', payload: { count: value } });
   }, []);
 
-  const setMapPickerTeamId: React.Dispatch<React.SetStateAction<string | null>> = useCallback(value => {
-    dispatch({ type: 'SET_MAP_PICKER_TEAM_ID', payload: { value } });
+  const setMapPickerTeamId: React.Dispatch<string | null> = useCallback(value => {
+    dispatch({ type: 'SET_MAP_PICKER_TEAM_ID', payload: { teamId: value } });
   }, []);
 
   useEffect(() => {

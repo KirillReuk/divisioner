@@ -5,7 +5,7 @@ import { Team } from '../utils/types';
 
 interface UseTeamActionsParams {
   setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
-  setMapPickerTeamId: React.Dispatch<React.SetStateAction<string | null>>;
+  setMapPickerTeamId: React.Dispatch<string | null>;
 }
 
 export function useTeamActions({ setTeams, setMapPickerTeamId }: UseTeamActionsParams) {
