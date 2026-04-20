@@ -37,6 +37,17 @@ export function useTeamActions({ setTeams, setMapPickerTeamId }: UseTeamActionsP
   const handleCloseMapPicker = () => setMapPickerTeamId(null);
 
   const handleMapPick = async (teamId: string, lat: number, lng: number) => {
+    setTeams(prevTeams =>
+      prevTeams.map(team =>
+        team.id === teamId
+          ? {
+              ...team,
+              latitude: lat,
+              longitude: lng,
+            }
+          : team
+      )
+    );
     const results = await fetchCoordinates(normalizeCoordinate(lat), normalizeCoordinate(lng));
     setTeams(prevTeams =>
       prevTeams.map(team =>
