@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import debounce from 'lodash.debounce';
 import { CoordinateField, Team } from '../utils/types';
 import { fetchCoordinates } from '../utils/geocoding';
 import { isValidCoords } from './useTeamValidation';
+import { LOCATION_SEARCH_DEBOUNCE_MS } from '../data/constants';
 
 type PendingCoords = { teamId: string; latitude: number; longitude: number };
 
@@ -13,19 +14,21 @@ export function useReverseGeocoding(teams: Team[], setTeams: React.Dispatch<Reac
   const setTeamsRef = useRef(setTeams);
   setTeamsRef.current = setTeams;
 
-  const debouncedFetch = useRef(
-    debounce(async () => {
-      const coords = pendingRef.current;
-      if (!coords || !isValidCoords(coords.latitude, coords.longitude)) return;
+  const debouncedFetch = useMemo(
+    () =>
+      debounce(async () => {
+        const coords = pendingRef.current;
+        if (!coords || !isValidCoords(coords.latitude, coords.longitude)) return;
 
-      const results = await fetchCoordinates(coords.latitude, coords.longitude);
-      if (results && results.length > 0) {
-        setTeamsRef.current(prevTeams =>
-          prevTeams.map(team => (team.id === coords.teamId ? { ...team, location: results[0].formatted } : team))
-        );
-      }
-    }, 500)
-  ).current;
+        const results = await fetchCoordinates(coords.latitude, coords.longitude);
+        if (results && results.length > 0) {
+          setTeamsRef.current(prevTeams =>
+            prevTeams.map(team => (team.id === coords.teamId ? { ...team, location: results[0].formatted } : team))
+          );
+        }
+      }, LOCATION_SEARCH_DEBOUNCE_MS),
+    []
+  );
 
   useEffect(() => {
     return () => debouncedFetch.cancel();

@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import AsyncSelect from 'react-select/async';
 import { fetchLocations } from '../utils/geocoding';
-import { MIN_LOCATION_SEARCH_INPUT_LENGTH } from '../data/constants';
+import { LOCATION_SEARCH_DEBOUNCE_MS, MIN_LOCATION_SEARCH_INPUT_LENGTH } from '../data/constants';
 import { useAbortableLatest } from '../teams/useTeamActions';
+import debounce from 'lodash.debounce';
 
 interface LocationSearchInputProps {
   teamId: string;
@@ -32,22 +33,27 @@ const LocationSearchInput: React.FC<LocationSearchInputProps> = ({ teamId, onSel
     }
   }, [location]);
 
-  const loadOptions = async (inputValue: string) => {
-    if (inputValue.length < MIN_LOCATION_SEARCH_INPUT_LENGTH) return [];
+  const loadOptions = useMemo(
+    () =>
+      debounce(async (inputValue: string, callback: (options: LocationOption[]) => void) => {
+        if (inputValue.length < MIN_LOCATION_SEARCH_INPUT_LENGTH) return callback([]);
 
-    const signal = latestControllerSignal();
-    const results = await fetchLocations(inputValue, signal);
-    if (signal.aborted) return new Promise<LocationOption[]>(() => {});
+        const signal = latestControllerSignal();
+        const results = await fetchLocations(inputValue, signal);
+        if (signal.aborted) return;
+        callback(
+          results?.map(result => ({
+            label: result.formatted,
+            value: result.formatted,
+            lat: result.geometry.lat,
+            lng: result.geometry.lng,
+          })) ?? []
+        );
+      }, LOCATION_SEARCH_DEBOUNCE_MS),
+    [latestControllerSignal]
+  );
 
-    return (
-      results?.map(result => ({
-        label: result.formatted,
-        value: result.formatted,
-        lat: result.geometry.lat,
-        lng: result.geometry.lng,
-      })) || []
-    );
-  };
+  useEffect(() => () => loadOptions.cancel(), [loadOptions]);
 
   const handleChange = (option: LocationOption | null) => {
     setSelectedOption(option);
@@ -59,7 +65,7 @@ const LocationSearchInput: React.FC<LocationSearchInputProps> = ({ teamId, onSel
   return (
     <AsyncSelect
       cacheOptions
-      loadOptions={loadOptions}
+      loadOptions={(inputValue, callback) => void loadOptions(inputValue, callback)}
       onChange={handleChange}
       value={selectedOption}
       placeholder="Search location"

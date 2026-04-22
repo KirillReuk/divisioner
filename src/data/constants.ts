@@ -15,6 +15,7 @@ export const MIN_LONGITUDE = -180;
 
 // Location Search Input
 export const MIN_LOCATION_SEARCH_INPUT_LENGTH = 3;
+export const LOCATION_SEARCH_DEBOUNCE_MS = 300;
 
 // Division Count
 export const DEFAULT_DIVISION_COUNT = 8;
