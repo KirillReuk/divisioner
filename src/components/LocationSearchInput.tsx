@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import AsyncSelect from 'react-select/async';
 import { fetchLocations } from '../utils/geocoding';
 import { MIN_LOCATION_SEARCH_INPUT_LENGTH } from '../data/constants';
@@ -19,6 +19,7 @@ interface LocationOption {
 
 const LocationSearchInput: React.FC<LocationSearchInputProps> = ({ teamId, onSelect, location, onFocus }) => {
   const [selectedOption, setSelectedOption] = useState<LocationOption | null>(null);
+  const latestRequestController = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (location !== undefined) {
@@ -30,9 +31,17 @@ const LocationSearchInput: React.FC<LocationSearchInputProps> = ({ teamId, onSel
     }
   }, [location]);
 
+  useEffect(() => () => latestRequestController.current?.abort(), []);
+
   const loadOptions = async (inputValue: string) => {
     if (inputValue.length < MIN_LOCATION_SEARCH_INPUT_LENGTH) return [];
-    const results = await fetchLocations(inputValue);
+
+    latestRequestController.current?.abort();
+    const currentController = new AbortController();
+    latestRequestController.current = currentController;
+    const results = await fetchLocations(inputValue, currentController.signal);
+    if (currentController.signal.aborted) return new Promise<LocationOption[]>(() => {});
+
     return (
       results?.map(result => ({
         label: result.formatted,

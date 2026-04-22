@@ -42,14 +42,14 @@ const fetchGeocodingData = async (url: string, signal?: AbortSignal): Promise<Ge
   return null;
 };
 
-export const fetchLocations = async (searchQuery: string): Promise<GeocodingResult[] | null> => {
+export const fetchLocations = async (searchQuery: string, signal?: AbortSignal): Promise<GeocodingResult[] | null> => {
   const apiKey = getApiKey();
   if (!apiKey) {
     return null;
   }
 
   const url = `${GEOCODING_API_URL}?q=${encodeURIComponent(searchQuery)}&key=${apiKey}`;
-  return fetchGeocodingData(url);
+  return fetchGeocodingData(url, signal);
 };
 
 export const fetchCoordinates = async (
