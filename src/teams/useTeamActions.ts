@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { createDefaultTeam } from '../data/constants';
 import { fetchCoordinates, normalizeCoordinate } from '../utils/geocoding';
 import { Team } from '../utils/types';
@@ -9,6 +9,10 @@ interface UseTeamActionsParams {
 }
 
 export function useTeamActions({ setTeams, setMapPickerTeamId }: UseTeamActionsParams) {
+  const latestRequestController = useRef<AbortController | null>(null);
+
+  useEffect(() => () => latestRequestController.current?.abort(), []);
+
   const handleTeamNameChange = useCallback(
     (teamId: string, value: string) => {
       setTeams(prevTeams => prevTeams.map(team => (team.id === teamId ? { ...team, name: value } : team)));
@@ -57,7 +61,17 @@ export function useTeamActions({ setTeams, setMapPickerTeamId }: UseTeamActionsP
             : team
         )
       );
-      const results = await fetchCoordinates(normalizeCoordinate(lat), normalizeCoordinate(lng));
+
+      latestRequestController.current?.abort();
+      const currentController = new AbortController();
+      latestRequestController.current = currentController;
+      const results = await fetchCoordinates(
+        normalizeCoordinate(lat),
+        normalizeCoordinate(lng),
+        currentController.signal
+      );
+      if (currentController.signal.aborted) return;
+
       setTeams(prevTeams =>
         prevTeams.map(team =>
           team.id === teamId

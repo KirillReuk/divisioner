@@ -27,15 +27,16 @@ const getApiKey = (): string | null => {
   return null;
 };
 
-const fetchGeocodingData = async (url: string): Promise<GeocodingResult[] | null> => {
+const fetchGeocodingData = async (url: string, signal?: AbortSignal): Promise<GeocodingResult[] | null> => {
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, { signal });
     const data: GeocodingResponse = await response.json();
 
     if (data.results) {
       return data.results;
     }
   } catch (error) {
+    if ((error as Error)?.name === 'AbortError') return null;
     console.error('Error fetching location data:', error);
   }
   return null;
@@ -51,14 +52,18 @@ export const fetchLocations = async (searchQuery: string): Promise<GeocodingResu
   return fetchGeocodingData(url);
 };
 
-export const fetchCoordinates = async (lat: number, lng: number): Promise<GeocodingResult[] | null> => {
+export const fetchCoordinates = async (
+  lat: number,
+  lng: number,
+  signal?: AbortSignal
+): Promise<GeocodingResult[] | null> => {
   const apiKey = getApiKey();
   if (!apiKey) {
     return null;
   }
 
   const url = `${GEOCODING_API_URL}?q=${encodeURIComponent(`${lat} ${lng}`)}&key=${apiKey}`;
-  return fetchGeocodingData(url);
+  return fetchGeocodingData(url, signal);
 };
 
 export const normalizeCoordinate = (coordinate: number) => {
