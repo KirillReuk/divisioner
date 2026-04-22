@@ -8,10 +8,20 @@ interface UseTeamActionsParams {
   setMapPickerTeamId: React.Dispatch<string | null>;
 }
 
-export function useTeamActions({ setTeams, setMapPickerTeamId }: UseTeamActionsParams) {
+export function useAbortableLatest() {
   const latestRequestController = useRef<AbortController | null>(null);
-
   useEffect(() => () => latestRequestController.current?.abort(), []);
+
+  return useCallback(() => {
+    latestRequestController.current?.abort();
+    const currentController = new AbortController();
+    latestRequestController.current = currentController;
+    return currentController.signal;
+  }, []);
+}
+
+export function useTeamActions({ setTeams, setMapPickerTeamId }: UseTeamActionsParams) {
+  const latestControllerSignal = useAbortableLatest();
 
   const handleTeamNameChange = useCallback(
     (teamId: string, value: string) => {
@@ -62,15 +72,9 @@ export function useTeamActions({ setTeams, setMapPickerTeamId }: UseTeamActionsP
         )
       );
 
-      latestRequestController.current?.abort();
-      const currentController = new AbortController();
-      latestRequestController.current = currentController;
-      const results = await fetchCoordinates(
-        normalizeCoordinate(lat),
-        normalizeCoordinate(lng),
-        currentController.signal
-      );
-      if (currentController.signal.aborted) return;
+      const signal = latestControllerSignal();
+      const results = await fetchCoordinates(normalizeCoordinate(lat), normalizeCoordinate(lng), signal);
+      if (signal.aborted) return;
 
       setTeams(prevTeams =>
         prevTeams.map(team =>
