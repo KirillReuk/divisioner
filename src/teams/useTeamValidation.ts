@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { MAX_LATITUDE, MAX_LONGITUDE, MIN_LATITUDE, MIN_LONGITUDE } from '../data/constants';
 import { CoordinateField } from '../utils/types';
+import { normalizeCoordinate } from '../utils/geocoding';
 
 type TeamFieldErrors = Record<CoordinateField, boolean>;
 
@@ -9,16 +10,21 @@ type AriaProps = {
   'aria-describedby'?: string;
 };
 
-export const isValidCoords = (latitude: number, longitude: number) =>
-  isValidLatitude(latitude) && isValidLongitude(longitude);
+export const hasValidCoords = <T extends { latitude: number | null; longitude: number | null }>(
+  item: T
+): item is T & { latitude: number; longitude: number } => {
+  if (item.latitude == null || item.longitude == null) return false;
+  if (!Number.isFinite(item.latitude) || !Number.isFinite(item.longitude)) return false;
+  return isValidLatitude(normalizeCoordinate(item.latitude)) && isValidLongitude(normalizeCoordinate(item.longitude));
+};
 
-const isValidLatitude = (latitude: number) =>
-  Number.isFinite(latitude) && latitude >= MIN_LATITUDE && latitude <= MAX_LATITUDE;
+const isValidLatitude = (latitude: number | null): latitude is number =>
+  latitude != null && Number.isFinite(latitude) && latitude >= MIN_LATITUDE && latitude <= MAX_LATITUDE;
 
-const isValidLongitude = (longitude: number) =>
-  Number.isFinite(longitude) && longitude >= MIN_LONGITUDE && longitude <= MAX_LONGITUDE;
+const isValidLongitude = (longitude: number | null): longitude is number =>
+  longitude != null && Number.isFinite(longitude) && longitude >= MIN_LONGITUDE && longitude <= MAX_LONGITUDE;
 
-export const getCoordinateError = (field: CoordinateField, value: number): boolean => {
+export const getCoordinateError = (field: CoordinateField, value: number | null): boolean => {
   switch (field) {
     case 'latitude':
       return !isValidLatitude(value);
@@ -29,7 +35,7 @@ export const getCoordinateError = (field: CoordinateField, value: number): boole
   }
 };
 
-export const useTeamValidation = (teamId: string, latitude: number, longitude: number) => {
+export const useTeamValidation = (teamId: string, latitude: number | null, longitude: number | null) => {
   const [errors, setErrors] = useState<TeamFieldErrors>(() => ({
     latitude: getCoordinateError('latitude', latitude),
     longitude: getCoordinateError('longitude', longitude),
@@ -42,7 +48,7 @@ export const useTeamValidation = (teamId: string, latitude: number, longitude: n
     });
   }, [latitude, longitude]);
 
-  const validateLatLng = (field: CoordinateField, value: number) => {
+  const validateLatLng = (field: CoordinateField, value: number | null) => {
     setErrors(prev => ({
       ...prev,
       [field]: getCoordinateError(field, value),

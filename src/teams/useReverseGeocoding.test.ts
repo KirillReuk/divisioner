@@ -7,9 +7,13 @@ import { useReverseGeocoding } from './useReverseGeocoding';
 import { fetchCoordinates } from '../utils/geocoding';
 import type { Team } from '../utils/types';
 
-vi.mock('../utils/geocoding', () => ({
-  fetchCoordinates: vi.fn(),
-}));
+vi.mock('../utils/geocoding', async importOriginal => {
+  const actual = await importOriginal<typeof import('../utils/geocoding')>();
+  return {
+    ...actual,
+    fetchCoordinates: vi.fn(),
+  };
+});
 
 const makeTeam = (id: string, latitude: number, longitude: number, location = ''): Team => ({
   id,

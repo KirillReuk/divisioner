@@ -3,10 +3,12 @@ export interface Team {
   name: string;
   shortName?: string;
   location: string;
+  latitude: number | null;
+  longitude: number | null;
+}
+export interface TeamWithPseudo extends Omit<Team, 'latitude' | 'longitude'> {
   latitude: number;
   longitude: number;
-}
-export interface TeamWithPseudo extends Team {
   teamsIncluded?: Team[];
 }
 

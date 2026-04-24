@@ -1,5 +1,6 @@
 import React from 'react';
 import { Rivalry, Tab, Team } from '../utils/types';
+import { hasValidCoords } from './useTeamValidation';
 
 interface EditableTeamsProps {
   teams: Team[];
@@ -24,7 +25,12 @@ const DivisionCountInput: React.FC<EditableTeamsProps> = ({
       setDivisionsCount(value);
     }
   };
-  const canGenerateDivisions = teams.length > 0;
+  const canGenerateDivisions = teams.length > 0 && teams.every(hasValidCoords);
+  const generateDisabledTitle = !canGenerateDivisions
+    ? teams.length === 0
+      ? 'To generate divisions you need at least one team'
+      : 'Every team needs a valid latitude and longitude before generating divisions'
+    : undefined;
 
   return (
     <div className="flex items-center p-4 bg-gray-100 mb-4">
@@ -45,7 +51,7 @@ const DivisionCountInput: React.FC<EditableTeamsProps> = ({
           generateConferences(teams, Math.min(divisionsCount, teams.length), rivalries);
           setActiveTab('divisions');
         }}
-        title={!canGenerateDivisions ? 'To generate divisions you need at least one team' : undefined}
+        title={generateDisabledTitle}
         className="flex-1 bg-blue-500 text-white rounded h-8 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Generate Divisions

@@ -25,6 +25,7 @@ const MapView: React.FC<MapViewProps> = ({ divisions }) => {
     const items: MapMarkerItem[] = [];
     divisions.forEach((division, divisionIndex) => {
       division.teams.forEach((team, teamIndex) => {
+        if (team.latitude == null || team.longitude == null) return;
         items.push({
           key: `team-${divisionIndex}-${teamIndex}`,
           position: [normalizeCoordinate(team.latitude), normalizeCoordinate(team.longitude)],

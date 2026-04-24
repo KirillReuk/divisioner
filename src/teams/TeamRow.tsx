@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { X } from 'lucide-react';
 import LocationSearchInput from '../components/LocationSearchInput';
@@ -15,9 +15,15 @@ interface TeamRowProps {
   onTeamNameChange: (teamId: string, value: string) => void;
   onLocationSelect: (teamId: string, location: string, latitude: number, longitude: number) => void;
   onLocationFocus: (teamId: string) => void;
-  onCoordinateChange: (teamId: string, field: CoordinateField, value: number) => void;
+  onCoordinateChange: (teamId: string, field: CoordinateField, value: number | null) => void;
   onRemove: (teamId: string) => void;
 }
+
+const convertDisplayStringToCoordinate = (draft: string): number | null => {
+  if (draft === '') return null;
+  const parsed = parseFloat(draft);
+  return Number.isFinite(parsed) ? parsed : null;
+};
 
 const TeamRow: React.FC<TeamRowProps> = ({
   team,
@@ -29,13 +35,41 @@ const TeamRow: React.FC<TeamRowProps> = ({
   onCoordinateChange,
   onRemove,
 }) => {
-  const normalizedLatitude = normalizeCoordinate(team.latitude);
-  const normalizedLongitude = normalizeCoordinate(team.longitude);
+  const normalizedLatitude = team.latitude == null ? null : normalizeCoordinate(team.latitude);
+  const normalizedLongitude = team.longitude == null ? null : normalizeCoordinate(team.longitude);
+  const latitudeDisplay = normalizedLatitude == null ? '' : String(normalizedLatitude);
+  const longitudeDisplay = normalizedLongitude == null ? '' : String(normalizedLongitude);
   const { errors, validateLatLng, getAriaPropsForField } = useTeamValidation(
     team.id,
     normalizedLatitude,
     normalizedLongitude
   );
+
+  const [latitudeDraft, setLatitudeDraft] = useState(latitudeDisplay);
+  const [longitudeDraft, setLongitudeDraft] = useState(longitudeDisplay);
+
+  useEffect(() => {
+    if (convertDisplayStringToCoordinate(latitudeDraft) !== normalizedLatitude) {
+      setLatitudeDraft(latitudeDisplay);
+    }
+  }, [normalizedLatitude]);
+
+  useEffect(() => {
+    if (convertDisplayStringToCoordinate(longitudeDraft) !== normalizedLongitude) {
+      setLongitudeDraft(longitudeDisplay);
+    }
+  }, [normalizedLongitude]);
+
+  const handleCoordinateInputChange = (
+    field: CoordinateField,
+    rawInput: string,
+    setDraft: React.Dispatch<React.SetStateAction<string>>
+  ) => {
+    setDraft(rawInput);
+    const coordinate = convertDisplayStringToCoordinate(rawInput);
+    validateLatLng(field, coordinate);
+    onCoordinateChange(team.id, field, coordinate);
+  };
 
   const rowStyle: React.CSSProperties | undefined = rivalryRowStyle
     ? {
@@ -80,15 +114,11 @@ const TeamRow: React.FC<TeamRowProps> = ({
           <input
             type="number"
             name={`latitude-${team.id}`}
-            value={normalizedLatitude}
+            value={latitudeDraft}
             min={MIN_LATITUDE}
             max={MAX_LATITUDE}
             step="0.001"
-            onChange={e => {
-              const value = parseFloat(e.target.value);
-              validateLatLng('latitude', value);
-              onCoordinateChange(team.id, 'latitude', value);
-            }}
+            onChange={e => handleCoordinateInputChange('latitude', e.target.value, setLatitudeDraft)}
             {...getAriaPropsForField('latitude')}
             className={clsx(
               'rounded w-1/2 min-w-[90px] p-2 duration-300 ease-out',
@@ -101,15 +131,11 @@ const TeamRow: React.FC<TeamRowProps> = ({
           <input
             type="number"
             name={`longitude-${team.id}`}
-            value={normalizedLongitude}
+            value={longitudeDraft}
             min={MIN_LONGITUDE}
             max={MAX_LONGITUDE}
             step="0.001"
-            onChange={e => {
-              const value = parseFloat(e.target.value);
-              validateLatLng('longitude', value);
-              onCoordinateChange(team.id, 'longitude', value);
-            }}
+            onChange={e => handleCoordinateInputChange('longitude', e.target.value, setLongitudeDraft)}
             {...getAriaPropsForField('longitude')}
             className={clsx(
               'rounded w-1/2 min-w-[90px] p-2 duration-300 ease-out',

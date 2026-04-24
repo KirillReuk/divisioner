@@ -5,8 +5,8 @@ export const createDefaultTeam = (): Team => ({
   id: crypto.randomUUID(),
   name: 'New Team',
   location: '',
-  latitude: 0,
-  longitude: 0,
+  latitude: null,
+  longitude: null,
 });
 export const MAX_LATITUDE = 90;
 export const MIN_LATITUDE = -90;

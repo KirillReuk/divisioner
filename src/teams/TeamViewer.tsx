@@ -133,6 +133,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({
                       <TeamMapPicker
                         latitude={team.latitude}
                         longitude={team.longitude}
+                        initialCenter={[team.latitude ?? 0, team.longitude ?? 0]}
                         onPick={createMapPickHandler(team.id)}
                         onClose={handleCloseMapPicker}
                       />

@@ -2,6 +2,17 @@ import { Division, Rivalry, TeamWithPseudo, Team } from './types';
 import { haversineDistance } from '../utils/distance';
 import { getSpectralScaleColors } from './spectralColors';
 
+type ResolvedTeam = Team & { latitude: number; longitude: number };
+
+const assertResolvedTeam = (team: Team): ResolvedTeam => {
+  if (team.latitude == null || team.longitude == null) {
+    throw new Error(
+      `Partitioning: team "${team.name || team.id}" is missing coordinates; all teams must have valid latitude and longitude before generating divisions.`
+    );
+  }
+  return team as ResolvedTeam;
+};
+
 type PotentialSwap = {
   from: number;
   to: number;
@@ -20,8 +31,8 @@ type PotentialMove = {
 const calculateCentroid = (division: Division): { lat: number; lon: number } => {
   const { totalLat, totalLon } = division.teams.reduce(
     (acc, team) => ({
-      totalLat: acc.totalLat + team.latitude,
-      totalLon: acc.totalLon + team.longitude,
+      totalLat: acc.totalLat + (team.latitude ?? 0),
+      totalLon: acc.totalLon + (team.longitude ?? 0),
     }),
     { totalLat: 0, totalLon: 0 }
   );
@@ -61,7 +72,9 @@ class Partitioning {
     this.divisionCount = divisionCount;
     this.maxDivisionSize = Math.ceil(teams.length / divisionCount);
 
-    const teamsById = new Map(teams.map(team => [team.id, team]));
+    const resolvedTeams: ResolvedTeam[] = teams.map(assertResolvedTeam);
+
+    const teamsById = new Map(resolvedTeams.map(team => [team.id, team]));
     for (const rivalry of rivalries) {
       const resolvedCount = rivalry.teamIds.filter(id => teamsById.has(id)).length;
       if (resolvedCount > this.maxDivisionSize) {
@@ -84,7 +97,9 @@ class Partitioning {
     }
     const rivalryTeams = rivalries
       .map(rivalry =>
-        rivalry.teamIds.map(teamId => teamsById.get(teamId)).filter((team): team is Team => Boolean(team))
+        rivalry.teamIds
+          .map(teamId => teamsById.get(teamId))
+          .filter((team): team is ResolvedTeam => Boolean(team))
       )
       .filter(rivalryTeamsGroup => rivalryTeamsGroup.length >= 2);
 
@@ -97,7 +112,7 @@ class Partitioning {
       teamsIncluded: rivalryTeamsGroup,
     }));
     const rivalryTeamIds = new Set(rivalries.flatMap(rivalry => rivalry.teamIds));
-    const nonRivaledTeams = teams.filter(team => !rivalryTeamIds.has(team.id));
+    const nonRivaledTeams = resolvedTeams.filter(team => !rivalryTeamIds.has(team.id));
 
     const teamsWithIndex = pseudoTeamsFromRivalries.concat(nonRivaledTeams).map((team, index) => ({
       ...team,
