@@ -46,17 +46,16 @@ export function useReverseGeocoding(teams: Team[], setTeams: React.Dispatch<Reac
         prevTeams.map(team => (team.id === teamId ? { ...team, [field]: value } : team))
       );
 
-      const prev = pendingRef.current;
+      const previouslyPending = pendingRef.current;
 
-      if (prev && prev.teamId !== teamId) {
+      if (previouslyPending && previouslyPending.teamId !== teamId) {
         debouncedFetch.flush();
       }
 
-      pendingRef.current = {
-        teamId,
-        latitude: field === 'latitude' ? value : prev?.teamId === teamId ? prev.latitude : currentTeam.latitude,
-        longitude: field === 'longitude' ? value : prev?.teamId === teamId ? prev.longitude : currentTeam.longitude,
-      };
+      pendingRef.current =
+        previouslyPending?.teamId === teamId
+          ? { ...previouslyPending, [field]: value }
+          : { teamId, latitude: currentTeam.latitude, longitude: currentTeam.longitude, [field]: value };
 
       debouncedFetch();
     },
