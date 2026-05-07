@@ -81,23 +81,24 @@ const App: React.FC = () => {
   return (
     <>
       {showIntroModal && <IntroModal onClose={handleCloseIntro} />}
-      <PresetModal
-        isOpen={showPresetModal}
-        variant={presetModalWelcome ? 'welcome' : 'plain'}
-        onClose={closePresetModal}
-        onSelectPreset={({ teams: presetTeams, divisionsCount }) => {
-          dispatch({ type: 'APPLY_PRESET', payload: { teams: presetTeams, divisionsCount } });
-        }}
-      />
-
-      <RivalryModal
-        isOpen={showRivalry}
-        onClose={() => setShowRivalry(false)}
-        teams={teams}
-        divisionsCount={divisionsCount}
-        rivalries={rivalries}
-        dispatch={dispatch}
-      />
+      {showPresetModal && (
+        <PresetModal
+          variant={presetModalWelcome ? 'welcome' : 'plain'}
+          onClose={closePresetModal}
+          onSelectPreset={({ teams: presetTeams, divisionsCount }) => {
+            dispatch({ type: 'APPLY_PRESET', payload: { teams: presetTeams, divisionsCount } });
+          }}
+        />
+      )}
+      {showRivalry && (
+        <RivalryModal
+          onClose={() => setShowRivalry(false)}
+          teams={teams}
+          divisionsCount={divisionsCount}
+          rivalries={rivalries}
+          dispatch={dispatch}
+        />
+      )}
 
       <div className="flex justify-start mb-4 gap-2">
         {renderTabButton('teams', 'Teams')}

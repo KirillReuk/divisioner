@@ -4,13 +4,12 @@ import { Team } from '../../utils/types';
 import Modal from './Modal';
 
 interface PresetModalProps {
-  isOpen: boolean;
   variant?: 'welcome' | 'plain';
   onClose: () => void;
   onSelectPreset: (payload: { teams: Team[]; divisionsCount?: number }) => void;
 }
 
-const PresetModal: React.FC<PresetModalProps> = ({ isOpen, variant = 'plain', onClose, onSelectPreset }) => {
+const PresetModal: React.FC<PresetModalProps> = ({ variant = 'plain', onClose, onSelectPreset }) => {
   const isWelcome = variant === 'welcome';
 
   const presetList = (
@@ -38,7 +37,7 @@ const PresetModal: React.FC<PresetModalProps> = ({ isOpen, variant = 'plain', on
   if (isWelcome) {
     return (
       <Modal
-        isOpen={isOpen}
+        isOpen={true}
         onClose={onClose}
         title="Get started"
         description="Pick a league below to load teams and divisions — most people start here. You can also close this window or use the button below to enter your own teams on the Teams tab."
@@ -57,7 +56,7 @@ const PresetModal: React.FC<PresetModalProps> = ({ isOpen, variant = 'plain', on
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Select a preset">
+    <Modal isOpen={true} onClose={onClose} title="Select a preset">
       {presetList}
     </Modal>
   );

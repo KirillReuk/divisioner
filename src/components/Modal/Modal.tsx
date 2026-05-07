@@ -44,7 +44,6 @@ const Modal: React.FC<ModalProps> = ({
 
     const panel = panelRef.current;
     if (!panel) return;
-
     panel.focus?.();
 
     const onDocumentKeyDown = (e: KeyboardEvent) => {

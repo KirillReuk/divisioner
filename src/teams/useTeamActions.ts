@@ -10,7 +10,9 @@ interface UseTeamActionsParams {
 
 export function useAbortableLatest() {
   const latestRequestController = useRef<AbortController | null>(null);
-  useEffect(() => () => latestRequestController.current?.abort(), []);
+  useEffect(() => {
+    return () => latestRequestController.current?.abort();
+  }, []);
 
   return useCallback(() => {
     latestRequestController.current?.abort();

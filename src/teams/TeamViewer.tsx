@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect, useMemo, useCallback } from 'react';
 import { Rivalry, Team } from '../utils/types';
 import { RIVALRY_ROW_TINTS } from '../utils/spectralColors';
 import { Atom } from 'lucide-react';
@@ -37,7 +37,7 @@ const TeamView: React.FC<EditableTeamsProps> = ({
     createMapPickHandler,
   } = useTeamActions({ setTeams, setMapPickerTeamId });
   const canOpenRivalries = teams.length >= 2;
-  const teamIdToRivalryIndex = React.useMemo(() => {
+  const teamIdToRivalryIndex = useMemo(() => {
     const map = new Map<string, number>();
     rivalries.forEach((rivalry, rivalryIndex) => {
       for (const teamId of rivalry.teamIds) {
@@ -46,26 +46,21 @@ const TeamView: React.FC<EditableTeamsProps> = ({
     });
     return map;
   }, [rivalries]);
-  const parentRowRef = React.useRef<HTMLTableRowElement | null>(null);
-  const mapRowRef = React.useRef<HTMLTableRowElement | null>(null);
+  const parentRowRef = useRef<HTMLTableRowElement | null>(null);
+  const mapRowRef = useRef<HTMLTableRowElement | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!mapPickerTeamId) return;
 
-    const handleDocumentMouseDown = (event: MouseEvent) => {
-      const target = event.target as Node | null;
-      if (!target) return;
-
-      const clickedInsideParentRow = Boolean(parentRowRef.current?.contains(target));
-      const clickedInsideMapRow = Boolean(mapRowRef.current?.contains(target));
-      if (!clickedInsideParentRow && !clickedInsideMapRow) {
-        setMapPickerTeamId(null);
-      }
+    const onMouseDown = ({ target }: MouseEvent) => {
+      const node = target as Node | null;
+      if (parentRowRef.current?.contains(node) || mapRowRef.current?.contains(node)) return;
+      setMapPickerTeamId(null);
     };
 
-    document.addEventListener('mousedown', handleDocumentMouseDown);
-    return () => document.removeEventListener('mousedown', handleDocumentMouseDown);
-  }, [mapPickerTeamId, setMapPickerTeamId]);
+    document.addEventListener('mousedown', onMouseDown);
+    return () => document.removeEventListener('mousedown', onMouseDown);
+  }, [mapPickerTeamId]);
 
   return (
     <div className="p-4 bg-gray-100 shadow-md">

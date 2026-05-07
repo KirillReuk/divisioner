@@ -6,7 +6,6 @@ import Modal from './Modal';
 import { TeamBuilderAction } from '../../app/teamBuilderReducer';
 
 interface RivalryModalProps {
-  isOpen: boolean;
   onClose: () => void;
   teams: Team[];
   divisionsCount: number;
@@ -14,7 +13,7 @@ interface RivalryModalProps {
   dispatch: React.Dispatch<TeamBuilderAction>;
 }
 
-const RivalryModal: React.FC<RivalryModalProps> = ({ isOpen, onClose, teams, divisionsCount, rivalries, dispatch }) => {
+const RivalryModal: React.FC<RivalryModalProps> = ({ onClose, teams, divisionsCount, rivalries, dispatch }) => {
   const teamById = new Map(teams.map(team => [team.id, team]));
   const maxRivalrySize = Math.ceil(teams.length / divisionsCount);
 
@@ -60,7 +59,7 @@ const RivalryModal: React.FC<RivalryModalProps> = ({ isOpen, onClose, teams, div
 
   return (
     <Modal
-      isOpen={isOpen}
+      isOpen={true}
       onClose={onClose}
       title="Rivalries"
       showCloseButton={false}
