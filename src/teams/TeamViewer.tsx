@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useMemo, useCallback } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { Rivalry, Team } from '../utils/types';
 import { RIVALRY_ROW_TINTS } from '../utils/spectralColors';
 import { Atom } from 'lucide-react';
