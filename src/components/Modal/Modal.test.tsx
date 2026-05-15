@@ -9,19 +9,9 @@ afterEach(() => {
 });
 
 describe('Modal', () => {
-  it('renders nothing when closed', () => {
-    render(
-      <Modal isOpen={false} onClose={() => {}} title="Title">
-        body
-      </Modal>
-    );
-    const dialog = screen.queryByRole('dialog');
-    expect(dialog).toBeNull();
-  });
-
   it('renders dialog, title, and children when open', () => {
     render(
-      <Modal isOpen onClose={() => {}} title="Hello">
+      <Modal onClose={() => {}} title="Hello">
         <p>Modal body</p>
       </Modal>
     );
@@ -35,7 +25,7 @@ describe('Modal', () => {
 
   it('links description for a11y when description is provided', () => {
     render(
-      <Modal isOpen onClose={() => {}} title="T" description="More info">
+      <Modal onClose={() => {}} title="T" description="More info">
         x
       </Modal>
     );
@@ -50,7 +40,7 @@ describe('Modal', () => {
 
   it('does not set aria-describedby when there is no description', () => {
     render(
-      <Modal isOpen onClose={() => {}} title="T">
+      <Modal onClose={() => {}} title="T">
         x
       </Modal>
     );
@@ -61,7 +51,7 @@ describe('Modal', () => {
   it('calls onClose when the close button is clicked', () => {
     const onClose = vi.fn();
     render(
-      <Modal isOpen onClose={onClose} title="T">
+      <Modal onClose={onClose} title="T">
         x
       </Modal>
     );
@@ -73,7 +63,7 @@ describe('Modal', () => {
   it('calls onClose when the backdrop is clicked', () => {
     const onClose = vi.fn();
     render(
-      <Modal isOpen onClose={onClose} title="T">
+      <Modal onClose={onClose} title="T">
         x
       </Modal>
     );
@@ -88,7 +78,7 @@ describe('Modal', () => {
   it('does not call onClose when the modal panel content is clicked', () => {
     const onClose = vi.fn();
     render(
-      <Modal isOpen onClose={onClose} title="T">
+      <Modal onClose={onClose} title="T">
         <button type="button">Inside</button>
       </Modal>
     );
@@ -100,7 +90,7 @@ describe('Modal', () => {
   it('calls onClose when Escape is pressed', () => {
     const onClose = vi.fn();
     render(
-      <Modal isOpen onClose={onClose} title="T">
+      <Modal onClose={onClose} title="T">
         x
       </Modal>
     );
@@ -113,26 +103,22 @@ describe('Modal', () => {
     document.body.style.overflow = 'scroll';
     const onClose = vi.fn();
 
-    const { rerender } = render(
-      <Modal isOpen onClose={onClose} title="T">
+    const { unmount } = render(
+      <Modal onClose={onClose} title="T">
         x
       </Modal>
     );
 
     expect(document.body.style.overflow).toBe('hidden');
 
-    rerender(
-      <Modal isOpen={false} onClose={onClose} title="T">
-        x
-      </Modal>
-    );
+    unmount();
 
     expect(document.body.style.overflow).toBe('scroll');
   });
 
   it('hides the close button when showCloseButton is false', () => {
     render(
-      <Modal isOpen onClose={() => {}} title="T" showCloseButton={false}>
+      <Modal onClose={() => {}} title="T" showCloseButton={false}>
         x
       </Modal>
     );

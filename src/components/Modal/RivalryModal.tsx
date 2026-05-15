@@ -59,7 +59,6 @@ const RivalryModal: React.FC<RivalryModalProps> = ({ onClose, teams, divisionsCo
 
   return (
     <Modal
-      isOpen={true}
       onClose={onClose}
       title="Rivalries"
       showCloseButton={false}

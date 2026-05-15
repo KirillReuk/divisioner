@@ -8,7 +8,6 @@ interface IntroModalProps {
 
 const IntroModal: React.FC<IntroModalProps> = ({ onClose }) => (
   <Modal
-    isOpen={true}
     onClose={onClose}
     title={
       <span className="inline-flex items-end gap-2">

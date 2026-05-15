@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 type ModalProps = {
-  isOpen: boolean;
   onClose: () => void;
   title: React.ReactNode;
   description?: React.ReactNode;
@@ -21,7 +20,6 @@ const DEFAULT_DESCRIPTION_CLASS = 'mb-4 text-gray-700';
 const DEFAULT_TITLE_WRAPPER_CLASS = 'mb-4';
 
 const Modal: React.FC<ModalProps> = ({
-  isOpen,
   onClose,
   title,
   description,
@@ -37,14 +35,10 @@ const Modal: React.FC<ModalProps> = ({
   const panelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!isOpen) return;
-
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
-    const panel = panelRef.current;
-    if (!panel) return;
-    panel.focus?.();
+    panelRef.current?.focus?.();
 
     const onDocumentKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -59,15 +53,13 @@ const Modal: React.FC<ModalProps> = ({
       document.body.style.overflow = prevOverflow;
       document.removeEventListener('keydown', onDocumentKeyDown, { capture: true });
     };
-  }, [isOpen, onClose]);
+  }, [onClose]);
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
-
-  if (!isOpen) return null;
 
   return createPortal(
     <div

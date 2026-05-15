@@ -37,7 +37,6 @@ const PresetModal: React.FC<PresetModalProps> = ({ variant = 'plain', onClose, o
   if (isWelcome) {
     return (
       <Modal
-        isOpen={true}
         onClose={onClose}
         title="Get started"
         description="Pick a league below to load teams and divisions — most people start here. You can also close this window or use the button below to enter your own teams on the Teams tab."
@@ -56,7 +55,7 @@ const PresetModal: React.FC<PresetModalProps> = ({ variant = 'plain', onClose, o
   }
 
   return (
-    <Modal isOpen={true} onClose={onClose} title="Select a preset">
+    <Modal onClose={onClose} title="Select a preset">
       {presetList}
     </Modal>
   );
